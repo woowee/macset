@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Computer Account Settings
+COMPUTERNAME=
+HOSTNAME=
+LOCALHOSTNAME=
+# GitHub Account Settings
+GITHUB_USERNAME=
+GITHUB_EMAIL=
