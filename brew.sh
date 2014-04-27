@@ -9,15 +9,20 @@ source ${dir_current}/functions.sh
 
 type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
-if ! brew tap >/dev/null 2>&1; then
-    brew tap homebrew/dupes
-    brew tap sanemat/font
-    brew tap phinze/cask
-    brew tap woowee/mycask
-fi
+## brew
+#
+#
 
+# tap
+brew tap homebrew/dupes
+brew tap sanemat/font
+brew tap phinze/cask
+brew tap woowee/mycask
+
+# update
 brew update && brew upgrade
 
+# install
 brew install zsh
 brew install tmux
 
@@ -26,22 +31,23 @@ brew install wget
 brew install openssl
 brew install w3m
 
-brew install rtmpdump
-brew install ffmpeg
-brew install base64
-brew install swftools
-brew install eyeD3
-brew install libdvdcss    # handbrake
+brew install rtmpdump  # for radiko recording
+brew install ffmpeg    # for radiko recording
+brew install base64    # for radiko recording
+brew install swftools  # for radiko recording
+brew install eyeD3     # for radiko recording
+brew install libdvdcss # for handbrake
 
 brew install go
 brew install python
 brew install python3
 brew link --overwrite python
 
-brew install rsync
-brew install ricty
+brew install rsync    # homebrew/dupes
+brew install ricty    # sanemat/font
 cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty was installed..." && echo "warrning: installation of ricty occured some error..." 1>&2
 
+# brew-cask
 brew install brew-cask
 brew cask install alfred
 brew cask install google-chrome
@@ -65,7 +71,6 @@ brew cask alfred link
 #
 
 # zsh
-# path_zsh=$(mdfinds -onlyin $(brew --prefix) -name zsh)
 path_zsh=$(find $(brew --prefix)/bin -name zsh)
 if [ -n ${path_zsh} ]; then
     echo -e "\033[32m==>\033[0m zsh settings..."
