@@ -2,21 +2,35 @@
 
 set -e
 
+sudo -v
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 dir_current=$(dirname $0)
 cd ${dir_current}
 
 ### tmp (as a work dir)
-dir_tmp="${HOME}/tmp_mysettings"
+dir_tmp="${HOME}/tmp"
 [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
 
 ### config.sh
-file_conf="${dir_current}/config.sh"
+if [ -e ${dir_current}/config.sh ]; then
+    mv -f ${dir_current}/config.sh ${dir_tmp}/config.sh
+else
+    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
+fi
+
+file_conf="${dir_tmp}/config.sh"
 
 ### so
-source ${dir_current}/functions.sh
+if [ -e ${dir_current}/functions.sh ]; then
+    source ${dir_current}/functions.sh
+else
+    echo "there is no function.sh. check it." 1>&2
+    exit 1
+fi
 
-# FUNCTIONS {
 #
+# FUNCTIONS {
 #
 
 ## Computer Account
@@ -96,10 +110,14 @@ confirm_githubaccountinfo()
 }
 
 #
-#
 # } FUNCTIONS
+#
 
 
+
+#
+# Read info
+#
 if [ -e "${file_conf}" ] && [ -s "${file_conf}" ]; then
     source "${file_conf}"
 
@@ -128,25 +146,36 @@ EOF
     exit 1
 fi
 
-## Systen Settings
-ask_confirm "\033[1m##### System Information #####\033[0m"
 
-cat << DATA
+
+#
+# Systen Settings
+#
+echo -e "\033[1m######################### System Information #########################\033[0m"
+if ask_yesno "Do you want to set the system information ?"; then
+
+    cat << DATA
 Check the contents ... ;
   - Computer Name   : ${MyCOMPUTERNAME}
   - Hostname        : ${MyHOSTNAME}.local
   - Local Host Name : ${MyLOCALHOSTNAME}
 
 DATA
+    confirm_systeminfo "Are you sure want to set using above infomation?"
 
-confirm_systeminfo "Are you sure want to set using above infomation?"
-sudo scutil --set ComputerName "${MyCOMPUTERNAME}"
-sudo scutil --set HostName "${MyHOSTNAME}.local"
-sudo scutil --set LocalHostName "${MyLOCALHOSTNAME}"
+    sudo scutil --set ComputerName "${MyCOMPUTERNAME}"
+    sudo scutil --set HostName "${MyHOSTNAME}.local"
+    sudo scutil --set LocalHostName "${MyLOCALHOSTNAME}"
 
-## Generating SSH Keys for Github
-ask_confirm "\033[1m#####       GitHub       #####\033[0m"
-if ask_yesno "Do you generate \033[1;32ma SSH key for GitHub\033[0m?"; then
+fi
+
+
+
+#
+# Generating SSH Keys for Github
+#
+echo -e "\033[1m############################### GitHub ###############################\033[0m"
+if ask_yesno "Do you generate a SSH key for GitHub ?"; then
     MySSH_KEYNAME="github_rsa"
     MySSH_FILE="${HOME}/.ssh/${MySSH_KEYNAME}"
 
@@ -159,17 +188,10 @@ DATA
 
     # generating
     ssh-keygen -t rsa -f ${MySSH_FILE} -C "${MyGITHUB_EMAIL}"
+    # save the key (/c/Users/you/.ssh/id_rsa): ${HOME}/.ssh/github_rsa
 
-    ## Creates a new ssh key, using the provided email as a label
-    # Generating public/private rsa key pair.
-    # Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]
-
-    # Enter passphrase (empty for no passphrase): [Type a passphrase]
-    # Enter same passphrase again: [Type passphrase again]
-
-    # Your identification has been saved in /c/Users/you/.ssh/id_rsa.
-    # Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.
-    # The key fingerprint is:
+    # % Enter passphrase (empty for no passphrase): *****
+    # % Enter same passphrase again: *****
 
     # add your new key to the ssh-agent
     ssh-add ${MySSH_FILE}
@@ -180,11 +202,13 @@ DATA
 
     confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
 
-    ask_confirm "\nok, now open browser, \n      \"\e[7m Safari \e[m\"\n      just now ?\n\nyou should register your ssh pub key to your account settings of github.\n"
+    echo ""
+    echo -e "ok, now open browser, \e[1;4;32m\"Safari\"\e[m just now ?"
+    ask_confirm "you should register your ssh pub key to your account settings of github.\n"
 
     open -a Safari "https://github.com/settings/ssh"
 
-    echo "finish settings it, then type 'done'."
+    echo -e "when you finish settings it, then type '\e[1;4mdone\e[m'."
     while true; do
         read res
         if [ "${res}" == "done" ]; then
@@ -204,8 +228,6 @@ EOF
     #
     ssh -T git@github.com &&:
 
-    # The authenticity of host 'github.com (207.97.227.239)' can't be established.
-    # RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
     # Are you sure you want to continue connecting (yes/no)?
     #
     # Hi username! You've successfully authenticated, but GitHub does not provide shell access.
@@ -216,23 +238,34 @@ EOF
     git config --global user.email "${MyGITHUB_USERNAME}"
 fi
 
-## Dotfiles
-ask_confirm "\033[1m#####      Dotfiles      #####\033[0m"
-dotfiles="${HOME}/dots"
-if ask_confirm "Clone \033[1;32mdotfiles\033[0m ... Are you ready?"; then
+
+
+#
+# Dotfiles
+#
+echo -e "\033[1m################################ Dotfiles ############################\033[0m"
+
+if ask_yesno "Do you want to clone dotfiles ?"; then
+    dotfiles="${HOME}/dots"
+
     if [ -e "${dotfiles}" ]; then
         mv "${dotfiles}" "${dotfiles}~$(date '+%Y%m%d%H%M')"
     fi
     mkdir -p ${dotfiles}
+
     git clone https://github.com/woowee/dots.git "${dotfiles}"
-    sleep 10
+
     ln -fs ${dotfiles}/.vimrc ${HOME}/.vimrc
     ln -fs ${dotfiles}/.gvimrc ${HOME}/.gvimrc
     ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
 fi
 
-## OSX Settings
-ask_confirm "\033[1m#####    OSX Settings    #####\033[0m"
+
+
+#
+# OSX Settings
+#
+echo -e "\033[1m################################ OSX Settings ########################\033[0m"
 
 # Trackpad
 echo '  トラックパッドのナチュラル・スクロールを止める... '
@@ -380,17 +413,15 @@ defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"|"' -bool FALSE
 defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"~"' -bool FALSE
 defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"\U00a5"' -bool FALSE
 
-
+#
 # Applications
+#
 echo ""
-ask_confirm "\033[1m#### Install Applications ####\033[0m"
-
-work_directoryname="_firstofall"
-mkdir -p "${HOME}/${work_directoryname}"
+echo -e "\033[1m############################ Install Applications ####################\033[0m"
 
 app_macvim_name='MacVim-KaoriYa'
 app_macvim_filename='MacVim.app'
-app_macvim_url='https://macvim-kaoriya.googlecode.com/files/macvim-kaoriya-20131126.dmg'
+app_macvim_url='https://github.com/splhack/macvim/releases/download/20140107/macvim-kaoriya-20140107.dmg'
 
 app_alfred_name="Alfred 2"
 app_alfred_filename="Alfred 2.app"
@@ -402,23 +433,33 @@ app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
 
 ## access, download, and install
 function install_application() {
-    # arguments
+    # arguments.check
+    if [ $# -lt 3 ]; then
+        echo -e "usage: \033[1minstall_application\033[0m \033[4mapp_name\033[0m \033[4mapp_filename(*.app)\033[0m \033[4murl\033[0m [\033[4mdir\033[0m]" 1>&2
+        return 1
+    fi
+    # arguments.set
     app_name=$1
     app_filename=$2
     app_url=$3
+    if [ $# -eq 4 ]; then
+        dir_tmp=$4
+    else
+        dir_tmp="${HOME}/tmp_installation"
+        mkdir -p ${dir_tmp}
+    fi
 
-    echo "Installing \033[1;32m${app_name}\033[0m..."
+    echo -e "Installing \033[1;32m${app_name}\033[0m..."
+
     # get
-    cd "${HOME}/${work_directoryname}"
+    cd "${HOME}/${dir_tmp}"
     curl --location --remote-name "${app_url}"
-    app_filepath="${HOME}/${work_directoryname}/${app_url##*/}"
+    app_filepath="${HOME}/${dir_tmp}/${app_url##*/}"
     echo ${app_filepath}
     # expansion & install
-    #case "${app_filename##*.}" in
     case "${app_url##*.}" in
     'zip')
         unzip -q "${app_filepath}"
-        #cp -a "$app_filepath" "/Applications"
         cp -a "${app_filename}" "/Applications"
         ;;
     'dmg')
@@ -430,23 +471,38 @@ function install_application() {
     esac
 }
 
-## install
-install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}"
-#install_application ${app_alfred_name} ${app_alfred_filename} ${app_alfred_url}
-install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}"
-install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}"
+if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-kaoriya ?"; then
 
-## Each application settings
-# Terminal
-defaults write com.apple.terminal "Default Window Settings" -string "Pro"
-defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
+    type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+    brew update && brew upgrade
 
-# MacVim
-defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+    brew tap phinze/cask
+    brew tap woowee/mycask
+#todo.
+    brew install brew-cask
+    brew upgrade brew-cask && brew cask update
 
-# Alfred
-ask_confirm 'Once open Alfred to start Alfred automatically at loguin.'
-open -a Alfred\ 2
+    brew cask install alfred
+    brew cask install google-chrome
+    brew cask install macvim-kaoriya    # woowee/mycask
+
+    ## install
+    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
+    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
+    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
+
+    ## Each application settings
+    # Terminal
+    defaults write com.apple.terminal "Default Window Settings" -string "Pro"
+    defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
+
+    # MacVim
+    defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+
+    # Alfred
+    ask_confirm 'Once open Alfred to start Alfred automatically at loguin.'
+    open -a Alfred\ 2
+fi
 
 ## Please restart
 cat << END

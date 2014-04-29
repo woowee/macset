@@ -67,7 +67,7 @@ check_existence_app()
 check_existence_command()
 {
     if [ $# -lt 1 ]; then
-        echo "usage: $0 <App Name>" 1>&2
+        echo "usage: $0 <Command Name>" 1>&2
         exit 1
     fi
 
