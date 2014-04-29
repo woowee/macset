@@ -13,13 +13,19 @@ dir_tmp="${HOME}/tmp"
 [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
 
 ### config.sh
-if [ -e ${dir_current}/config.sh ]; then
-    mv -f ${dir_current}/config.sh ${dir_tmp}/config.sh
-else
+if [ ! -e "${dir_tmp}/config.sh" ]; then
     cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
 fi
 
 file_conf="${dir_tmp}/config.sh"
+source "${file_conf}"
+
+MyCOMPUTERNAME="${COMPUTERNAME}"
+MyHOSTNAME="${HOSTNAME}"
+MyLOCALHOSTNAME="${LOCALHOSTNAME}"
+
+MyGITHUB_EMAIL="${GITHUB_USERNAME}"
+MyGITHUB_USERNAME="${GITHUB_EMAIL}"
 
 ### so
 if [ -e ${dir_current}/functions.sh ]; then
@@ -203,12 +209,12 @@ DATA
     confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
 
     echo ""
-    echo -e "ok, now open browser, \e[1;4;32m\"Safari\"\e[m just now ?"
+    echo -e "ok, now open browser, \033[1;4;32m\"Safari\"\033[0m just now ?"
     ask_confirm "you should register your ssh pub key to your account settings of github.\n"
 
     open -a Safari "https://github.com/settings/ssh"
 
-    echo -e "when you finish settings it, then type '\e[1;4mdone\e[m'."
+    echo -e "when you finish settings it, then type '\033[1;4mdone\033[0m'."
     while true; do
         read res
         if [ "${res}" == "done" ]; then
@@ -452,7 +458,7 @@ function install_application() {
     echo -e "Installing \033[1;32m${app_name}\033[0m..."
 
     # get
-    cd "${HOME}/${dir_tmp}"
+    cd "${dir_tmp}"
     curl --location --remote-name "${app_url}"
     app_filepath="${HOME}/${dir_tmp}/${app_url##*/}"
     echo ${app_filepath}
@@ -478,7 +484,7 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
 
     brew tap phinze/cask
     brew tap woowee/mycask
-#todo.
+
     brew install brew-cask
     brew upgrade brew-cask && brew cask update
 
@@ -486,10 +492,10 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
     brew cask install google-chrome
     brew cask install macvim-kaoriya    # woowee/mycask
 
-    ## install
-    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
-    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
-    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
+#    ## install
+#    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
+#    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
+#    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
 
     ## Each application settings
     # Terminal
@@ -497,11 +503,26 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
     defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
 
     # MacVim
-    defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+    if check_existence_app "${app_macvim_filename}"; then
+        defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+
+        # MacVim > Neobundle
+        if ask_yesno "\033[1;32mMacVim\033[0m, Install the plugins by using 'NeoBundleInstall'?"; then
+            vimbundle="~/.vim/bundle"
+            if [ -e ${HOME}/.vim ]; then
+                mv ${HOME}/.vim "${HOME}/.vim~$(date '+%Y%m%d%H%M')"
+            fi
+            mkdir -p ~/.vim/bundle
+            git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+
+            vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
+            echo ""
+        fi
+    fi
 
     # Alfred
-    ask_confirm 'Once open Alfred to start Alfred automatically at loguin.'
-    open -a Alfred\ 2
+    brew cask alfred link
+
 fi
 
 ## Please restart
@@ -517,23 +538,3 @@ cat << END
 
 
 END
-
-## ADDITIONA SETTINGS
-#ask_confirm "\033[1m????? Addtional Settings ?????\033[0m"
-
-# MacVim
-if check_existence_app "${app_macvim_filename}"; then
-    # MacVim > Neobundle
-    if ask_yesno "\033[1;32mMacVim\033[0m, Install the plugins by using 'NeoBundleInstall'?"; then
-        vimbundle="~/.vim/bundle"
-        if [ -e ${HOME}/.vim ]; then
-            mv ${HOME}/.vim "${HOME}/.vim~$(date '+%Y%m%d%H%M')"
-        fi
-        mkdir -p ~/.vim/bundle
-        git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
-
-        vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
-        echo ""
-    fi
-fi
-echo “vim settings is done”

@@ -49,7 +49,6 @@ apps=(\
 "dropbox" \
 "evernote" \
 "iterm2" \
-"libreoffice" \
 "vlc" \
 "handbrake" \
 "bettertouchtool" \
