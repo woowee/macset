@@ -248,7 +248,7 @@ EOF
     # to set your account's default identity.
     # Omit --global to set the identity only in this repository.
     git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_USERNAME}"
+    git config --global user.email "${MyGITHUB_EMAIL}"
 fi
 
 
