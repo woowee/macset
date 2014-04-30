@@ -8,16 +8,23 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 dir_current=$(dirname $0)
 cd ${dir_current}
 
-### tmp (as a work dir)
+# tmp (as a work dir)
 dir_tmp="${HOME}/tmp"
 [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
 
-### config.sh
-if [ ! -e "${dir_tmp}/config.sh" ]; then
-    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
+# config.sh
+file_conf="${dir_tmp}/config.sh"
+if [ ! -e "${file_conf}" ]; then
+    cp -f ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
 fi
 
-file_conf="${dir_tmp}/config.sh"
+if [ ! -e "${file_conf}" -o ! -s "${file_conf}" ]; then
+    echo -e "there is not your config file. exit this process.\ncheck your configration file; ${file_conf}" 1>&2
+
+    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
+    exit 1
+fi
+
 source "${file_conf}"
 
 MyCOMPUTERNAME="${COMPUTERNAME}"
@@ -27,7 +34,7 @@ MyLOCALHOSTNAME="${LOCALHOSTNAME}"
 MyGITHUB_EMAIL="${GITHUB_USERNAME}"
 MyGITHUB_USERNAME="${GITHUB_EMAIL}"
 
-### so
+# functions.sh
 if [ -e ${dir_current}/functions.sh ]; then
     source ${dir_current}/functions.sh
 else
@@ -249,8 +256,7 @@ fi
 #
 # Dotfiles
 #
-echo -e "\033[1m################################ Dotfiles ############################\033[0m"
-
+echo -e "\033[1m############################## Dotfiles ##############################\033[0m"
 if ask_yesno "Do you want to clone dotfiles ?"; then
     dotfiles="${HOME}/dots"
 
@@ -271,8 +277,7 @@ fi
 #
 # OSX Settings
 #
-echo -e "\033[1m################################ OSX Settings ########################\033[0m"
-
+echo -e "\033[1m############################ OSX Settings ############################\033[0m"
 # Trackpad
 echo '  トラックパッドのナチュラル・スクロールを止める... '
 defaults write -g com.apple.swipescrolldirection -bool false
@@ -358,7 +363,6 @@ echo '  言語切り替えは “US-ひらがな” のみ (カタカナなど�
 
 if defaults read ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources >/dev/null 2>&1; then
     defaults delete ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources
-    echo "delete '~/Library/Preferences/com.apple.HIToolbox.plist AppleEnabledInputSources...'"
 fi
 defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Japanese"; InputSourceKind = "Input Mode";}'
 defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Japanese.placename";InputSourceKind = "Input Mode";}'
@@ -423,8 +427,7 @@ defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"\U00a5"' -bool F
 # Applications
 #
 echo ""
-echo -e "\033[1m############################ Install Applications ####################\033[0m"
-
+echo -e "\033[1m######################## Install Applications ########################\033[0m"
 app_macvim_name='MacVim-KaoriYa'
 app_macvim_filename='MacVim.app'
 app_macvim_url='https://github.com/splhack/macvim/releases/download/20140107/macvim-kaoriya-20140107.dmg'
@@ -485,7 +488,7 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
     brew tap phinze/cask
     brew tap woowee/mycask
 
-    brew install brew-cask
+    brew upgrade brew-cask || true
     brew upgrade brew-cask && brew cask update
 
     brew cask install alfred
