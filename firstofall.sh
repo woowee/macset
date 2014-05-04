@@ -8,20 +8,31 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 dir_current=$(dirname $0)
 cd ${dir_current}
 
-# tmp (as a work dir)
+### tmp (as a work dir)
 dir_tmp="${HOME}/tmp"
 [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
 
-# config.sh
+### config.sh
 file_conf="${dir_tmp}/config.sh"
-if [ ! -e "${file_conf}" ]; then
-    cp -f ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
+if [ -e "${file_conf}" ]; then
+    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
 fi
 
 if [ ! -e "${file_conf}" -o ! -s "${file_conf}" ]; then
     echo -e "there is not your config file. exit this process.\ncheck your configration file; ${file_conf}" 1>&2
 
-    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
+    # this case "No", exit the process...
+    cat << EOF > "${file_conf}"
+#!/bin/bash
+
+# Computer Account Settings
+COMPUTERNAME=
+HOSTNAME=
+LOCALHOSTNAME=
+# GitHub Account Settings
+GITHUB_USERNAME=
+GITHUB_EMAIL=
+EOF
     exit 1
 fi
 
@@ -34,7 +45,7 @@ MyLOCALHOSTNAME="${LOCALHOSTNAME}"
 MyGITHUB_EMAIL="${GITHUB_USERNAME}"
 MyGITHUB_USERNAME="${GITHUB_EMAIL}"
 
-# functions.sh
+### functions.sh
 if [ -e ${dir_current}/functions.sh ]; then
     source ${dir_current}/functions.sh
 else
@@ -248,7 +259,7 @@ EOF
     # to set your account's default identity.
     # Omit --global to set the identity only in this repository.
     git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_EMAIL}"
+    git config --global user.email "${MyGITHUB_USERNAME}"
 fi
 
 
@@ -270,6 +281,9 @@ if ask_yesno "Do you want to clone dotfiles ?"; then
     ln -fs ${dotfiles}/.vimrc ${HOME}/.vimrc
     ln -fs ${dotfiles}/.gvimrc ${HOME}/.gvimrc
     ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
+    ln -fs ${dotfiles}/.gitconfig ${HOME}/.gitconfig
+    ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
+
 fi
 
 
@@ -495,7 +509,7 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
     brew cask install google-chrome
     brew cask install macvim-kaoriya    # woowee/mycask
 
-#    ## install
+#    ## install >> use Homebrew Cask
 #    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
 #    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
 #    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
