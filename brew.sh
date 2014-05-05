@@ -9,8 +9,15 @@ cd ${dir_current}
 
 source ${dir_current}/functions.sh
 
-here=$(basename $0)
+execho()
+{
+    prefix="\033[32m$(basename $0)>\033[0m"
+    if [ $# -lt 1 ]; then
+        echo -e "${prefix} usage: execho MESSAGE"
+    fi
 
+    echo -e ${prefix} $1
+}
 #
 # staff to install
 #
@@ -79,7 +86,7 @@ brew update && brew upgrade
 #
 # brew
 #
-echo -e "\033[32m${here}>\033[0m brew install..."
+execho "brew install..."
 for bin in "${bins[@]}";
 do
     brew install "${bin}"
@@ -90,9 +97,9 @@ done
 #
 # cask
 #
+execho "brew cask install..."
 brew upgrade brew-cask || true
 brew cask update
-echo -e "\033[32m${here}>\033[0m brew cask install..."
 for app in "${apps[@]}"; do brew cask install "${app}"; done
 
 #
@@ -101,8 +108,8 @@ for app in "${apps[@]}"; do brew cask install "${app}"; done
 
 # shell
 path_zsh=$(find $(brew --prefix)/bin -name zsh)
-if [ -n ${path_zsh} ]; then
-    echo -e "\033[32m${here}>\033[0m shell, zsh settings..."
+if [ -n ${path_zsh} -a ${SHELL##*/} != "zsh" ]; then
+    execho "shell, zsh settings..."
     echo "zsh: ${path_zsh}"
     # add zsh
     echo ${path_zsh} | sudo tee -a /etc/shells
@@ -112,16 +119,20 @@ fi
 
 # iterm2
 if check_existence_app 'iTerm.app' path_app; then
-    echo -e "\033[32m${here}>\033[0m iterm settings..."
+    execho "iterm settings..."
     echo "iterm: ${path_app}"
     #todo. iterm settings (should use profile ?)
 fi
 
 # ricty
-cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty was installed..."
+
+if [ -n "$(mdfind -onlyin /Users/koo/Library/Fonts 'kMDItemFSName="Ricty*.ttf"')" ]; then
+    execho "ricty settings..."
+    cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf
+fi
 
 # python
-echo -e "\033[32m${here}>\033[0m python link..."
+execho "python link..."
 brew link --overwrite python
 if ! check_existence_command 'pip'; then
     pip install --upgrade setuptools
@@ -130,7 +141,7 @@ fi
 
 # mutagen (to use mid3v2)
 if ! check_existence_command 'mid3v2'; then
-    echo -e "\033[32m${here}>\033[0m mutagen installation..."
+    execho "mutagen installation..."
     pip install mutagen
 fi
 
