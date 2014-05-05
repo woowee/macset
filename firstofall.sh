@@ -283,7 +283,6 @@ if ask_yesno "Do you want to clone dotfiles ?"; then
     ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
     ln -fs ${dotfiles}/.gitconfig ${HOME}/.gitconfig
     ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
-
 fi
 
 
@@ -509,7 +508,7 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
     brew cask install google-chrome
     brew cask install macvim-kaoriya    # woowee/mycask
 
-#    ## install >> use Homebrew Cask
+#    ## install
 #    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
 #    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
 #    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
