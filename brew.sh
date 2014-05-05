@@ -57,6 +57,7 @@ bettertouchtool \
 shiftit \
 gimp-lisanet \
 inkscape \
+ifunbox \
 ### woowee/mycask
 mytracks \
 macvim-kaoriya \
@@ -120,12 +121,15 @@ fi
 cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty was installed..."
 
 # python
+echo -e "\033[32m${here}>\033[0m python link..."
 brew link --overwrite python
-pip install --upgrade setuptools
-pip install --upgrade pip
+if ! check_existence_command 'pip'; then
+    pip install --upgrade setuptools
+    pip install --upgrade pip
+fi
 
 # mutagen (to use mid3v2)
-if ! check_existence_command 'mutagen'; then
+if ! check_existence_command 'mid3v2'; then
     echo -e "\033[32m${here}>\033[0m mutagen installation..."
     pip install mutagen
 fi
