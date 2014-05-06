@@ -8,17 +8,17 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 dir_current=$(dirname $0)
 cd ${dir_current}
 
-### tmp (as a work dir)
-dir_tmp="${HOME}/tmp"
-[ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
-
 ### config.sh
-file_conf="${dir_tmp}/config.sh"
-if [ -e "${file_conf}" ]; then
-    cp -i ${dir_current}/config.sh.tmp ${dir_tmp}/config.sh
-fi
+dir_tmp="${HOME}/tmp"
+filename_tmp="config.sh"
 
-if [ ! -e "${file_conf}" -o ! -s "${file_conf}" ]; then
+if [ -e "${dir_current}/${filename_tmp}" ]; then
+    file_conf="${dir_current}/${filename_tmp}"
+elif [ -e "${dir_tmp}/${filename_tmp}" ]; then
+    file_conf="${dir_tmp}/${filename_tmp}"
+else
+    [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
+
     echo -e "there is not your config file. exit this process.\ncheck your configration file; ${file_conf}" 1>&2
 
     # this case "No", exit the process...
@@ -36,14 +36,6 @@ EOF
     exit 1
 fi
 
-source "${file_conf}"
-
-MyCOMPUTERNAME="${COMPUTERNAME}"
-MyHOSTNAME="${HOSTNAME}"
-MyLOCALHOSTNAME="${LOCALHOSTNAME}"
-
-MyGITHUB_EMAIL="${GITHUB_USERNAME}"
-MyGITHUB_USERNAME="${GITHUB_EMAIL}"
 
 ### functions.sh
 if [ -e ${dir_current}/functions.sh ]; then
@@ -56,6 +48,15 @@ fi
 #
 # FUNCTIONS {
 #
+execho()
+{
+    prefix="\033[32m$(basename $0)>\033[0m"
+    if [ $# -lt 1 ]; then
+        echo -e "${prefix} usage: execho MESSAGE"
+    fi
+
+    echo -e ${prefix} $1
+}
 
 ## Computer Account
 set_systeminfo()
@@ -99,8 +100,8 @@ confirm_systeminfo()
 ## GitHub account
 set_githubaccountinfo()
 {
-    ask_inputvalue "  Enter your email address registered with Github : " MyGITHUB_EMAIL
     ask_inputvalue "  Enter your Github user name                     : " MyGITHUB_USERNAME
+    ask_inputvalue "  Enter your email address registered with Github : " MyGITHUB_EMAIL
     echo ""
 }
 confirm_githubaccountinfo()
@@ -119,8 +120,8 @@ confirm_githubaccountinfo()
                 set_githubaccountinfo
 
                 echo "Check the contents ..."
-                echo "  - E-mail address  : ${MyGITHUB_EMAIL}"
                 echo "  - User Name       : ${MyGITHUB_USERNAME}"
+                echo "  - E-mail address  : ${MyGITHUB_EMAIL}"
                 echo ""
                 confirm_githubaccountinfo "${msg}"
                 return 0;;
@@ -142,34 +143,14 @@ confirm_githubaccountinfo()
 #
 # Read info
 #
-if [ -e "${file_conf}" ] && [ -s "${file_conf}" ]; then
-    source "${file_conf}"
+source "${file_conf}"
 
-    MyCOMPUTERNAME=${COMPUTERNAME}
-    MyHOSTNAME=${HOSTNAME}
-    MyLOCALHOSTNAME=${LOCALHOSTNAME}
+MyCOMPUTERNAME="${COMPUTERNAME}"
+MyHOSTNAME="${HOSTNAME}"
+MyLOCALHOSTNAME="${LOCALHOSTNAME}"
 
-    MyGITHUB_USERNAME=${GITHUB_USERNAME}
-    MyGITHUB_EMAIL=${GITHUB_EMAIL}
-
-else
-    echo -e "there is not your config file. exit this process.\ncheck your configration file; ${file_conf}" 1>&2
-
-    # this case "No", exit the process...
-    cat << EOF > "${file_conf}"
-#!/bin/bash
-
-# Computer Account Settings
-COMPUTERNAME=
-HOSTNAME=
-LOCALHOSTNAME=
-# GitHub Account Settings
-GITHUB_USERNAME=
-GITHUB_EMAIL=
-EOF
-    exit 1
-fi
-
+MyGITHUB_USERNAME="${GITHUB_USERNAME}"
+MyGITHUB_EMAIL="${GITHUB_EMAIL}"
 
 
 #
@@ -205,10 +186,12 @@ if ask_yesno "Do you generate a SSH key for GitHub ?"; then
 
     cat << DATA
 Check the contents ...
-  - E-mail address  : ${MyGITHUB_EMAIL}
   - User Name       : ${MyGITHUB_USERNAME}
+  - E-mail address  : ${MyGITHUB_EMAIL}
 
 DATA
+
+    confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
 
     # generating
     ssh-keygen -t rsa -f ${MySSH_FILE} -C "${MyGITHUB_EMAIL}"
@@ -223,8 +206,6 @@ DATA
     # Copies the contents of the id_rsa.pub file to your clipboard
     pbcopy < "${MySSH_FILE}.pub"
     sudo chmod 600 "${MySSH_FILE}.pub"    # just in case...'
-
-    confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
 
     echo ""
     echo -e "ok, now open browser, \033[1;4;32m\"Safari\"\033[0m just now ?"
@@ -283,6 +264,10 @@ if ask_yesno "Do you want to clone dotfiles ?"; then
     ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
     ln -fs ${dotfiles}/.gitconfig ${HOME}/.gitconfig
     ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
+
+    # set .gitconf again
+    git config --global user.name "${MyGITHUB_USERNAME}"
+    git config --global user.email "${MyGITHUB_USERNAME}"
 fi
 
 
@@ -291,6 +276,7 @@ fi
 # OSX Settings
 #
 echo -e "\033[1m############################ OSX Settings ############################\033[0m"
+ask_confirm "we will set osx defaults."
 # Trackpad
 echo '  トラックパッドのナチュラル・スクロールを止める... '
 defaults write -g com.apple.swipescrolldirection -bool false
@@ -496,11 +482,19 @@ function install_application() {
 if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-kaoriya ?"; then
 
     type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+
+    # set PATH
+    [ -e ${HOME}/.bashrc ] || touch ${HOME}/.bashrc
+    echo "export PATH=/usr/local/bin:/usr/local/sbin:$PATH" > ${HOME}/.bashrc
+    source ${HOME}/.bashrc
+    echo "PATH: ${PATH}"
+
     brew update && brew upgrade
 
     brew tap phinze/cask
     brew tap woowee/mycask
 
+    brew install brew-cask
     brew upgrade brew-cask || true
     brew upgrade brew-cask && brew cask update
 
