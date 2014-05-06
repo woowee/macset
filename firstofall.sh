@@ -240,7 +240,7 @@ EOF
     # to set your account's default identity.
     # Omit --global to set the identity only in this repository.
     git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_USERNAME}"
+    git config --global user.email "${MyGITHUB_EMAIL}"
 fi
 
 
@@ -262,12 +262,25 @@ if ask_yesno "Do you want to clone dotfiles ?"; then
     ln -fs ${dotfiles}/.vimrc ${HOME}/.vimrc
     ln -fs ${dotfiles}/.gvimrc ${HOME}/.gvimrc
     ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
-    ln -fs ${dotfiles}/.gitconfig ${HOME}/.gitconfig
     ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
+
+    if [ -e ${HOME}/.gitconfig ]; then
+        if ! $(grep "core" ${HOME}/.gitconfig); then
+            cat << EOF >> "${HOME}/.gitconfig"
+[core]
+    excludesfile = ~/.gitignore
+EOF
+        fi
+    else
+        cat << EOF > "${HOME}/.gitconfig"
+[core]
+    excludesfile = ~/.gitignore
+EOF
+    fi
 
     # set .gitconf again
     git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_USERNAME}"
+    git config --global user.email "${MyGITHUB_EMAIL}"
 fi
 
 
