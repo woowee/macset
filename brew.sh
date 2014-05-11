@@ -9,15 +9,6 @@ cd ${dir_current}
 
 source ${dir_current}/functions.sh
 
-execho()
-{
-    prefix="\033[32m$(basename $0)>\033[0m"
-    if [ $# -lt 1 ]; then
-        echo -e "${prefix} usage: execho MESSAGE"
-    fi
-
-    echo -e ${prefix} $1
-}
 #
 # staff to install
 #
@@ -39,6 +30,7 @@ ffmpeg \
 base64 \
 swftools \
 eyeD3 \
+the_silver_searcher \
 ### for handbrake
 libdvdcss \
 ### phinze/cask
@@ -64,7 +56,6 @@ bettertouchtool \
 shiftit \
 gimp-lisanet \
 inkscape \
-ifunbox \
 ### woowee/mycask
 mytracks \
 macvim-kaoriya \
@@ -74,19 +65,23 @@ macvim-kaoriya \
 #
 # homebrew install, tap, and update
 #
+
+execho "homebrew install..."
 type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
+execho "brew tap..."
 brew tap homebrew/dupes
 brew tap phinze/cask
 brew tap sanemat/font
 brew tap woowee/mycask
 
+execho "brew update & upgrade..."
 brew update && brew upgrade
 
 #
 # brew
 #
-execho "brew install..."
+execho "brew install commands..."
 for bin in "${bins[@]}";
 do
     brew install "${bin}"
@@ -97,9 +92,10 @@ done
 #
 # cask
 #
-execho "brew cask install..."
+execho "brew cask updating..."
 brew upgrade brew-cask || true
 brew cask update
+execho "brew cask install apps..."
 for app in "${apps[@]}"; do brew cask install "${app}"; done
 
 #
@@ -108,9 +104,9 @@ for app in "${apps[@]}"; do brew cask install "${app}"; done
 
 # shell
 path_zsh=$(find $(brew --prefix)/bin -name zsh)
-if [ -n ${path_zsh} -a ${SHELL##*/} != "zsh" ]; then
+if [ -n ${path_zsh} ]; then
     execho "shell, zsh settings..."
-    echo "zsh: ${path_zsh}"
+    execho "zsh: ${path_zsh}"
     # add zsh
     echo ${path_zsh} | sudo tee -a /etc/shells
     # set zsh
@@ -120,32 +116,35 @@ fi
 # iterm2
 if check_existence_app 'iTerm.app' path_app; then
     execho "iterm settings..."
-    echo "iterm: ${path_app}"
+    execho "iterm: ${path_app}"
     #todo. iterm settings (should use profile ?)
 fi
 
 # ricty
-
-if [ -n "$(mdfind -onlyin /Users/koo/Library/Fonts 'kMDItemFSName="Ricty*.ttf"')" ]; then
-    execho "ricty settings..."
-    cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf
-fi
+cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty was installed..."
 
 # python
-execho "python link..."
 brew link --overwrite python
-if ! check_existence_command 'pip'; then
-    pip install --upgrade setuptools
-    pip install --upgrade pip
-fi
+pip install --upgrade setuptools
+pip install --upgrade pip
 
 # mutagen (to use mid3v2)
-if ! check_existence_command 'mid3v2'; then
+if ! check_existence_command 'mutagen'; then
     execho "mutagen installation..."
-    pip install mutagen
+    if ! pip install mutagen; then
+        [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
+        mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
+        mutagen_name=${mutagen_url##*/}
+        curl --location --remote-name "${mutagen_url}"
+        # hdiutil attach "${HOME}/${mutagen_name}" -noidmereveal
+        tar zxvf "${HOME}/${mutagen_name}"
+        cd ${HOME}/$(basename $mutagen_name .tar.gz)
+        python setup.py build
+        sudo python setup.py install
+    fi
 fi
 
-# alfred
+# alfred (kMDItemFSName = "Alfred 2.app")
 brew cask alfred link
 
 
