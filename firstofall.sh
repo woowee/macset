@@ -509,11 +509,11 @@ check_existence_caskapp()
         fi
     fi
     #find
-    caskapp_path=$(find ${target_dir} -name $1)
+    caskapp_path=$(find "${target_dir}" -name "$1")
 
     #return
     if [ -n "${caskapp_path}" ]; then
-        [ $# -ge 2 ] && eval $2="\"${caskapp_path}\""    #"
+        [ $# -ge 2 ] && eval $2="\"${caskapp_path}\""
         return 0
     else
         return 1
@@ -571,8 +571,11 @@ if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-ka
         fi
     fi
     # Alfred
-    check_existence_app ${app_alfred_filename} && open -a ${app_alfred_filename} & brew cask alfred link
-
+    if check_existence_app "${app_alfred_filename}"; then
+        open -a "${app_alfred_filename}"
+        sleet 8 | echo "opening alfred 2. please wait ..."
+        brew cask alfred link
+    fi
 
 fi
 
