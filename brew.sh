@@ -117,7 +117,14 @@ fi
 if check_existence_app 'iTerm.app' path_app; then
     execho "iterm settings..."
     execho "iterm: ${path_app}"
-    #todo. iterm settings (should use profile ?)
+
+    #blur
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" Library/Preferences/com.googlecode.iterm2.plist
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
+    #transparency
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" Library/Preferences/com.googlecode.iterm2.plist
+    #wond type
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" Library/Preferences/com.googlecode.iterm2.plist
 fi
 
 # ricty
@@ -136,7 +143,6 @@ if ! check_existence_command 'mutagen'; then
         mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
         mutagen_name=${mutagen_url##*/}
         curl --location --remote-name "${mutagen_url}"
-        # hdiutil attach "${HOME}/${mutagen_name}" -noidmereveal
         tar zxvf "${HOME}/${mutagen_name}"
         cd ${HOME}/$(basename $mutagen_name .tar.gz)
         python setup.py build
