@@ -118,13 +118,15 @@ if check_existence_app 'iTerm.app' path_app; then
     execho "iterm settings..."
     execho "iterm: ${path_app}"
 
-    ##blur
+    #blur
     #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" Library/Preferences/com.googlecode.iterm2.plist
     #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
-    ##transparency
-    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" Library/Preferences/com.googlecode.iterm2.plist
-    ##wond type
-    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" Library/Preferences/com.googlecode.iterm2.plist
+    #transparency
+    # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Transparency\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+    #window type
+    # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Window Type\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
 fi
 
 # ricty
@@ -132,23 +134,25 @@ cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf &
 
 # python
 brew link --overwrite python
-pip install --upgrade setuptools
-pip install --upgrade pip
+pip install --upgrade setuptools && pip install --upgrade pip || true
 
 # mutagen (to use mid3v2)
-if ! check_existence_command 'mutagen'; then
+if ! check_existence_command 'mid3v2'; then
     execho "mutagen installation..."
     if ! pip install mutagen; then
         [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
         mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
         mutagen_name=${mutagen_url##*/}
+        cd $HOME/tmp
         curl --location --remote-name "${mutagen_url}"
-        tar zxvf "${HOME}/${mutagen_name}"
-        cd ${HOME}/$(basename $mutagen_name .tar.gz)
+        tar zxvf "${mutagen_name}"
+        cd $(basename $mutagen_name .tar.gz)
         python setup.py build
         sudo python setup.py install
     fi
 fi
+
+cd ${dir_current}
 
 # alfred (kMDItemFSName = "Alfred 2.app")
 brew cask alfred link
