@@ -60,9 +60,5 @@ else
 EOF
 fi
 
-# set .gitconf again
-# git config --global user.name "${MyGITHUB_USERNAME}"
-# git config --global user.email "${MyGITHUB_EMAIL}"
 
-
-execho "${esc_ylw}DONE!!: Settings for dotfiles.${esc_off}"
+execho "${esc_ylw}DONE: Dotfiles settings.${esc_off}"

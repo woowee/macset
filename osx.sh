@@ -59,7 +59,7 @@ function ask {
       default=
     fi
 
-    printf "$1 [$prompt] "
+    printf "$prefix $1 [$prompt] "
 
     if [ "$auto" == "Y" ]; then
       echo
@@ -78,6 +78,32 @@ function ask {
   done
 }
 
+#
+# PREPARE
+#
+dir_current=$(dirname $0)
+cd ${dir_current}
+
+# check file configration
+filename_conf="config.sh"
+filename_func="functions.sh"
+
+filename_check="check4running.sh"
+if [ ! -e "${dir_current}/${filename_check}" ]; then
+    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${dir_current}/${filename_check}' ?)"
+    exit 1
+fi
+
+${dir_current}/${filename_check} ${filename_conf} ${filename_func}
+
+# read functions
+source ${dir_current}/${filename_func}
+
+
+
+#
+# SET OSX DEFAULT
+#
 
 ## Trackpad
 if ask 'トラックパッドのナチュラル・スクロールを止める．' Y; then
@@ -127,12 +153,12 @@ if ask 'Dock の大きさをセットする。(36)' Y; then
     # [システム環境設定 > Dock > 大きさ] = sld[サイズ] 1/8 くらい
 fi
 
-if 'Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．' Y; then
+if ask 'Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．' Y; then
     defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
     # (none)
 fi
 
-if 'Dock の起動しているアプリケーションにインジケータ・ランプを表示する' Y; then
+if ask 'Dock の起動しているアプリケーションにインジケータ・ランプを表示する' Y; then
     defaults write com.apple.dock show-process-indicators -bool true
     # [システム環境設定 > Dock > 起動済みのアプリケーションにインジケータ・ランプを表示] => "オン"
 fi
@@ -295,8 +321,6 @@ if ask '数字，記号はシングルバイトで入力する．' Y; then
     defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"\U00a5"' -bool FALSE
 fi
 
-## sc
-
 ### Shell (Zsh)
 # -> manifest file @ boxen
 
@@ -305,7 +329,19 @@ if ask "Kill affected applications" Y; then
   for app in Safari Finder Dock Mail SystemUIServer Kotoeri; do
     killall "$app" >/dev/null 2>&1
   done
-  echo
-  echo "** \033[33mSome changes needs a reboot to take effect\033[0m **"
-  echo
 fi
+
+
+## Please restart
+cat << END
+
+
+**************************************************
+               NOW IT'S DONE.
+
+   Some changes needs a reboot to take effect.
+     (c.g., [Command] + [Control] + [EJECT])
+**************************************************
+
+
+END
