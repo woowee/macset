@@ -1,288 +1,36 @@
-#!/bin/bash -ux
+#!/bin/bash -u
 
 set -e
 
-sudo -v
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+#sudo -v
+#while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 dir_current=$(dirname $0)
 cd ${dir_current}
 
-### config.sh
-dir_tmp="${HOME}/tmp"
-filename_tmp="config.sh"
+#
+# check file configration
+#
+filename_conf="config.sh"
+filename_func="functions.sh"
 
-if [ -e "${dir_current}/${filename_tmp}" ]; then
-    file_conf="${dir_current}/${filename_tmp}"
-elif [ -e "${dir_tmp}/${filename_tmp}" ]; then
-    file_conf="${dir_tmp}/${filename_tmp}"
-else
-    [ -e ${dir_tmp} ] || mkdir -p ${dir_tmp}
-
-    echo -e "${esc}$(basename $0)==>${esc_off} there is not your config file. exit this process.\ncheck your configration file; ${file_conf}" 1>&2
-
-    # this case "No", exit the process...
-    cat << EOF > "${file_conf}"
-#!/bin/bash
-
-# Computer Account Settings
-COMPUTERNAME=
-HOSTNAME=
-LOCALHOSTNAME=
-# GitHub Account Settings
-GITHUB_USERNAME=
-GITHUB_EMAIL=
-EOF
+filename_check="check4running.sh"
+if [ ! -e "${dir_current}/${filename_check}" ]; then
+    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${dir_current}/${filename_check}' ?)"
     exit 1
 fi
 
+${dir_current}/${filename_check} ${filename_conf} ${filename_func}
 
-### functions.sh
-if [ -e ${dir_current}/functions.sh ]; then
-    source ${dir_current}/functions.sh
-else
-    echo -e "${esc}$(basename $0)==>${esc_off} there is no function.sh. check it." 1>&2
-    exit 1
-fi
-
-#
-# FUNCTIONS {
-#
-
-## Computer Account
-set_systeminfo()
-{
-    ask_inputvalue "  Enter your computer name   : " MyCOMPUTERNAME
-    ask_inputvalue "  Enter your hostname        : " MyHOSTNAME
-    ask_inputvalue "  Enter your local host name : " MyLOCALHOSTNAME
-    echo ""
-}
-confirm_systeminfo()
-{
-    choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
-    msg="$1"
-
-    msg_display="${prefix} ${msg} ${choice}"
-    while true; do
-        printf "${msg_display}"
-        read res
-
-        case "${res}" in
-            a) return 0;;
-            r)
-                execho "Set your system information."
-                set_systeminfo
-
-                execho "Check the contents ..."
-                execho "  - Computer Name   : ${MyCOMPUTERNAME}"
-                execho "  - Hostname        : ${MyHOSTNAME}.local"
-                execho "  - Local Host Name : ${MyLOCALHOSTNAME}"
-                echo ""
-                confirm_systeminfo "${msg}"
-                return 0;;
-            x)
-                return 1;;
-            *)
-                execho "I can not read your input..."
-                confirm_systeminfo "${msg}"
-        esac
-    done
-}
-
-## GitHub account
-set_githubaccountinfo()
-{
-    ask_inputvalue "  Enter your Github user name                     : " MyGITHUB_USERNAME
-    ask_inputvalue "  Enter your email address registered with Github : " MyGITHUB_EMAIL
-    echo ""
-}
-confirm_githubaccountinfo()
-{
-    choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
-    msg="$1 ${choice}"
-
-    while true; do
-        printf "${msg}"
-        read res
-
-        case "${res}" in
-            a) return 0;;
-            r)
-                execho "Tell me your information of Github."
-                set_githubaccountinfo
-
-                execho "Check the contents ..."
-                execho "  - User Name       : ${MyGITHUB_USERNAME}"
-                execho "  - E-mail address  : ${MyGITHUB_EMAIL}"
-                echo ""
-                confirm_githubaccountinfo "${msg}"
-                return 0;;
-            x)
-                return 1;;
-            *)
-                echo "I can note read your input..."
-                confirm_githubaccountinfo "${msg}"
-        esac
-    done
-}
-
-#
-# } FUNCTIONS
-#
-
-
-
-#
-# Read info
-#
-source "${file_conf}"
-
-MyCOMPUTERNAME="${COMPUTERNAME}"
-MyHOSTNAME="${HOSTNAME}"
-MyLOCALHOSTNAME="${LOCALHOSTNAME}"
-
-MyGITHUB_USERNAME="${GITHUB_USERNAME}"
-MyGITHUB_EMAIL="${GITHUB_EMAIL}"
-
-
-#
-# Systen Settings
-#
-echo -e "\033[1m######################### System Information #########################\033[0m"
-if ask_yesno "Do you want to set the system information ?"; then
-
-    cat << DATA
-Check the contents ... ;
-  - Computer Name   : ${MyCOMPUTERNAME}
-  - Hostname        : ${MyHOSTNAME}.local
-  - Local Host Name : ${MyLOCALHOSTNAME}
-
-DATA
-    confirm_systeminfo "Are you sure want to set using above infomation?"
-
-    sudo scutil --set ComputerName "${MyCOMPUTERNAME}"
-    sudo scutil --set HostName "${MyHOSTNAME}.local"
-    sudo scutil --set LocalHostName "${MyLOCALHOSTNAME}"
-
-fi
-
-
-
-#
-# Generating SSH Keys for Github
-#
-echo -e "\033[1m############################### GitHub ###############################\033[0m"
-if ask_yesno "Do you generate a SSH key for GitHub ?"; then
-    MySSH_KEYNAME="github_rsa"
-    MySSH_FILE="${HOME}/.ssh/${MySSH_KEYNAME}"
-
-    cat << DATA
-Check the contents ...
-  - User Name       : ${MyGITHUB_USERNAME}
-  - E-mail address  : ${MyGITHUB_EMAIL}
-
-DATA
-
-    confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
-
-    # generating
-    ssh-keygen -t rsa -f ${MySSH_FILE} -C "${MyGITHUB_EMAIL}"
-    # save the key (/c/Users/you/.ssh/id_rsa): ${HOME}/.ssh/github_rsa
-
-    # % Enter passphrase (empty for no passphrase): *****
-    # % Enter same passphrase again: *****
-
-    # add your new key to the ssh-agent
-    ssh-add ${MySSH_FILE}
-
-    # Copies the contents of the id_rsa.pub file to your clipboard
-    pbcopy < "${MySSH_FILE}.pub"
-    sudo chmod 600 "${MySSH_FILE}.pub"    # just in case...'
-
-    echo ""
-    execho "ok, now open browser, \033[1;4;32m\"Safari\"\033[0m just now ?"
-    ask_confirm "you should register your ssh pub key to your account settings of github.\n"
-
-    execho "opening Safari ..."
-    open -a Safari "https://github.com/settings/ssh"
-
-    execho "when you finish settings it, then type '\033[1;4mdone\033[0m'.;"
-    while true; do
-        read res
-        if [ "${res}" == "done" ]; then
-            break
-        else
-            execho "finish settings? so type 'done'."
-        fi
-    done
-
-    # make config file
-    cat << EOF > "${HOME}/.ssh/config"
-Host github.com
-Hostname github.com
-Identityfile ${MySSH_FILE}
-EOF
-
-    #
-    ssh -T git@github.com &&:
-
-    # Are you sure you want to continue connecting (yes/no)?
-    #
-    # Hi username! You've successfully authenticated, but GitHub does not provide shell access.
-
-    # to set your account's default identity.
-    # Omit --global to set the identity only in this repository.
-    git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_EMAIL}"
-fi
-
-
-
-#
-# Dotfiles
-#
-echo -e "\033[1m############################## Dotfiles ##############################\033[0m"
-if ask_yesno "Do you want to clone dotfiles ?"; then
-    dotfiles="${HOME}/dots"
-
-    if [ -e "${dotfiles}" ]; then
-        mv "${dotfiles}" "${dotfiles}~$(date '+%Y%m%d%H%M')"
-    fi
-    mkdir -p ${dotfiles}
-
-    git clone https://github.com/woowee/dots.git "${dotfiles}"
-
-    ln -fs ${dotfiles}/.vimrc ${HOME}/.vimrc
-    ln -fs ${dotfiles}/.gvimrc ${HOME}/.gvimrc
-    ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
-    ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
-
-    if [ -e ${HOME}/.gitconfig ]; then
-        if ! $(grep "core" ${HOME}/.gitconfig); then
-            cat << EOF >> "${HOME}/.gitconfig"
-[core]
-    excludesfile = ~/.gitignore
-EOF
-        fi
-    else
-        cat << EOF > "${HOME}/.gitconfig"
-[core]
-    excludesfile = ~/.gitignore
-EOF
-    fi
-
-    # set .gitconf again
-    git config --global user.name "${MyGITHUB_USERNAME}"
-    git config --global user.email "${MyGITHUB_EMAIL}"
-fi
+# read functions
+source ${dir_current}/${filename_func}
 
 
 
 #
 # OSX Settings
 #
-echo -e "\033[1m############################ OSX Settings ############################\033[0m"
-ask_confirm "we will set osx defaults."
+
 # Trackpad
 execho '  トラックパッドのナチュラル・スクロールを止める... '
 defaults write -g com.apple.swipescrolldirection -bool false
@@ -388,8 +136,7 @@ defaults write com.apple.inputmethod.Kotoeri 'zhnm' -int 0
 #    # [システム環境設定 > 言語とテキスト > テキスト > 記号とテキストの置換を使用] = "OFF"
 
 execho '  スペルチェック機能は要らない... '
-#/usr/libexec/Plistbuddy -c "set :NSAutomaticSpellingCorrectionEnabled bool false" ~/Library/Preferences/.GlobalPreferences.plist
-#/usr/libexec/Plistbuddy -c "set :WebAutomaticSpellingCorrectionEnabled bool false" ~/Library/Preferences/.GlobalPreferences.plist
+defaults write com.apple.mail SpellCheckingBehavior -string "NoSpellCheckingEnabled"
 # [システム環境設定 > 言語とテキスト > テキスト > 記号とテキストの置換を使用] = "OFF"
 
 execho '  スペース、括弧は (できるものだけでも) シングルバイトで入力する... '
@@ -428,167 +175,5 @@ defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"|"' -bool FALSE
 defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"~"' -bool FALSE
 defaults write com.apple.inputmethod.Kotoeri 'zhsy' -dict-add '"\U00a5"' -bool FALSE
 
-#
-# Applications
-#
-echo ""
-echo -e "\033[1m######################## Install Applications ########################\033[0m"
-app_macvim_name='MacVim-KaoriYa'
-app_macvim_filename='MacVim.app'
-app_macvim_url='https://github.com/splhack/macvim/releases/download/20140107/macvim-kaoriya-20140107.dmg'
-
-app_alfred_name="Alfred 2"
-app_alfred_filename="Alfred 2.app"
-app_alfred_url='http://cachefly.alfredapp.com/Alfred_2.2_243b.zip'
-
-app_chrome_name='Google Chrome'
-app_chrome_filename='Google Chrome.app'
-app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
-
-## access, download, and install
-function install_application() {
-    # arguments.check
-    if [ $# -lt 3 ]; then
-        execho "usage: \033[1minstall_application\033[0m \033[4mapp_name\033[0m \033[4mapp_filename(*.app)\033[0m \033[4murl\033[0m [\033[4mdir\033[0m]" 1>&2
-        return 1
-    fi
-    # arguments.set
-    app_name=$1
-    app_filename=$2
-    app_url=$3
-    if [ $# -eq 4 ]; then
-        dir_tmp=$4
-    else
-        dir_tmp="${HOME}/tmp_installation"
-        mkdir -p ${dir_tmp}
-    fi
-
-    execho "Installing \033[1;32m${app_name}\033[0m..."
-
-    # get
-    cd "${dir_tmp}"
-    curl --location --remote-name "${app_url}"
-    app_filepath="${HOME}/${dir_tmp}/${app_url##*/}"
-
-    # expansion & install
-    case "${app_url##*.}" in
-    'zip')
-        unzip -q "${app_filepath}"
-        cp -a "${app_filename}" "/Applications"
-        ;;
-    'dmg')
-        app_mount="/Volumes/${app_name}"
-        hdiutil attach "${app_filepath}" -noidmereveal
-        cp -a "${app_mount}/${app_filename}" "/Applications"
-        hdiutil detach -force "${app_mount}"
-        ;;
-    esac
-}
-
-check_existence_caskapp()
-{
-    #cannot search by `mdfnd`, so decided to use `find`... i dont know why using `mdfind`
-
-    #arg
-    if [ $# -eq 0 ]; then
-        execho err "usage: ${esc_bld}$0${esc_off} ${esc_uln}appname${esc_off} [obtained apppath(return)] [target dirpath...]"
-        return 1
-    fi
-
-    #scope
-    target_dir=''
-    if [ $# -ge 3 ]; then
-        [ -e $3 ] && target_dir=$3
-    fi
-    if [ -z "${target_dir}" ]; then
-        if [ ! -e "${HOME}/Applications" ]; then
-            execho "where is your homebrew-cask ?"
-            exit 1
-        else
-            target_dir="${HOME}/Applications"
-        fi
-    fi
-    #find
-    caskapp_path=$(find "${target_dir}" -name "$1")
-
-    #return
-    if [ -n "${caskapp_path}" ]; then
-        [ $# -ge 2 ] && eval $2="\"${caskapp_path}\""
-        return 0
-    else
-        return 1
-    fi
-}
-
-if ask_yesno "Do you want to install applications, alfred, chrome, and macvim-kaoriya ?"; then
-
-    type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-
-    # set PATH
-    [ -e ${HOME}/.bashrc ] || touch ${HOME}/.bashrc
-    echo "export PATH=/usr/local/bin:/usr/local/sbin:$PATH" > ${HOME}/.bashrc
-    source ${HOME}/.bashrc
-    execho "PATH: ${PATH}"
-
-    brew update && brew upgrade
-
-    brew tap phinze/cask
-    brew tap woowee/mycask
-
-    brew install brew-cask
-    brew upgrade brew-cask || true
-    brew upgrade brew-cask && brew cask update
-
-    brew cask install alfred
-    brew cask install google-chrome
-    brew cask install macvim-kaoriya    # woowee/mycask
-
-#    ## install
-#    install_application "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
-#    install_application "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
-#    install_application "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
-
-    ## Each application settings
-    # Terminal
-    defaults write com.apple.terminal "Default Window Settings" -string "Pro"
-    defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
-
-    # MacVim
-    if check_existence_app ${app_macvim_filename}; then
-        defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
-
-        # MacVim > Neobundle
-        if ask_yesno "MacVim, Install the plugins by using 'NeoBundleInstall'?"; then
-            vimbundle="~/.vim/bundle"
-            if [ -e ${HOME}/.vim ]; then
-                mv ${HOME}/.vim "${HOME}/.vim~$(date '+%Y%m%d%H%M')"
-            fi
-            mkdir -p ~/.vim/bundle
-            git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
-
-            vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
-            echo ""
-        fi
-    fi
-    # Alfred
-    if check_existence_app "${app_alfred_filename}"; then
-        open -a "${app_alfred_filename}"
-        sleet 8 | echo "opening alfred 2. please wait ..."
-        brew cask alfred link
-    fi
-
-fi
-
-## Please restart
-cat << END
-
-
-**************************************************
-               NOW IT'S DONE.
-
-   You Should RESTART to activate the settings.
-     (c.g., [Command] + [Control] + [EJECT])
-**************************************************
-
-
-END
+#fin
+execho "${esc_ylw}DONE: MacOS X Defaults Settings${esc_off}"

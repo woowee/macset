@@ -118,13 +118,13 @@ if check_existence_app 'iTerm.app' path_app; then
     execho "iterm settings..."
     execho "iterm: ${path_app}"
 
-    #blur
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" Library/Preferences/com.googlecode.iterm2.plist
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
-    #transparency
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" Library/Preferences/com.googlecode.iterm2.plist
-    #wond type
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" Library/Preferences/com.googlecode.iterm2.plist
+    ##blur
+    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" Library/Preferences/com.googlecode.iterm2.plist
+    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
+    ##transparency
+    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" Library/Preferences/com.googlecode.iterm2.plist
+    ##wond type
+    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" Library/Preferences/com.googlecode.iterm2.plist
 fi
 
 # ricty

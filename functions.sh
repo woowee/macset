@@ -6,9 +6,34 @@ esc='\033[1;32m'
 esc_uln='\033[4m'
 esc_bld='\033[1m'
 esc_rev='\033[7m'
+esc_ylw='\033[1;33m'
 esc_off='\033[0m'
 
-prefix="$esc${iam}==>$esc_off"
+prefix_str="${iam}==>"
+prefix="$esc${prefix_str}$esc_off"
+
+indent=$(tr [:print:] " " <<<${prefix_str})
+
+execho()
+{
+    echo_usage=0
+
+    #echo msg
+    case $# in
+        1)
+            echo -e "${prefix} $1" ;;
+        2)
+            [ $1 == "err" ] && echo -e "${prefix} $2" 1>&2 || echo_usage=1 ;;
+        *)
+            echo_usage=1
+    esac
+
+    #usage?
+    if [ ${echo_usage} -ne 0 ]; then
+        echo -e "${prefix} usage: ${esc_bld}$0${esc_off} [err] ${esc_uln}msg${esc_off}"
+        exit 1
+    fi
+}
 
 ask_confirm()
 {
@@ -39,11 +64,12 @@ ask_yesno()
         read res
 
         case ${res} in
-            [Yy]*) return 0;;
-            [Nn]*) return 1;;
+            [Yy]*) ret=0; return 0;;
+            [Nn]*) ret=1; return 1;;
             *)
                 execho "Can't read your enter. try again."
                 ask_yesno "${msg}"
+                return ${ret};;
         esac
     done
 }
@@ -91,25 +117,4 @@ check_existence_command()
         return 1
     fi
 
-}
-
-execho()
-{
-    echo_usage=0
-
-    #echo msg
-    case $# in
-        1)
-            echo -e "${prefix} $1" ;;
-        2)
-            [ $1 == "err" ] && echo -e "${prefix} $2" 1>&2 || echo_usage=1 ;;
-        *)
-            echo_usage=1
-    esac
-
-    #usage?
-    if [ ${echo_usage} -ne 0 ]; then
-        echo -e "${prefix} usage: ${esc_bld}$0${esc_off} [err] ${esc_uln}msg${esc_off}"
-        exit 1
-    fi
 }
