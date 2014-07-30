@@ -124,7 +124,7 @@ if ask 'スクリーンショットでついてくるウィンドウの影を抑
 fi
 
 if ask 'スクリーンショットの保存先．' Y; then
-    dir_screenshoots="~/Pictures/screenshoots"
+    dir_screenshoots="${HOME}/Pictures/screenshoots"
     [ ! -e "${dir_screenshoots}" ] && mkdir "${dir_screenshoots}"
     defaults write com.apple.screencapture location -string "${dir_screenshoots}"
     # (none)
@@ -272,7 +272,7 @@ if ask 'デスクトップの表示を [F10] にマップする．' Y; then
 fi
 
 if ask '[F2] でメニューを操作する．' Y; then
-e   defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
+   defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > キーボードと文字入力 > メニューバーを操作対象にする] = "ON"，[F2]
 fi
 
