@@ -52,7 +52,6 @@ evernote \
 iterm2 \
 vlc \
 handbrake \
-bettertouchtool \
 shiftit \
 gimp-lisanet \
 inkscape \
