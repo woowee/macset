@@ -2,3 +2,4 @@ config.sh
 *.tar.gz
 *.un~
 .DS_Store
+log/

@@ -54,6 +54,7 @@ vlc \
 handbrake \
 shiftit \
 gimp-lisanet \
+gimp \
 inkscape \
 ### woowee/mycask
 mytracks \
