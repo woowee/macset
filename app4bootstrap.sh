@@ -44,7 +44,8 @@ app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
 #
 installby_brew()
 {
-    type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+#   type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+    type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
     # set PATH
     [ -e ${HOME}/.bashrc ] || touch ${HOME}/.bashrc

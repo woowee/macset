@@ -78,6 +78,15 @@ brew tap woowee/mycask
 execho "brew update & upgrade..."
 brew update && brew upgrade
 
+execho "brew cask updating..."
+brew upgrade brew-cask || true
+brew cask update
+
+# for installation of ricty
+execho "brew cask updating..."
+brew cask install "xquartz"
+
+
 #
 # brew
 #
@@ -92,9 +101,6 @@ done
 #
 # cask
 #
-execho "brew cask updating..."
-brew upgrade brew-cask || true
-brew cask update
 execho "brew cask install apps..."
 for app in "${apps[@]}"; do brew cask install "${app}"; done
 
