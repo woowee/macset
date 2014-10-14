@@ -142,7 +142,7 @@ defaults write com.apple.terminal "Default Window Settings" -string "Pro"
 defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
 
 # MacVim.app + plugins
-if check_existence_app ${app_macvim_filename}; then
+if check_existence_app "${app_macvim_filename}"; then
     defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
 
     # MacVim > Neobundle
@@ -161,6 +161,9 @@ fi
 
 # Alfred.app
 if check_existence_app "${app_alfred_filename}"; then
+
+    brew cask alfred link
+
     open -a "${app_alfred_filename}"
     sleep 8 & echo "opening alfred 2. please wait ..."
     brew cask alfred link
