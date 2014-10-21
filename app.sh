@@ -53,7 +53,6 @@ iterm2 \
 vlc \
 handbrake \
 shiftit \
-gimp-lisanet \
 gimp \
 inkscape \
 ### woowee/mycask
@@ -129,10 +128,10 @@ if check_existence_app 'iTerm.app' path_app; then
     #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
     #transparency
     # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Transparency\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+#    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
     #window type
     # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Window Type\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+#    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
 fi
 
 # ricty
