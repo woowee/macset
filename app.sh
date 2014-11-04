@@ -10,6 +10,13 @@ cd ${dir_current}
 source ${dir_current}/functions.sh
 
 #
+# prepare template dir
+#
+dir_tmp="${HOME}/tmp"
+[ -e "${dir_tmp}" ] || mkdir -p "${dir_tmp}"
+
+
+#
 # staff to install
 #
 
@@ -21,6 +28,7 @@ git \
 wget \
 openssl \
 w3m \
+ag \
 go \
 python \
 python3 \
@@ -119,20 +127,32 @@ if [ -n ${path_zsh} ]; then
 fi
 
 # iterm2
-if check_existence_app 'iTerm.app' path_app; then
-    execho "iterm settings..."
-    execho "iterm: ${path_app}"
+# ref. app4bootstrap.sh
 
-    #blur
-    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" Library/Preferences/com.googlecode.iterm2.plist
-    #/usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" Library/Preferences/com.googlecode.iterm2.plist
-    #transparency
-    # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Transparency\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-#    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-    #window type
-    # /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Window Type\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-#    /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
-fi
+# terminal.app
+# エンコーディングは UTF-8 のみ。
+defaults write com.apple.terminal StringEncodings -array 4
+# 環境設定 > エンコーディング = [Unicode (UTF-8)]
+
+cd "${dir_tmp}"
+
+# Use a modified version of the Solarized Dark theme by default in Terminal.app
+curl -o "Solarized Dark.terminal" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/fdae845aeaf5295f9c422afa1b4ae8c08cdcf303/Solarized%20Dark.terminal
+sleep 1; # Wait a bit...
+term_profile='Solarized Dark'
+current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
+if [ "${current_profile}" != "${term_profile}" ]; then
+    open "${HOME}/${dir_tmp}/${term_profile}.terminal"
+    sleep 1; # Wait a bit to make sure the theme is loaded
+    defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
+    defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
+fi;
+#if [ "${current_profile}" != "Pro" ]; then
+#    open "${HOME}/${dir_tmp}/${term_profile}.terminal"
+#    sleep 1; # Wait a bit to make sure the theme is loaded
+#    defaults write com.apple.terminal 'Default Window Settings' -string 'Pro';
+#    defaults write com.apple.terminal 'Startup Window Settings' -string 'Pro';
+#fi;
 
 # ricty
 cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty was installed..."

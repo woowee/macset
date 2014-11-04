@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -ux
 
 set -e
 
@@ -19,6 +19,11 @@ filename_func="functions.sh"
 source ${dir_current}/${filename_func}
 
 
+#
+# prepare template dir
+#
+dir_tmp="${HOME}/tmp"
+[ -e "${dir_tmp}" ] || mkdir -p "${dir_tmp}"
 
 #
 # Applications
@@ -26,17 +31,23 @@ source ${dir_current}/${filename_func}
 app_macvim_name='MacVim-KaoriYa'
 app_macvim_brewname='macvim-kaoriya'
 app_macvim_filename='MacVim.app'
-app_macvim_url='https://github.com/splhack/macvim/releases/download/20140107/macvim-kaoriya-20140107.dmg'
+app_macvim_url='https://github.com/splhack/macvim/releases/download/20140805/macvim-kaoriya-20140805.dmg'
 
 app_alfred_name="Alfred 2"
 app_alfred_brewname="alfred"
 app_alfred_filename="Alfred 2.app"
-app_alfred_url='http://cachefly.alfredapp.com/Alfred_2.2_243b.zip'
+app_alfred_url='https://cachefly.alfredapp.com/Alfred_2.5.1_308.zip'
 
 app_chrome_name='Google Chrome'
 app_chrome_brewname='google-chrome'
 app_chrome_filename='Google Chrome.app'
 app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
+
+app_iterm2_name='iTerm2'
+app_iterm2_brewname='iterm2'
+app_iterm2_filename='iTerm.app'
+app_iterm2_url='http://www.iterm2.com/downloads/stable/iTerm2_v2_0.zip'
+
 
 
 #
@@ -44,7 +55,7 @@ app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
 #
 installby_brew()
 {
-#   type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+    execho "install homebrew..."
     type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
     # set PATH
@@ -53,27 +64,34 @@ installby_brew()
     source ${HOME}/.bashrc
     execho "PATH: ${PATH}"
 
+    execho "update and upgrade homebrew..."
     brew update && brew upgrade
 
-    # tap
-    brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask; brew install brew-cask
+    execho "install homebrew-cask..."
+    # brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask; brew install brew-cask
+    brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
     brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
 
-    # brew-cask
-    brew upgrade brew-cask || true
+    execho "upgrade and update homebrew-cask..."
+    brew upgrade brew-cask && brew cleanup && brew cask cleanup
     brew cask update
 
-    brew cask install "${app_alfred_brewname}" "${app_chrome_brewname}" "${app_macvim_brewname}"
+    execho "install apps using homebrew-cask..."
+    brew cask install \
+        "${app_alfred_brewname}" \
+        "${app_chrome_brewname}" \
+        "${app_macvim_brewname}" \
+        "${app_iterm2_brewname}"
 }
 
 installby_diy()
 {
-    dir_tmp="${HOME}/tmp"
     [ -e "${dir_tmp}" ] || mkdir -p "${dir_tmp}"
 
     installer "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
     installer "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
     installer "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
+    installer "${app_iterm2_name}" "${app_iterm2_filename}" "${app_iterm2_url}" "${dir_tmp}"
 }
 
 installer()
@@ -92,6 +110,13 @@ installer()
     else
         dir_tmp="${HOME}/tmp_installation"
         mkdir -p ${dir_tmp}
+    fi
+
+    # existence check
+    if check_existence_app "${app_filename}" path_app; then
+        if ! ask_yesno "${app_name} has already been installed (${path_app}). Do you want to continue installation?"; then
+            return 0
+        fi
     fi
 
     execho "Installing \033[1;32m${app_name}\033[0m..."
@@ -120,6 +145,7 @@ installer()
 #
 
 
+
 #
 # Installation
 #
@@ -128,21 +154,83 @@ if installby_brew; then
     execho "Installed using brew-cask."
 else
     if ask_yesno "Could not install app using brew-cask.\n${indent} Do yoo want to try again using curl and hdiutil/unzip commands?\n${indent} * notes: Apps will be installed into \`/Application\` not \`~/Application\` as brew-cask do."; then
-        echo $?
         installby_diy
     fi
 fi
+
+
 
 #
 # Settings
 #
 execho "Setting for the applications..."
+
+# Alfred.app
+execho "${app_alfred_filename} Settings ..."
+brew cask alfred link
+if check_existence_app "${app_alfred_filename}" path_app; then
+    execho "${app_alfred_filename}= ${path_app}"
+
+    execho "opening alfred 2. please wait ..."
+    open -W -a "${app_alfred_filename}"
+
+    # again...
+    brew cask alfred link
+else
+    execho "Sorry, ${app_alfred_filename} was not found..."
+fi
+
+# iTerm2.app
+execho "${app_iterm2_filename} Settings..."
+if check_existence_app "${app_iterm2_filename}" path_app; then
+    execho "${app_iterm2_filename}= ${path_app}"
+
+    #execho "opening iterm2. please wait ..."
+    #open -W -a "${app_iterm2_filename}"
+    cd "${dir_tmp}"
+
+    curl -o com.googlecode.iterm2.plist https://gist.githubusercontent.com/woowee/53fd864693f2ea01a247/raw/1efbfd5578149fac9937107f80859d5058bc4e07/com.googlecode.iterm2.plist
+    cp -f com.googlecode.iterm2.plist ${HOME}/Library/Preferences
+
+    curl -o "Solarized Dark.itermcolors" https://raw.githubusercontent.com/altercation/solarized/master/iterm2-colors-solarized/Solarized%20Dark.itermcolors
+    open "Solarized Dark.itermcolors"; rm "Solarized Dark.itermcolors"
+
+    curl -o Hybrid.itermcolors https://gist.githubusercontent.com/w0ng/5e0a431531670e05dc4f/raw/138b83d2736070f7b089a1ff22068c2d1702cf6c/gistfile1.txt
+    open Hybrid.itermcolors; rm Hybrid.itermcolors
+    # ref.https://github.com/databus23/dotfiles/blob/master/osx
+
+    plist="${HOME}/Library/Preferences/com.googlecode.iterm2.plist"
+    if [ -e "${plist}" ]; then
+        #blur
+        sudo /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur\" true" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+        sudo /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Blur Radius\" 2.500" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+        #transparency
+        sudo /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Transparency\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+        sudo /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Transparency\" 0.250" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+        #window type
+        sudo /usr/libexec/PlistBuddy -c "Print :\"New Bookmarks\":0:\"Window Type\"" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+        sudo /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Window Type\" 2" ${HOME}/Library/Preferences/com.googlecode.iterm2.plist
+
+        # Don’t display the annoying prompt when quitting iTerm
+        defaults write com.googlecode.iterm2 PromptOnQuit -bool false
+    else
+        execho "Oops! ${plist} was not found. Please set preferences of iTerm2 later."
+    fi
+
+    cd ${HOME}
+
+else
+    execho "Sorry, ${app_iterm2_filename} was not found..."
+fi
+
 # Terminal.app
-defaults write com.apple.terminal "Default Window Settings" -string "Pro"
-defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
+# does it mean that can not set itself while using Terminal.app itself ?
 
 # MacVim.app + plugins
-if check_existence_app "${app_macvim_filename}"; then
+execho "${app_macvim_filename} Settings..."
+if check_existence_app "${app_macvim_filename}" app_path; then
+    execho "${app_macvim_filename}= ${app_path}"
+
     defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
 
     # MacVim > Neobundle
@@ -157,17 +245,10 @@ if check_existence_app "${app_macvim_filename}"; then
         vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
         echo ""
     fi
+else
+    execho "Sorry, ${app_macvim_filename} was not found..."
 fi
 
-# Alfred.app
-if check_existence_app "${app_alfred_filename}"; then
-
-    brew cask alfred link
-
-    open -a "${app_alfred_filename}"
-    sleep 8 & echo "opening alfred 2. please wait ..."
-    brew cask alfred link
-fi
 
 
 #fin

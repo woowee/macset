@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -ux
 
 set -e
 
@@ -127,7 +127,7 @@ ask_yesno "Do you want to clone dotfiles ?" && ./dotfiles.sh
 # OSX Settings
 #
 echo -e "\033[1m############################ OSX Settings ############################\033[0m"
-ask_confirm "Sets OSX defaults."; ./osx4bootstrap.sh
+ask_confirm "Sets OSX defaults."; ./osx4bootstrap.sh --silent
 
 
 #
