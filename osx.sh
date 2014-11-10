@@ -1,5 +1,6 @@
 #!/bin/bash -u
 
+set -e
 ######################################################################
 # This script been referred to ;
 #  - [dotfiles .osx at master - mathiasbynens dotfiles](https://github.com/mathiasbynens/dotfiles/blob/master/.osx)
@@ -49,13 +50,14 @@ function ask {
 
     printf "$prefix $1 [$prompt] "
 
+    yn=""
     if [ "$auto" == "Y" ]; then
       echo
     else
       read yn
     fi
 
-    if [ -z "$yz" ]; then
+    if [ -z "$yn" ]; then
       yn=$default
     fi
 
@@ -143,10 +145,10 @@ if ask 'Finder: ダウンロードアプリケーションを開く際の警告�
     # (none)
 fi
 
-if ask 'Finder: クラッシュリポーターを無効にする．' Y; then
-    #defaults write com.apple.CrashReporter DialogType -string "none"
-    # (none)
-fi
+#if ask 'Finder: クラッシュリポーターを無効にする．' Y; then
+#    defaults write com.apple.CrashReporter DialogType -string "none"
+#    # (none)
+#fi
 
 if ask 'Finder: ヘルプを non-floating mode にする．' Y; then
     defaults write com.apple.helpviewer DevMode -bool true
@@ -177,9 +179,10 @@ if ask 'Finder: Finder ウィンドウは、リスト形式でデフォルト表
 fi
 
 if ask 'Finder: フォルダの名称は、英語表記．' Y; then
-   mv /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
-      /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
-   cp -f \
+    sudo mv \
+        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
+        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
+   sudo cp -f \
       /System/Library/CoreServices/SystemFolderLocalizations/en.lproj/SystemFolderLocalizations.strings \
       /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/
 fi
@@ -383,7 +386,7 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
     pb=/usr/libexec/PlistBuddy
     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
 
-    sudo cp $plistis "$HOME/KeySetting_Default.plist.org"
+    sudo cp -f "${plistis}" "$HOME/KeySetting_Default.plist.org"
 
     sudo "${pb}" -c "Set :keys:before_typing:\'' \'':character ' '" "${plistis}"    # 　  space
     #sudo "${pb}" -c "Set :keys:*:\''-\'':character '-'" "${plistis}"   # －   minus (x)
@@ -436,30 +439,27 @@ fi
 
 ## timemachine
 if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
-tmutil addexclusion \
-    /Applications \
-    /Users \
-    /dev \
-    /net \
-    /tmp \
-    /Library \
-    /Volumes \
-    /etc \
-    /opt \
-    /usr \
-    /Network \
-    /bin \
-    /home \
-    /private \
-    /var \
-    /System \
-    /cores \
-    /sbin
-    tmutil removeexclusion "${HOME}"
-    #対象外の確認: sudo open /Library/Preferences/com.apple.TimeMachine.plist の `ExcludeByPath`
-    #対象外の確認: tmutil isexclude
+    sudo tmutil addexclusion \
+      "/Applications" \
+      "/Library" \
+      "/opt" \
+      "/usr" \
+      "/bin" \
+      "/private" \
+      "/System" \
+      "/cores" \
+      "/sbin" \
+    sudo tmutil removeexclusion "${HOME}"
+    sudo tmutil addexclusion \
+      "$HOME/Applications" \
+      "$HOME/Desktop" \
+      "$HOME/Downloads" \
+      "$HOME/Library" \
+      "$HOME/Public" \
+      "$HOME/tmp" \
+    #対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
+    #対象外の確認: ls -l@
 fi
-
 
 
 if ask 'Time Machine: ローカルスナップショットを無効にする．' Y; then
@@ -477,10 +477,10 @@ if ask 'Time Machine: ローカルスナップショットを無効にする．'
     # (none)
 fi
 
-if ask 'Time Machine: バッテリー電源が繋がっている時．' Y; then
-    defaults write /Library/Preferences/com.apple.TimeMachine RequiresACPower 0
-    # (none)
-fi
+#if ask 'Time Machine: バッテリー電源が繋がっている時．' Y; then
+#    defaults write com.apple.TimeMachine RequiresACPower 0
+#    # (none)
+#fi
 
 
 ## spotlight
@@ -501,7 +501,7 @@ fi
 # Fin
 #
 if ask "Killall to make the settings effective." Y; then
-  for app in Finder Dock SystemUIServer JapaneseIM; do
+  for app in cfprefsd Finder Dock SystemUIServer JapaneseIM; do
     killall "$app" >/dev/null 2>&1
   done
 fi

@@ -43,16 +43,17 @@ function ask {
       default=
     fi
 
-    printf "$prefix $1 [$prompt] "
+    printf "$1 [$prompt] "
 
+    yn=""
     if [ "$auto" == "Y" ]; then
-      echo
+        echo
     else
-      read yn
+        read yn
     fi
 
-    if [ -z "$yz" ]; then
-      yn=$default
+    if [ -z "$yn" ]; then
+        yn=$default
     fi
 
     case $yn in
@@ -160,7 +161,7 @@ keyboardid=$(ioreg -n IOHIDKeyboard -r | grep -E 'VendorID"|ProductID' | awk '{ 
 # Input - Keyboard - Modified key
 if ask 'Input: Caps Lock を Control キーにする．' Y; then
     # CapsLock(2) -> Control(0)
-    defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
+#defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
     defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
     # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
 fi
@@ -232,7 +233,7 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
     pb=/usr/libexec/PlistBuddy
     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
 
-    sudo cp $plistis "$HOME/KeySetting_Default.plist.org"
+#sudo cp $plistis "$HOME/KeySetting_Default.plist.org"
 
     sudo "${pb}" -c "Set :keys:before_typing:\'' \'':character ' '" "${plistis}"    # 　  space
     #sudo "${pb}" -c "Set :keys:*:\''-\'':character '-'" "${plistis}"   # －   minus (x)

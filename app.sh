@@ -46,6 +46,7 @@ brew-cask \
 ### homebrew/dupes
 rsync \
 ### sanemat/font
+automake \
 ricty \
 )
 
