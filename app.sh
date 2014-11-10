@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -ux
 set -e
 
 sudo -v
@@ -47,6 +47,7 @@ brew-cask \
 rsync \
 ### sanemat/font
 automake \
+pkg-config \
 ricty \
 )
 
@@ -143,7 +144,7 @@ sleep 1; # Wait a bit...
 term_profile='Solarized Dark'
 current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
 if [ "${current_profile}" != "${term_profile}" ]; then
-    open "${HOME}/${dir_tmp}/${term_profile}.terminal"
+    open "${dir_tmp}/${term_profile}.terminal"
     sleep 1; # Wait a bit to make sure the theme is loaded
     defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
     defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"

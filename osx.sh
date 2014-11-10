@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -ux
 
 set -e
 ######################################################################
@@ -449,7 +449,9 @@ if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
       "/System" \
       "/cores" \
       "/sbin" \
+
     sudo tmutil removeexclusion "${HOME}"
+
     sudo tmutil addexclusion \
       "$HOME/Applications" \
       "$HOME/Desktop" \
@@ -457,6 +459,7 @@ if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
       "$HOME/Library" \
       "$HOME/Public" \
       "$HOME/tmp" \
+
     #対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
     #対象外の確認: ls -l@
 fi
