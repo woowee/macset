@@ -38,22 +38,17 @@ ffmpeg \
 base64 \
 swftools \
 eyeD3 \
-the_silver_searcher \
 ### for handbrake
 libdvdcss \
-### phinze/cask
-brew-cask \
 ### homebrew/dupes
 rsync \
-### sanemat/font
-automake \
-pkg-config \
+### woowee/font
 ricty \
 )
 
 # homebrew-cask
 apps=(\
-### phinze/cask
+### caskroom/homebrew-cask
 alfred \
 google-chrome \
 appcleaner \
@@ -76,12 +71,14 @@ macvim-kaoriya \
 #
 
 execho "homebrew install..."
-type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+execho "homebrew-cask install..."
+brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
 
 execho "brew tap..."
 brew tap homebrew/dupes
-brew tap phinze/cask
-brew tap sanemat/font
+brew tap woowee/font
 brew tap woowee/mycask
 
 execho "brew update & upgrade..."
@@ -102,8 +99,8 @@ brew cask install "xquartz"
 execho "brew install commands..."
 for bin in "${bins[@]}";
 do
-    brew install "${bin}"
-    # some process as needed
+brew install "${bin}"
+# some process as needed
 done
 
 
@@ -113,6 +110,7 @@ done
 execho "brew cask install apps..."
 for app in "${apps[@]}"; do brew cask install "${app}"; done
 
+
 #
 # settings
 #
@@ -120,21 +118,21 @@ for app in "${apps[@]}"; do brew cask install "${app}"; done
 # shell
 path_zsh=$(find $(brew --prefix)/bin -name zsh)
 if [ -n ${path_zsh} ]; then
-    execho "shell, zsh settings..."
-    execho "zsh: ${path_zsh}"
-    # add zsh
-    echo ${path_zsh} | sudo tee -a /etc/shells
-    # set zsh
-    chsh -s ${path_zsh}
+execho "shell, zsh settings..."
+execho "zsh: ${path_zsh}"
+# add zsh
+echo ${path_zsh} | sudo tee -a /etc/shells
+# set zsh
+chsh -s ${path_zsh}
 fi
 
 # iterm2
 # ref. app4bootstrap.sh
 
 # terminal.app
-# エンコーディングは UTF-8 のみ。
+# 繧ｨ繝ｳ繧ｳ繝ｼ繝�ぅ繝ｳ繧ｰ縺ｯ UTF-8 縺ｮ縺ｿ縲
 defaults write com.apple.terminal StringEncodings -array 4
-# 環境設定 > エンコーディング = [Unicode (UTF-8)]
+# 迺ｰ蠅�ｨｭ螳 > 繧ｨ繝ｳ繧ｳ繝ｼ繝�ぅ繝ｳ繧ｰ = [Unicode (UTF-8)]
 
 cd "${dir_tmp}"
 
@@ -144,10 +142,11 @@ sleep 1; # Wait a bit...
 term_profile='Solarized Dark'
 current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
 if [ "${current_profile}" != "${term_profile}" ]; then
-    open "${dir_tmp}/${term_profile}.terminal"
-    sleep 1; # Wait a bit to make sure the theme is loaded
-    defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
-    defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
+open "${dir_tmp}/${term_profile}.terminal"
+sleep 1; # Wait a bit to make sure the theme is loaded
+defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
+defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
+killall "Terminal"
 fi;
 #if [ "${current_profile}" != "Pro" ]; then
 #    open "${HOME}/${dir_tmp}/${term_profile}.terminal"
@@ -165,18 +164,18 @@ pip install --upgrade setuptools && pip install --upgrade pip || true
 
 # mutagen (to use mid3v2)
 if ! check_existence_command 'mid3v2'; then
-    execho "mutagen installation..."
-    if ! pip install mutagen; then
-        [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
-        mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
-        mutagen_name=${mutagen_url##*/}
-        cd $HOME/tmp
-        curl --location --remote-name "${mutagen_url}"
-        tar zxvf "${mutagen_name}"
-        cd $(basename $mutagen_name .tar.gz)
-        python setup.py build
-        sudo python setup.py install
-    fi
+execho "mutagen installation..."
+if ! pip install mutagen; then
+[ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
+mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
+mutagen_name=${mutagen_url##*/}
+cd $HOME/tmp
+curl --location --remote-name "${mutagen_url}"
+tar zxvf "${mutagen_name}"
+cd $(basename $mutagen_name .tar.gz)
+python setup.py build
+sudo python setup.py install
+fi
 fi
 
 cd ${dir_current}
@@ -189,7 +188,7 @@ cat << END
 
 
 **************************************************
-               NOW IT'S DONE.
+NOW IT'S DONE.
 **************************************************
 
 
