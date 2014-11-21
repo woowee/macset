@@ -382,6 +382,17 @@ if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
     # [システム環境設定 > キーボード > 入力ソース > "\"キーで入力する文字] = "\ (バックスラッシュ)"
 fi
 
+if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' -int 1
+    if defaults read ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources >/dev/null 2>&1; then
+        defaults delete ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources
+    fi
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Japanese"; InputSourceKind = "Input Mode";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Roman";InputSourceKind = "Input Mode";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";InputSourceKind = "Keyboard Input Method";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.50onPaletteIM";InputSourceKind = "Non Keyboard Input Method";}'
+    # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
+fi
+
 if ask 'Input: 数字，記号はシングルバイトでの入力にする．' Y; then
     pb=/usr/libexec/PlistBuddy
     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
