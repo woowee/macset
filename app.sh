@@ -157,7 +157,21 @@ fi;
 
 # ricty
 execho "setting ricty..."
-cp -f $(brew --prefix)/share/fonts/Ricty*.ttf ~/Library/Fonts/ && fc-cache -vf && echo "ricty has been installed."
+dirRicty=$(mdfind -onlyin "$(brew --prefix)/Cellar" "kMDItemFSName == 'ricty' && kMDItemKind == 'フォルダ'")
+dirRictyVer="$(ls "${dirRicty}" | sort -rf | head -1)"
+dirRictyIs="${dirRicty}/${dirRictyVer}/share/fonts"
+if [ -n "${dirRictyIs}" ]; then
+  cp "${dirRictyIs}"/Ricty*.ttf ~/Library/Fonts/ &&:
+  if [ $? -ne 0 ]; then
+    execho "could ${esc_bld}NOT${esc_off} install ricty."
+  else
+    fc-cache -vf
+    execho "ricty has been installed."
+  fi
+else
+  # err
+  execho "could ${esc_bld}NOT${esc_off} install ricty."
+fi
 
 # python
 execho "setting python..."

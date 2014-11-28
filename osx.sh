@@ -382,7 +382,7 @@ if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
     # [システム環境設定 > キーボード > 入力ソース > "\"キーで入力する文字] = "\ (バックスラッシュ)"
 fi
 
-if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' -int 1
+if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' Y; then
     if defaults read ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources >/dev/null 2>&1; then
         defaults delete ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources
     fi
