@@ -32,6 +32,8 @@ ag \
 go \
 python \
 python3 \
+### for LESS
+node \
 ### for radiko
 rtmpdump \
 ffmpeg \
@@ -154,6 +156,14 @@ fi;
 #    defaults write com.apple.terminal 'Default Window Settings' -string 'Pro';
 #    defaults write com.apple.terminal 'Startup Window Settings' -string 'Pro';
 #fi;
+
+# LESS
+if check_existence_command 'npm'; then
+  execho "setting LESS..."
+  npm install --global less
+else
+  execho "npm has not been installed. so coud ${esc_bld}NOT${esc_off} install LESS."
+fi
 
 # ricty
 execho "setting ricty..."
