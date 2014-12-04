@@ -162,7 +162,7 @@ if check_existence_command 'npm'; then
   execho "setting LESS..."
   npm install --global less
 else
-  execho "npm has not been installed. so coud ${esc_bld}NOT${esc_off} install LESS."
+  execho "npm has not been installed. can't use LESS but is that okay?"
 fi
 
 # ricty

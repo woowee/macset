@@ -3,3 +3,4 @@ config.sh
 *.un~
 .DS_Store
 log/
+node_modules/
