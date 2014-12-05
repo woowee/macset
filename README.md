@@ -49,7 +49,7 @@ cp config.sh.tmp config.sh
 vi config.sh
 ```
 
-Usage 1 Â» To Prepare "Minimal" Enviroment
+Usage 1 » To Prepare "Minimal" Enviroment
 ---
 
 ``` sh
@@ -86,7 +86,7 @@ Note that Safari is going to open to regist SSH key in GitHub.
 [45]: https://github.com/splhack/homebrew-splhack "splhack homebrew-splhack"
 
 
-Usage 2 Â» To Build "Complete" Enviroment
+Usage 2 » To Build "Complete" Enviroment
 ---
 
 The scripts to set the defautls for OSX and install applications software are provided for each other because I think it will be the requirement to do separately.
@@ -140,3 +140,7 @@ Thank to all very much.
 
 Thank you for reading it through.  
 By now, I guess you get used to my funny English writing. Appreciate any suggestions you can make.:wink:
+
+This document Japanease language version is [here][100].
+
+[100]: https://github.com/woowee/macset/blob/master/README-JP.md "README-JP.md"
