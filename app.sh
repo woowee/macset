@@ -206,6 +206,15 @@ fi
 
 cd ${dir_current}
 
+
+# xcode
+execho "setting xcode..."
+cd ${HOME}
+git clone https://github.com/XVimProject/XVim.git
+cd XVim
+make
+
+
 # alfred (kMDItemFSName = "Alfred 2.app")
 brew cask alfred link
 
