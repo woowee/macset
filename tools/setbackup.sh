@@ -1,11 +1,17 @@
 #!/bin/bash -u
 
 set -e
-source "$(dirname $0)/functions.sh"
 
 # 処理内容；
-#   バックアップ処理の為のスケジュールを設定する。
-#   毎日 {sch_houris} 時、{dir_SRC} を {dir_DST} へバックアップをとる。
+#   バックアップ処理のスケジュール設定をする．
+#
+#
+#   * バックアップ処理の周期は、1 日 1 回。
+#   * 毎日 {sch_houris} 時に、スクリプトファイル {file_process} を実行し，
+#     {dir_SRC} の内容を {dir_DST} へバックアップする．
+#   * スケジューリング制御は launchd/launchctl による．
+#   * バックアップ処理の具体的な処理は，別途スクリプト {file_process} に設けている．
+#     本スクリプト内にはその処理自身の記述はない。
 #
 # 使い方；
 #   setbackup.sh {dir_SRC} {dir_DST}
@@ -15,8 +21,11 @@ source "$(dirname $0)/functions.sh"
 #   02. dir_DST ... バックアップ先(デフォルト；/Volumes/My\ Passport\ Studio/bkup/)
 
 
+source "../$(dirname $0)/functions.sh"
+
+
 #
-# 初期値(defaults)
+# 初期値(defaults); これら値は，ユーザー任意で変更可．
 #
 # バックアップを録る場所
 dir_SRC="$HOME/"
@@ -27,11 +36,12 @@ dir_DST="/Volumes/My Passport Studio/bkup/"
 dir_launch="$HOME/Library/LaunchAgents"
 # パスの指定、リトライ回数
 retry=3
-# バックアップ処理を実行する時刻、毎日
+# バックアップ処理を実行する時刻(0-24)
 sch_houris=3    # 03:00 am
 
-# ログを置く場所
+# 実行するスクリプトファイル(実際のバックアップ処理が記述されている)
 file_process="$HOME/macset/backup.sh"
+
 
 #
 # Functions
@@ -83,7 +93,7 @@ check_existence_dir()
 
 # 引数の数
 if [ $# -gt 2 ]; then
-    # エラー
+}# エラー
     execho "usage: $0 {sourcePath} {destinationPath}" 1>&2
     exit 1
 fi
