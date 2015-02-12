@@ -215,10 +215,6 @@ cd XVim
 make
 
 
-# alfred (kMDItemFSName = "Alfred 2.app")
-brew cask alfred link
-
-
 cat << END
 
 
