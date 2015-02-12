@@ -1,4 +1,4 @@
-#!/bin/bash -ux
+#!/bin/bash -u
 
 set -e
 
@@ -166,19 +166,7 @@ fi
 execho "Setting for the applications..."
 
 # Alfred.app
-execho "${app_alfred_filename} Settings ..."
-brew cask alfred link
-if check_existence_app "${app_alfred_filename}" path_app; then
-    execho "${app_alfred_filename}= ${path_app}"
-
-    execho "opening alfred 2. please wait ..."
-    open -W -a "${app_alfred_filename}"
-
-    # again...
-    brew cask alfred link
-else
-    execho "Sorry, ${app_alfred_filename} was not found..."
-fi
+# execho "${app_alfred_filename} Settings ..."
 
 # iTerm2.app
 execho "${app_iterm2_filename} Settings..."
