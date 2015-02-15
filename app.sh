@@ -1,4 +1,4 @@
-#!/bin/bash -ux
+#!/bin/bash -u
 set -e
 
 sudo -v
@@ -44,8 +44,8 @@ eyeD3 \
 libdvdcss \
 ### homebrew/dupes
 rsync \
-### woowee/font
-ricty \
+#### woowee/font
+#ricty \
 )
 
 # homebrew-cask
@@ -80,7 +80,7 @@ brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
 
 execho "brew tap..."
 brew tap homebrew/dupes
-brew tap woowee/font
+brew tap caskroom/fonts
 brew tap woowee/mycask
 
 execho "brew update & upgrade..."
@@ -165,23 +165,9 @@ else
   execho "npm has not been installed. can't use LESS but is that okay?"
 fi
 
-# ricty
-execho "setting ricty..."
-dirRicty=$(mdfind -onlyin "$(brew --prefix)/Cellar" "kMDItemFSName == 'ricty' && kMDItemKind == 'フォルダ'")
-dirRictyVer="$(ls "${dirRicty}" | sort -rf | head -1)"
-dirRictyIs="${dirRicty}/${dirRictyVer}/share/fonts"
-if [ -n "${dirRictyIs}" ]; then
-  cp "${dirRictyIs}"/Ricty*.ttf ~/Library/Fonts/ &&:
-  if [ $? -ne 0 ]; then
-    execho "could ${esc_bld}NOT${esc_off} install ricty."
-  else
-    fc-cache -vf
-    execho "ricty has been installed."
-  fi
-else
-  # err
-  execho "could ${esc_bld}NOT${esc_off} install ricty."
-fi
+## font
+execho "installing ricty-diminished..."
+brew install font-ricty-diminished &&:
 
 # python
 execho "setting python..."
@@ -210,9 +196,19 @@ cd ${dir_current}
 # xcode
 execho "setting xcode..."
 cd ${HOME}
-git clone https://github.com/XVimProject/XVim.git
-cd XVim
-make
+if [ -e ${HOME}/XVim ]; then
+    execho "xvim has been set."
+else
+    execho "applying xvim..."
+    git clone https://github.com/XVimProject/XVim.git
+    cd ${HOME}/XVim
+    make
+fi
+cd ${HOME}
+
+[ -e ${HOME}/.xvimrc ] && mv ${HOME}/.xvimrc ${HOME}/.xvimrc.$(date "+%Y%m%d-%H%M%S")
+curl -o ".xvimrc" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/fdae845aeaf5295f9c422afa1b4ae8c08cdcf303/Solarized%20Dark.terminal
+sleep 1; # Wait a bit...
 
 
 cat << END

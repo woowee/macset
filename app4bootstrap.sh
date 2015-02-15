@@ -166,7 +166,14 @@ fi
 execho "Setting for the applications..."
 
 # Alfred.app
-# execho "${app_alfred_filename} Settings ..."
+execho "${app_alfred_filename} Settings ..."
+if check_existence_app "${app_alfred_filename}" path_app; then
+    execho "opening alfred 2 once..."
+    open -a "${app_alfred_filename}"
+else
+    execho "Sorry, ${app_alfred_filename} was not found..."
+fi
+
 
 # iTerm2.app
 execho "${app_iterm2_filename} Settings..."
