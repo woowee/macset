@@ -378,8 +378,23 @@ fi
 
 # Input - Inputmethod JapaneseIM
 if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
+    defaults write com.apple.inputmethod.Kotoeri JIMPrefPunctuationTypeKey -int 3
+    # [システム環境設定 > キーボード > 入力ソース > 句読点の種類] = "．と，"
+fi
+
+if ask 'Input: スラッシュはスラッシュ．' Y; then
+    defaults write com.apple.inputmethod.Kotoeri JIMPrefCharacterForSlashKey -int 0
+    # [システム環境設定 > キーボード > 入力ソース > "/"キーで入力する文字] = "/ (スラッシュ)"
+fi
+
+if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
     defaults write com.apple.inputmethod.Kotoeri 'JIMPrefCharacterForYenKey' -int 1
     # [システム環境設定 > キーボード > 入力ソース > "\"キーで入力する文字] = "\ (バックスラッシュ)"
+fi
+
+if ask 'Input: 数字は常に半角．' Y; then
+    defaults write com.apple.inputmethod.Kotoeri 'JIMPrefFullWidthNumeralCharactersKey' -bool false
+    # [システム環境設定 > キーボード > 入力ソース > 数字を全角入力] = "オフ"
 fi
 
 if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' Y; then
@@ -393,7 +408,7 @@ if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナ�
     # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
 fi
 
-if ask 'Input: 数字，記号はシングルバイトでの入力にする．' Y; then
+if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
     pb=/usr/libexec/PlistBuddy
     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
 
