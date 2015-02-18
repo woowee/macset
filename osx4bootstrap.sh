@@ -248,8 +248,6 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
 
     sudo "${pb}" -c "Set :keys:before_typing:\'' \'':character ' '" "${plistis}"    # 　  space
     #sudo "${pb}" -c "Set :keys:*:\''-\'':character '-'" "${plistis}"   # －   minus (x)
-    sudo "${pb}" -c "Set :keys:*:\''[\'':character '['" "${plistis}"    # 「」 bracket
-    sudo "${pb}" -c "Set :keys:*:\'']\'':character ']'" "${plistis}"    # 「」 bracket
     sudo "${pb}" -c "Set :keys:*:\''|\'':character '|'" "${plistis}"    # ｜   vertical bar
     sudo "${pb}" -c "Set :keys:*:\''\!\'':character '\!'" "${plistis}"  # ！   exclamation
     #/usr/libexec/PlistBuddy -c "Print :keys:*:\''\"\''" "${plistis}"   # ”   double quotation  (x)
