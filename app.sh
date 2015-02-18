@@ -207,7 +207,7 @@ fi
 cd ${HOME}
 
 [ -e ${HOME}/.xvimrc ] && mv ${HOME}/.xvimrc ${HOME}/.xvimrc.$(date "+%Y%m%d-%H%M%S")
-curl -o ".xvimrc" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/fdae845aeaf5295f9c422afa1b4ae8c08cdcf303/Solarized%20Dark.terminal
+curl -o ".xvimrc" https://raw.githubusercontent.com/woowee/dots/master/.xvimrc
 sleep 1; # Wait a bit...
 
 
