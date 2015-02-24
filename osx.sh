@@ -438,6 +438,13 @@ if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
     sudo "${pb}" -c "Set :keys:*:\''^\'':character '^'" "${plistis}"    # ＾   caret
     sudo "${pb}" -c "Set :keys:*:\''_\'':character '_'" "${plistis}"    # ＿   underscore
     sudo "${pb}" -c "Set :keys:*:\''\`\'':character '\`'" "${plistis}"  # ‘   back quote
+
+    # ／ slash (solidus)
+    sudo "${pb}" -c "Add :keys:before_typing:\''/\'':character string '/'" "${plistis}"
+    sudo "${pb}" -c "Add :keys:typing:\''/\'':character string '/'" "${plistis}"
+    # ＼ backslash (reverse solidus)
+    sudo "${pb}" -c "Add :keys:before_typing:\''\\\\\'':character string '\\\'" "${plistis}"
+    sudo "${pb}" -c "Add :keys:typing:\''\\\\\'':character string '\\\'" "${plistis}"
 fi
 
 
