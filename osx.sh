@@ -453,6 +453,11 @@ fi
 # misc
 #
 
+## appearances (transparency)
+if ask 'Appearances: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)' Y; then
+   defaults write com.apple.universalaccess reduceTransparency -bool true
+fi
+
 ## menubar
 if ask 'Finder: メニューバー設定．' Y; then
     for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
