@@ -440,11 +440,11 @@ if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
     sudo "${pb}" -c "Set :keys:*:\''\`\'':character '\`'" "${plistis}"  # ‘   back quote
 
     # ／ slash (solidus)
-    sudo "${pb}" -c "Add :keys:before_typing:\''/\'':character string '/'" "${plistis}"
-    sudo "${pb}" -c "Add :keys:typing:\''/\'':character string '/'" "${plistis}"
+    sudo "${pb}" -c "Set :keys:before_typing:\''/\'':character '/'" "${plistis}"
+    sudo "${pb}" -c "Set :keys:typing:\''/\'':character '/'" "${plistis}"
     # ＼ backslash (reverse solidus)
-    sudo "${pb}" -c "Add :keys:before_typing:\''\\\\\'':character string '\\\'" "${plistis}"
-    sudo "${pb}" -c "Add :keys:typing:\''\\\\\'':character string '\\\'" "${plistis}"
+    sudo "${pb}" -c "Set :keys:before_typing:\''\\\\\'':character '\\\'" "${plistis}"
+    sudo "${pb}" -c "Set :keys:typing:\''\\\\\'':character '\\\'" "${plistis}"
 fi
 
 
