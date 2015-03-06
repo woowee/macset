@@ -167,7 +167,7 @@ fi
 
 ## font
 execho "installing ricty-diminished..."
-brew install font-ricty-diminished &&:
+brew cask install font-ricty-diminished &&:
 
 # python
 execho "setting python..."
