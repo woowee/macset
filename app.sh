@@ -30,7 +30,7 @@ openssl \
 w3m \
 ag \
 go \
-python \
+# python \
 python3 \
 ### for LESS
 node \
@@ -171,8 +171,9 @@ brew cask install font-ricty-diminished &&:
 
 # python
 execho "setting python..."
-brew link --overwrite python
-pip install --upgrade setuptools && pip install --upgrade pip || true
+# brew link --overwrite python
+# pip install --upgrade setuptools && pip install --upgrade pip || true
+pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 
 # mutagen (to use mid3v2)
 if ! check_existence_command 'mid3v2'; then
