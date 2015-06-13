@@ -58,7 +58,7 @@ touch ${logfile}
 #
 # バックアップ処理実行 (rsync)
 #
-rsync -vv -az --delete "${dir_SRC}" "${dir_DST}" >>"${logfile}"
+rsync -vv -az "${dir_SRC}" "${dir_DST}" >>"${logfile}"
 
 
 #
