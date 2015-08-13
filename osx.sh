@@ -11,6 +11,8 @@ set -e
 # Your Configration {{
 # スクリーンショットの保存先
 dir_screenshoots="${HOME}/Pictures/screenshoots"
+# デスクトップに使用するデータ
+desktopPicture="/Library/Desktop Pictures/Solid Colors/Solid Gray Pro Ultra Dark.png"
 # }} Your Configration
 
 # Ask for the administrator password upfront
@@ -534,6 +536,14 @@ if ask 'Updater: アップデートチェックは毎日．' Y; then
     defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
     # (none)
 fi
+
+
+## desktop
+if ask 'Desktop: デスクトップを変更する．' Y; then
+    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$desktopPicture"'"'
+    # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
+fi
+
 
 
 #
