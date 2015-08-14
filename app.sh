@@ -53,6 +53,7 @@ apps=(\
 ### caskroom/homebrew-cask
 alfred \
 google-chrome \
+google-chrome-canary \
 appcleaner \
 dropbox \
 evernote \
@@ -63,7 +64,7 @@ shiftit \
 gimp \
 inkscape \
 ### woowee/mycask
-mytracks \
+#TODO: mytracks \
 macvim-kaoriya \
 )
 
@@ -80,6 +81,7 @@ brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
 
 execho "brew tap..."
 brew tap homebrew/dupes
+brew tap caskroom/versions
 brew tap caskroom/fonts
 brew tap woowee/mycask
 
