@@ -32,6 +32,9 @@ app_macvim_name='MacVim-KaoriYa'
 app_macvim_brewname='macvim-kaoriya'
 app_macvim_filename='MacVim.app'
 app_macvim_url='https://github.com/splhack/macvim/releases/download/20140805/macvim-kaoriya-20140805.dmg'
+# settings for macvim
+app_macvim_settings_src="macset/vimset"
+app_macvim_settings_dst=".vim"
 
 app_alfred_name="Alfred 2"
 app_alfred_brewname="alfred"
@@ -221,7 +224,7 @@ fi
 # Terminal.app
 # does it mean that can not set itself while using Terminal.app itself ?
 
-# MacVim.app + plugins
+# MacVim.app + plugins, and settings for personal runtimepath (ex. ftplugins)
 execho "${app_macvim_filename} Settings..."
 if check_existence_app "${app_macvim_filename}" app_path; then
     execho "${app_macvim_filename}= ${app_path}"
@@ -239,6 +242,16 @@ if check_existence_app "${app_macvim_filename}" app_path; then
 
         vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
         echo ""
+    fi
+
+
+    # settgins for macvim
+    dir_src="${HOME}/$app_macvim_settings_src"
+    dir_dst="${HOME}/$app_macvim_settings_dst"
+
+    execho "Set your vim runtimepath..."
+    source ${dir_current}/app4vim.sh ${dir_src} ${dir_dst}
+
     fi
 else
     execho "Sorry, ${app_macvim_filename} was not found..."
