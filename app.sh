@@ -54,6 +54,7 @@ apps=(\
 alfred \
 google-chrome \
 google-chrome-canary \
+firefox-ja \
 appcleaner \
 dropbox \
 evernote \
