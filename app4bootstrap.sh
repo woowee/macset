@@ -252,7 +252,6 @@ if check_existence_app "${app_macvim_filename}" app_path; then
     execho "Set your vim runtimepath..."
     source ${dir_current}/app4vim.sh ${dir_src} ${dir_dst}
 
-    fi
 else
     execho "Sorry, ${app_macvim_filename} was not found..."
 fi

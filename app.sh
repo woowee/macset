@@ -64,7 +64,7 @@ shiftit \
 gimp \
 inkscape \
 ### woowee/mycask
-#TODO: mytracks \
+mytracks \
 macvim-kaoriya \
 )
 
