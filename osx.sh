@@ -411,6 +411,7 @@ if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナ�
 fi
 
 if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
+    execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\nもし設定が反映されていなかったら，`csrutil disable` で再起動し，System Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${esc_off}"
     pb=/usr/libexec/PlistBuddy
     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
 
