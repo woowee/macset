@@ -71,10 +71,6 @@ installby_brew()
     brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
     brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
 
-    execho "upgrade and update homebrew-cask..."
-    brew upgrade brew-cask && brew cleanup && brew cask cleanup
-    brew cask update
-
     execho "install apps using homebrew-cask..."
     brew cask install \
         "${app_alfred_brewname}" \
