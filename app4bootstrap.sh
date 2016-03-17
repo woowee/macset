@@ -228,19 +228,10 @@ if check_existence_app "${app_macvim_filename}" app_path; then
 
     defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
 
-    # MacVim > Neobundle
-    if ask_yesno "MacVim, Install the plugins ?"; then
-        vimbundle="~/.vim/bundle"
-        if [ -e ${HOME}/.vim ]; then
-            mv ${HOME}/.vim "${HOME}/.vim~$(date '+%Y%m%d%H%M')"
-        fi
-        mkdir -p ~/.vim/bundle
-        git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
-
-        vim -u ~/.vimrc -i NONE -c "try | NeoBundleUpdate! | finally | q! | endtry" -e -s -V1 &&:
-        echo ""
-    fi
-
+    # MacVim > dein.vim
+    curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
+    sh ./installer.sh ~/.vim/dein
+    # ref. https://github.com/Shougo/dein.vim#if-you-are-using-unixlinux-or-mac-os-x
 else
     execho "Sorry, ${app_macvim_filename} was not found..."
 fi
