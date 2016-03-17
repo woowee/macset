@@ -68,8 +68,7 @@ installby_brew()
     brew update && brew upgrade
 
     execho "install homebrew-cask..."
-    # brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask; brew install brew-cask
-    brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
+    brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
     brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
 
     execho "upgrade and update homebrew-cask..."
@@ -228,7 +227,7 @@ if check_existence_app "${app_macvim_filename}" app_path; then
 
     defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
 
-    # MacVim > dein.vim
+    # install the plugin manager "dein.vim"
     curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
     sh ./installer.sh ~/.vim/dein
     # ref. https://github.com/Shougo/dein.vim#if-you-are-using-unixlinux-or-mac-os-x
