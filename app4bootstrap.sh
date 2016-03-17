@@ -31,12 +31,12 @@ dir_tmp="${HOME}/tmp"
 app_macvim_name='MacVim-KaoriYa'
 app_macvim_brewname='macvim-kaoriya'
 app_macvim_filename='MacVim.app'
-app_macvim_url='https://github.com/splhack/macvim/releases/download/20140805/macvim-kaoriya-20140805.dmg'
+app_macvim_url='https://github.com/splhack/macvim-kaoriya/releases/download/20160312/MacVim-KaoriYa-20160312.dmg'
 
 app_alfred_name="Alfred 2"
 app_alfred_brewname="alfred"
 app_alfred_filename="Alfred 2.app"
-app_alfred_url='https://cachefly.alfredapp.com/Alfred_2.5.1_308.zip'
+app_alfred_url='https://cachefly.alfredapp.com/Alfred_2.8.3_435.zip'
 
 app_chrome_name='Google Chrome'
 app_chrome_brewname='google-chrome'
@@ -46,7 +46,7 @@ app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
 app_iterm2_name='iTerm2'
 app_iterm2_brewname='iterm2'
 app_iterm2_filename='iTerm.app'
-app_iterm2_url='http://www.iterm2.com/downloads/stable/iTerm2_v2_0.zip'
+app_iterm2_url='https://iterm2.com/downloads/stable/iTerm2-2_1_4.zip'
 
 
 
