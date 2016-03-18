@@ -503,16 +503,17 @@ fi
 
 ## timemachine
 if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
-    sudo tmutil addexclusion \
-      "/Applications" \
-      "/Library" \
-      "/opt" \
-      "/usr" \
-      "/bin" \
-      "/private" \
-      "/System" \
-      "/cores" \
-      "/sbin" \
+    # TODO; "Unknown error while attempting to change exclusion setting."
+    # sudo tmutil addexclusion \
+    #   "/Applications" \
+    #   "/Library" \
+    #   "/opt" \
+    #   "/usr" \
+    #   "/bin" \
+    #   "/private" \
+    #   "/System" \
+    #   "/cores" \
+    #   "/sbin" \
 
     sudo tmutil removeexclusion "${HOME}"
 
