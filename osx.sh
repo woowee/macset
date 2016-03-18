@@ -180,14 +180,15 @@ if ask 'Finder: Finder ウィンドウは、リスト形式でデフォルト表
     # Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
 fi
 
-if ask 'Finder: フォルダの名称は、英語表記．' Y; then
-    sudo mv \
-        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
-        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
-   sudo cp -f \
-      /System/Library/CoreServices/SystemFolderLocalizations/en.lproj/SystemFolderLocalizations.strings \
-      /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/
-fi
+# TODO;
+# if ask 'Finder: フォルダの名称は、英語表記．' Y; then
+#     sudo mv \
+#         /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
+#         /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
+#    sudo cp -f \
+#       /System/Library/CoreServices/SystemFolderLocalizations/en.lproj/SystemFolderLocalizations.strings \
+#       /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/
+# fi
 
 ## Dock
 
