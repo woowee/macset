@@ -223,10 +223,6 @@ if check_existence_app "${app_macvim_filename}" app_path; then
 
     defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
 
-    # install the plugin manager "dein.vim"
-    curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
-    sh ./installer.sh ~/.vim/dein
-    # ref. https://github.com/Shougo/dein.vim#if-you-are-using-unixlinux-or-mac-os-x
 else
     execho "Sorry, ${app_macvim_filename} was not found..."
 fi
