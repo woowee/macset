@@ -383,10 +383,10 @@ if ask 'Input: Spotlight のショートカットを無効にする．' Y; then
 fi
 
 if ask 'Input: 入力ソースの切り替え “US-ひらがな”は command-space で行う．' Y; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 "<dict><key>enabled</key><false/></dict>"
-    # [システム環境設定 > キーボード > 入力ソース] の [前の入力ソースを選択] = "OFF"
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > 入力ソース] の [入力メニューの次のソースを選択] = "ON", [⌘スペース]
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60  "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
+    # [システム環境設定 > キーボード > 入力ソース] の [前の入力ソースを選択] = "ON", [⌘スペース]
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><false/></dict>"
+    # [システム環境設定 > キーボード > 入力ソース] の [入力メニューの次のソースを選択] = "OFF"
 fi
 
 # Input - Inputmethod JapaneseIM
