@@ -181,46 +181,58 @@ fi
 
 if ask 'Input: すべての Fn キーを標準にする．' Y; then
     defaults write -g com.apple.keyboard.fnState -bool true
-    # [システム環境設定 > キーボード > キーボード > F1，F2 などのすべてのキーを標準ファンクションキーとして使用] => "ON"
+    # [システム環境設定 > キーボード > キーボード > F1，F2 などのすべてのキーを標準ファンクションキーとして使用] = "ON"
 fi
 
 if ask 'Input: すべてのコントロールを Tab キーで移動する．' Y; then
     defaults write -g AppleKeyboardUIMode -int 3
-    # [システム環境設定 > キーボード > キーボードショートカット > フルキーボードアクセス : Tab キーを押してウィンドウやダイアログ内の操作対象を移動する機能の適用範囲] => [すべてのコントロール]
+    # [システム環境設定 > キーボード > ショートカット > フルキーボードアクセス : Tab キーを押してウィンドウやダイアログ内の操作対象を移動する機能の適用範囲] = [すべてのコントロール]
 fi
 
 if ask 'Input: Dashbord を使わない．' Y; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 62 "<dict><key>enabled</key><false/></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 63 "<dict><key>enabled</key><false/></dict>"
-    # [システム環境設定 > キーボード > Mission Control > Dashboard を表示] => "OFF"
+    # [システム環境設定 > キーボード > ショートカット > Mission Control] の [Dashboard を表示] = "OFF"
 fi
 
 if ask 'Input: Mission Control を [F12] にマップする．' Y; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 32 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 34 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > Mission Control > Mission Control] = "ON"，[F12]
+    # [システム環境設定 > キーボード > ショートカット > Mission Control] の [Mission Control] = "ON"，[F12]
 fi
 
 if ask 'Input: アプリケーションウィンドウの表示を [F11] にマップする．' Y; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 33 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 35 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > Mission Control > アプリケーションウィンドウ] = "ON"，[F11]
+    # [システム環境設定 > キーボード > ショートカット > Mission Control] の [アプリケーションウィンドウ] = "ON"，[F11]
 fi
 
 if ask 'Input: デスクトップの表示を [F10] にマップする．' Y; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 37 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > Mission Control > デスクトップを表示] = "ON"，[F10]
+    # [システム環境設定 > キーボード > ショートカット > Mission Control] の [デスクトップを表示] = "ON"，[F10]
 fi
 
 if ask 'Input: [F2] でメニューを操作する．' Y; then
-   defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > キーボードと文字入力 > メニューバーを操作対象にする] = "ON"，[F2]
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
+    # [システム環境設定 > キーボード > ショートカット > キーボード] の [メニューバーを操作対象にする] = "ON"，[F2]
 fi
 
 if ask 'Input: [F3] でツールバーを操作する．' Y; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 10 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>99</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
-    # [システム環境設定 > キーボード > キーボードと文字入力 > ウィンドウのツールバーを操作対象にする] = "ON"，[F3]
+    # [システム環境設定 > キーボード > ショートカット > キーボード] の [ウィンドウのツールバーを操作対象にする] = "ON"，[F3]
+fi
+
+if ask 'Input: Spotlight のショートカットを無効にする．' Y; then
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/></dict>"
+    # [システム環境設定 > キーボード > ショートカット > Spotlight] の [Spotlight 検索を表示] = "OFF"
+fi
+
+if ask 'Input: 入力ソースの切り替え “US-ひらがな”は command-space で行う．' Y; then
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 "<dict><key>enabled</key><false/></dict>"
+    # [システム環境設定 > キーボード > 入力ソース] の [前の入力ソースを選択] = "OFF"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
+    # [システム環境設定 > キーボード > 入力ソース] の [入力メニューの次のソースを選択] = "ON", [⌘スペース]
 fi
 
 # Input - Inputmethod JapaneseIM
