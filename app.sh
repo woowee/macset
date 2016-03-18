@@ -54,6 +54,7 @@ apps=(\
 alfred \
 google-chrome \
 google-chrome-canary \
+google-drive \
 firefox-ja \
 appcleaner \
 dropbox \
