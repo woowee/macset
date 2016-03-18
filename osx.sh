@@ -338,6 +338,7 @@ fi
 if ask 'Input: すべての Fn キーを標準にする．' Y; then
     defaults write -g com.apple.keyboard.fnState -bool true
     # [システム環境設定 > キーボード > キーボード > F1，F2 などのすべてのキーを標準ファンクションキーとして使用] = "ON"
+fi
 
 if ask 'Input: すべてのコントロールを Tab キーで移動する．' Y; then
     defaults write -g AppleKeyboardUIMode -int 3
