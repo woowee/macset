@@ -198,6 +198,11 @@ fi
 cd ${dir_current}
 
 
+# photos.app
+execho "setting photos.app..."
+defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
+
+
 # xcode
 execho "setting xcode..."
 cd ${HOME}

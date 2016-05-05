@@ -227,6 +227,9 @@ else
     execho "Sorry, ${app_macvim_filename} was not found..."
 fi
 
+# photos.app
+execho "setting photos.app..."
+defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 
 #fin
