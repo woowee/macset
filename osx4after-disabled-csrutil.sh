@@ -4,12 +4,63 @@ set -e
 #
 # PREPARE
 #
+
 filename_func=$(dirname $0)/functions.sh
+
 if [ ! -e ${filename_func} ]; then
     echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${filename_func}' ?)"
     exit 1
 fi
 source ${filename_func}
+
+case $1 in
+  "-s" | "-y" | "--silent" | "silent" )
+    echo "Running in silent mode..."
+    auto=Y
+    shift 1
+    ;;
+  *)
+    auto=N
+    if [ ! -t 0 ]; then
+      echo "Interactive mode needs terminal!" >&2
+      exit 1
+    fi
+    ;;
+esac
+
+function ask {
+  while true; do
+
+    if [ "$2" == "Y" ]; then
+      prompt="\033[1;32mY\033[0m/n"
+      default=Y
+    elif [ "$2" == "N" ]; then
+      prompt="y/\033[1;32mN\033[0m"
+      default=N
+    else
+      prompt="y/n"
+      default=
+    fi
+
+    printf "$prefix $1 [$prompt] "
+
+    yn=""
+    if [ "$auto" == "Y" ]; then
+      echo
+    else
+      read yn
+    fi
+
+    if [ -z "$yn" ]; then
+      yn=$default
+    fi
+
+    case $yn in
+      [Yy]*) return 0 ;;
+      [Nn]*) return 1 ;;
+    esac
+  done
+}
 
 if ask 'Input: 数字，記号はシングルバイトでの入力にする．' Y; then
     pb=/usr/libexec/PlistBuddy
@@ -62,4 +113,12 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
     keyCharExistence "typing" "\''\\\\\''" "'/'"
 fi
 
+if ask 'Finder: フォルダの名称は、英語表記．' Y; then
+    sudo mv \
+        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
+        /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
+   sudo cp -f \
+      /System/Library/CoreServices/SystemFolderLocalizations/en.lproj/SystemFolderLocalizations.strings \
+      /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/
+fi
 
