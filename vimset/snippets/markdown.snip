@@ -8,11 +8,27 @@ options     head
     * add [address]
     * opn [hhmm], -[ddd]
     * acc [access]
-
     ### items
     ### misc
     ### ref
     0. yyyy [str](url)
+
+
+snippet     food
+abbr        memo about food shop!
+options     head
+  ${1:shop}
+  -- {{{
+  * sta [staition]
+  * add [address]
+  * add [address]
+  * opn [hhmm], -[ddd]
+  * acc [access]
+  ### items
+  ### misc
+  ### ref
+  [01]: [url] "yyyy: title"
+  }}}
 
 snippet     quote
 abbr        link of quote
@@ -23,3 +39,21 @@ snippet     quotecode
 abbr        link of quote using code
 options     word
     <div class="viacode">via. [TITLE][${1:ID}]</div>
+
+
+snippet     shop
+abbr        check the restrant!
+options     head
+  <GENRE>.<NAME>@<PLACE>
+  open     HHMM-HHMM/HHMM-HHMM, -DAY
+  phone    PHONE
+  address  ADDRESS
+  acccess  ACCESS
+  notes    MEMO
+
+snippet     image
+abbr        to write html for the image use in entrance page
+options     head
+  <div style="position:relative;height:200px;width:640px;padding:1px;background:#333;margin:0 auto;">
+  [URL]
+  </div>
