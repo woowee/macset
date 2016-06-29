@@ -1,3 +1,8 @@
+snippet idurl
+abbr [id]: url "title"
+options word
+    [${1:#:id}]: url "#:title"
+
 snippet     twn
 abbr        memo about food shop!
 options     head
@@ -14,22 +19,6 @@ options     head
     0. yyyy [str](url)
 
 
-snippet     food
-abbr        memo about food shop!
-options     head
-  ${1:shop}
-  -- {{{
-  * sta [staition]
-  * add [address]
-  * add [address]
-  * opn [hhmm], -[ddd]
-  * acc [access]
-  ### items
-  ### misc
-  ### ref
-  [01]: [url] "yyyy: title"
-  }}}
-
 snippet     quote
 abbr        link of quote
 options     word
@@ -41,15 +30,21 @@ options     word
     <div class="viacode">via. [TITLE][${1:ID}]</div>
 
 
-snippet     shop
+snippet     food
 abbr        check the restrant!
 options     head
-  <GENRE>.<NAME>@<PLACE>
-  open     HHMM-HHMM/HHMM-HHMM, -DAY
+  ジャンル.名前@場所
+  --- {{{
+  open     HHMM, -DAY
   phone    PHONE
   address  ADDRESS
   acccess  ACCESS
-  notes    MEMO
+  station  STATION @LINE
+  ### notes
+  ### ref
+  id
+  !meal food shop 都市.CITY 県.PREFECTURE food.FOOD .notmap
+  }}} ---
 
 snippet     image
 abbr        to write html for the image use in entrance page
@@ -57,3 +52,4 @@ options     head
   <div style="position:relative;height:200px;width:640px;padding:1px;background:#333;margin:0 auto;">
   [URL]
   </div>
+
