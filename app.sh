@@ -65,6 +65,7 @@ handbrake \
 shiftit \
 gimp \
 inkscape \
+licecap \
 ### woowee/mycask
 # mytracks \
 macvim-kaoriya \
