@@ -66,6 +66,7 @@ shiftit \
 gimp \
 inkscape \
 licecap \
+keycastr \
 ### woowee/mycask
 # mytracks \
 macvim-kaoriya \
