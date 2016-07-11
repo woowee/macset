@@ -6,7 +6,8 @@ set -e
 #
 # constants
 #
-DIR_SRC="${HOME}/macset/vimset"
+# DIR_SRC="${HOME}/macset/vimset"
+DIR_SRC="${HOME}/dots/vimset"
 DIR_DST="${HOME}/.vim"
 
 

@@ -103,7 +103,7 @@ if ask 'Finder: Finderのタイトルバーにフルパスを表示する．' Y;
     # (none)
 fi
 
-if ask 'メニューバー設定．' Y; then
+if ask 'Finder: メニューバー設定．' Y; then
     for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
         defaults write "${domain}" dontAutoLoad -array \
         "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
@@ -117,6 +117,11 @@ if ask 'メニューバー設定．' Y; then
         "/System/Library/CoreServices/Menu Extras/Clock.menu"
 fi
 
+if ask 'Finder: 新規 Finder ウィンドウのデフォルトは `$HOME` ホームディレクトリ．' Y; then
+    defaults write com.apple.finder NewWindowTarget -string "PfHm"
+    defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
+    # Finder > 環境設定 > 一般 > 新規 Findoer ウィンドウを表示] = `$HOME`
+fi
 
 
 ## Dock

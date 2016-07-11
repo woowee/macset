@@ -180,15 +180,11 @@ if ask 'Finder: Finder ウィンドウは、リスト形式でデフォルト表
     # Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
 fi
 
-# TODO;
-# if ask 'Finder: フォルダの名称は、英語表記．' Y; then
-#     sudo mv \
-#         /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings \
-#         /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/SystemFolderLocalizations.strings.org
-#    sudo cp -f \
-#       /System/Library/CoreServices/SystemFolderLocalizations/en.lproj/SystemFolderLocalizations.strings \
-#       /System/Library/CoreServices/SystemFolderLocalizations/ja.lproj/
-# fi
+if ask 'Finder: 新規 Finder ウィンドウのデフォルトは `$HOME` ホームディレクトリ．' Y; then
+    defaults write com.apple.finder NewWindowTarget -string "PfHm"
+    defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
+    # Finder > 環境設定 > 一般 > 新規 Findoer ウィンドウを表示] = `$HOME`
+fi
 
 ## Dock
 
