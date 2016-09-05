@@ -261,6 +261,11 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
     execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\n `csrutil disable` して再起動し，System Integrity Protection を無効にしたうえで osx4input.sh を実行してください．${esc_off}"
 fi
 
+if ask 'Input: ライブ変換，要らないっ．' Y; then
+    defaults write -g com.apple.swipescrolldirection -bool false
+    # [システム環境設定 > キーボード > 入力ソース > ライブ変換] => "OFF"
+fi
+
 
 #
 # misc

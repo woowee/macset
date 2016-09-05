@@ -310,13 +310,15 @@ fi
 
 # Input - Keyboard
 keyboardid=$(ioreg -n IOHIDKeyboard -r | grep -E 'VendorID"|ProductID' | awk '{ print $4 }' | paste -s -d'-\n' -)'-0'
-# Input - Keyboard - Modified key
-if ask 'Input: Caps Lock を Control キーにする．' Y; then
-    # CapsLock(2) -> Control(0)
-    defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
-    defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
-    # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
-fi
+
+#TODO:
+## Input - Keyboard - Modified key
+#if ask 'Input: Caps Lock を Control キーにする．' Y; then
+#    # CapsLock(2) -> Control(0)
+#    defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
+#    defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
+#    # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
+#fi
 
 # Input - Keyboard - Shortcut
 if ask 'Input: Fn キーのショートカットとホットコーナーをすべて無効にする．' Y; then
@@ -471,6 +473,10 @@ if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
     keyCharExistence "typing" "\''\\\\\''" "'/'"
 fi
 
+if ask 'Input: ライブ変換，要らないっ．' Y; then
+    defaults write -g com.apple.swipescrolldirection -bool false
+    # [システム環境設定 > キーボード > 入力ソース > ライブ変換] => "OFF"
+fi
 
 
 #
@@ -497,33 +503,34 @@ if ask 'Finder: メニューバー設定．' Y; then
         "/System/Library/CoreServices/Menu Extras/Clock.menu"
 fi
 
-## timemachine
-if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
-    # TODO; "Unknown error while attempting to change exclusion setting."
-    # sudo tmutil addexclusion \
-    #   "/Applications" \
-    #   "/Library" \
-    #   "/opt" \
-    #   "/usr" \
-    #   "/bin" \
-    #   "/private" \
-    #   "/System" \
-    #   "/cores" \
-    #   "/sbin" \
-
-    sudo tmutil removeexclusion "${HOME}"
-
-    sudo tmutil addexclusion \
-      "$HOME/Applications" \
-      "$HOME/Desktop" \
-      "$HOME/Downloads" \
-      "$HOME/Library" \
-      "$HOME/Public" \
-      "$HOME/tmp" \
-
-    #対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
-    #対象外の確認: ls -l@
-fi
+#TODO:
+### timemachine
+#if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
+#    # TODO; "Unknown error while attempting to change exclusion setting."
+#    # sudo tmutil addexclusion \
+#    #   "/Applications" \
+#    #   "/Library" \
+#    #   "/opt" \
+#    #   "/usr" \
+#    #   "/bin" \
+#    #   "/private" \
+#    #   "/System" \
+#    #   "/cores" \
+#    #   "/sbin" \
+#
+#    sudo tmutil removeexclusion "${HOME}"
+#
+#    sudo tmutil addexclusion \
+#      "$HOME/Applications" \
+#      "$HOME/Desktop" \
+#      "$HOME/Downloads" \
+#      "$HOME/Library" \
+#      "$HOME/Public" \
+#      "$HOME/tmp" \
+#
+#    #対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
+#    #対象外の確認: ls -l@
+#fi
 
 
 if ask 'Time Machine: ローカルスナップショットを無効にする．' Y; then
