@@ -474,7 +474,7 @@ if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
 fi
 
 if ask 'Input: ライブ変換，要らないっ．' Y; then
-    defaults write -g com.apple.swipescrolldirection -bool false
+    defaults write -g JIMPrefLiveConversionKey -bool false
     # [システム環境設定 > キーボード > 入力ソース > ライブ変換] => "OFF"
 fi
 
