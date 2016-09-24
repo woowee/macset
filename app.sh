@@ -173,21 +173,22 @@ execho "setting python..."
 # pip install --upgrade setuptools && pip install --upgrade pip || true
 pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 
-# mutagen (to use mid3v2)
-if ! check_existence_command 'mid3v2'; then
-    execho "setting mutagen..."
-    if ! pip install mutagen; then
-        [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
-        mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
-        mutagen_name=${mutagen_url##*/}
-        cd $HOME/tmp
-        curl --location --remote-name "${mutagen_url}"
-        tar zxvf "${mutagen_name}"
-        cd $(basename $mutagen_name .tar.gz)
-        python setup.py build
-        sudo python setup.py install
-    fi
-fi
+#TODO:
+# # mutagen (to use mid3v2)
+# if ! check_existence_command 'mid3v2'; then
+#     execho "setting mutagen..."
+#     if ! pip install mutagen; then
+#         [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
+#         mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
+#         mutagen_name=${mutagen_url##*/}
+#         cd $HOME/tmp
+#         curl --location --remote-name "${mutagen_url}"
+#         tar zxvf "${mutagen_name}"
+#         cd $(basename $mutagen_name .tar.gz)
+#         python setup.py build
+#         sudo python setup.py install
+#     fi
+# fi
 
 cd ${dir_current}
 
