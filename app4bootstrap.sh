@@ -77,12 +77,11 @@ installby_brew()
 #
 execho "install apps using homebrew-cask..."
 
-type brew &>/dev/null
+switch_installation_brew=0
 
-if [ "$?" -eq 0 ]; then
-  execho "Been installed Homebrew. Update brew."
-  brew update
-else
+type brew &>/dev/null || switch_installation_brew=1
+
+if [ "$switch_installation_brew" -eq 1 ]; then
   execho "Install Homebrew"
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
@@ -91,6 +90,10 @@ else
 
   execho "Install Homebrew MY Cask"
   brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
+
+else
+  execho "Been installed Homebrew. Update brew."
+  brew update
 
 fi
 
