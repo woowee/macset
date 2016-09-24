@@ -31,22 +31,18 @@ dir_tmp="${HOME}/tmp"
 app_macvim_name='MacVim-KaoriYa'
 app_macvim_brewname='macvim-kaoriya'
 app_macvim_filename='MacVim.app'
-app_macvim_url='https://github.com/splhack/macvim-kaoriya/releases/download/20160312/MacVim-KaoriYa-20160312.dmg'
 
 app_alfred_name="Alfred 2"
 app_alfred_brewname="alfred"
 app_alfred_filename="Alfred 2.app"
-app_alfred_url='https://cachefly.alfredapp.com/Alfred_2.8.3_435.zip'
 
 app_chrome_name='Google Chrome'
 app_chrome_brewname='google-chrome'
 app_chrome_filename='Google Chrome.app'
-app_chrome_url='https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg'
 
 app_iterm2_name='iTerm2'
 app_iterm2_brewname='iterm2'
 app_iterm2_filename='iTerm.app'
-app_iterm2_url='https://iterm2.com/downloads/stable/iTerm2-2_1_4.zip'
 
 
 
@@ -118,8 +114,6 @@ if check_existence_app "${app_alfred_filename}" path_app; then
 else
     execho "Sorry, ${app_alfred_filename} was not found..."
 fi
-
-
 
 # MacVim.app + plugins, and settings for personal runtimepath (ex. ftplugins)
 execho "${app_macvim_filename} Settings..."
