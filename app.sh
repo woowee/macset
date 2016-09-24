@@ -39,7 +39,7 @@ rtmpdump \
 ffmpeg \
 base64 \
 swftools \
-eyeD3 \
+# eyeD3 \  TODO: hey, "Error: No formulae found in taps." ?
 ### for handbrake
 libdvdcss \
 ### homebrew/dupes
