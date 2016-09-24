@@ -198,23 +198,6 @@ execho "setting photos.app..."
 defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 
-# xcode
-execho "setting xcode..."
-cd ${HOME}
-if [ -e ${HOME}/XVim ]; then
-    execho "xvim has been set."
-else
-    execho "applying xvim..."
-    git clone https://github.com/XVimProject/XVim.git
-    cd ${HOME}/XVim
-    make
-fi
-cd ${HOME}
-
-[ -e ${HOME}/.xvimrc ] && mv ${HOME}/.xvimrc ${HOME}/.xvimrc.$(date "+%Y%m%d-%H%M%S")
-curl -o ".xvimrc" https://raw.githubusercontent.com/woowee/dots/master/.xvimrc
-sleep 1; # Wait a bit...
-
 
 cat << END
 
