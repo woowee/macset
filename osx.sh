@@ -309,16 +309,17 @@ if ask 'マウスの副ボタン機能をアクティヴにし、右クリック
 fi
 
 # Input - Keyboard
-keyboardid=$(ioreg -n IOHIDKeyboard -r | grep -E 'VendorID"|ProductID' | awk '{ print $4 }' | paste -s -d'-\n' -)'-0'
+keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk '{ print $4 }')
+keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
+keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
-#TODO:
-## Input - Keyboard - Modified key
-#if ask 'Input: Caps Lock を Control キーにする．' Y; then
-#    # CapsLock(2) -> Control(0)
-#    defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
-#    defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
-#    # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
-#fi
+# Input - Keyboard - Modified key
+if ask 'Input: Caps Lock を Control キーにする．' Y; then
+   # CapsLock(2) -> Control(0)
+   defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
+   defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
+   # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
+fi
 
 # Input - Keyboard - Shortcut
 if ask 'Input: Fn キーのショートカットとホットコーナーをすべて無効にする．' Y; then

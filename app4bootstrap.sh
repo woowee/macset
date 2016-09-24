@@ -55,86 +55,17 @@ app_iterm2_url='https://iterm2.com/downloads/stable/iTerm2-2_1_4.zip'
 #
 installby_brew()
 {
-    execho "install homebrew..."
-    type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    # set PATH
-    [ -e ${HOME}/.bashrc ] || touch ${HOME}/.bashrc
-    echo "export PATH=/usr/local/bin:/usr/local/sbin:$PATH" > ${HOME}/.bashrc
-    source ${HOME}/.bashrc
-    execho "PATH: ${PATH}"
+  for app in $*
+  do
+    execho "installing $app ..."
+    brew cask install $app
+    # TODO: error case.
+  done
 
-    execho "update and upgrade homebrew..."
-    brew update && brew upgrade
-
-    execho "install homebrew-cask..."
-    brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
-    brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
-
-    execho "install apps using homebrew-cask..."
-    brew cask install \
-        "${app_alfred_brewname}" \
-        "${app_chrome_brewname}" \
-        "${app_macvim_brewname}" \
-        "${app_iterm2_brewname}"
 }
 
-installby_diy()
-{
-    [ -e "${dir_tmp}" ] || mkdir -p "${dir_tmp}"
 
-    installer "${app_macvim_name}" "${app_macvim_filename}" "${app_macvim_url}" "${dir_tmp}"
-    installer "${app_alfred_name}" "${app_alfred_filename}" "${app_alfred_url}" "${dir_tmp}"
-    installer "${app_chrome_name}" "${app_chrome_filename}" "${app_chrome_url}" "${dir_tmp}"
-    installer "${app_iterm2_name}" "${app_iterm2_filename}" "${app_iterm2_url}" "${dir_tmp}"
-}
-
-installer()
-{
-    # arguments.check
-    if [ $# -lt 3 ]; then
-        execho "usage: \033[1minstall_application\033[0m \033[4mapp_name\033[0m \033[4mapp_filename(*.app)\033[0m \033[4murl\033[0m [\033[4mdir\033[0m]" 1>&2
-        return 1
-    fi
-    # arguments.set
-    app_name=$1
-    app_filename=$2
-    app_url=$3
-    if [ $# -eq 4 ]; then
-        dir_tmp=$4
-    else
-        dir_tmp="${HOME}/tmp_installation"
-        mkdir -p ${dir_tmp}
-    fi
-
-    # existence check
-    if check_existence_app "${app_filename}" path_app; then
-        if ! ask_yesno "${app_name} has already been installed (${path_app}). Do you want to continue installation?"; then
-            return 0
-        fi
-    fi
-
-    execho "Installing \033[1;32m${app_name}\033[0m..."
-
-    # get
-    cd "${dir_tmp}"
-    curl --location --remote-name "${app_url}"
-    app_filepath="${HOME}/${dir_tmp}/${app_url##*/}"
-
-    # expansion & install
-    case "${app_url##*.}" in
-    'zip')
-        unzip -q "${app_filepath}"
-        cp -a "${app_filename}" "/Applications"
-        ;;
-    'dmg')
-        app_mount="/Volumes/${app_name}"
-        hdiutil attach "${app_filepath}" -noidmereveal
-        cp -a "${app_mount}/${app_filename}" "/Applications"
-        hdiutil detach -force "${app_mount}"
-        ;;
-    esac
-}
 #
 # } FUNCTIONS
 #
@@ -144,14 +75,30 @@ installer()
 #
 # Installation
 #
-execho "Installing Apps..."
-if installby_brew; then
-    execho "Installed using brew-cask."
+execho "install apps using homebrew-cask..."
+
+type brew &>/dev/null
+
+if [ "$?" -eq 0 ]; then
+  execho "Been installed Homebrew. Update brew."
+  brew update
 else
-    if ask_yesno "Could not install app using brew-cask.\n${indent} Do yoo want to try again using curl and hdiutil/unzip commands?\n${indent} * notes: Apps will be installed into \`/Application\` not \`~/Application\` as brew-cask do."; then
-        installby_diy
-    fi
+  execho "Install Homebrew"
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+  execho "Install Homebrew Cask"
+  brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
+
+  execho "Install Homebrew MY Cask"
+  brew tap | grep woowee/mycask >/dev/null || brew tap woowee/mycask
+
 fi
+
+installby_brew \
+        "${app_alfred_brewname}" \
+        "${app_chrome_brewname}" \
+        "${app_macvim_brewname}" \
+        "${app_iterm2_brewname}"
 
 
 
