@@ -44,8 +44,6 @@ swftools \
 libdvdcss \
 ### homebrew/dupes
 rsync \
-#### woowee/font
-#ricty \
 )
 
 # homebrew-cask
@@ -145,7 +143,7 @@ defaults write com.apple.terminal StringEncodings -array 4
 cd "${dir_tmp}"
 
 # Use a modified version of the Solarized Dark theme by default in Terminal.app
-curl -o "Solarized Dark.terminal" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/fdae845aeaf5295f9c422afa1b4ae8c08cdcf303/Solarized%20Dark.terminal
+curl -o "Solarized Dark.terminal" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/efa793e6e9f0a89b11c743db6aafa33b93293608/Solarized%2520Dark.terminal
 sleep 1; # Wait a bit...
 term_profile='Solarized Dark'
 current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
@@ -156,12 +154,6 @@ if [ "${current_profile}" != "${term_profile}" ]; then
     defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
     killall "Terminal"
 fi;
-#if [ "${current_profile}" != "Pro" ]; then
-#    open "${HOME}/${dir_tmp}/${term_profile}.terminal"
-#    sleep 1; # Wait a bit to make sure the theme is loaded
-#    defaults write com.apple.terminal 'Default Window Settings' -string 'Pro';
-#    defaults write com.apple.terminal 'Startup Window Settings' -string 'Pro';
-#fi;
 
 # LESS
 if check_existence_command 'npm'; then
