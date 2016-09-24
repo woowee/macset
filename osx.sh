@@ -424,54 +424,6 @@ fi
 
 if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
     execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\nもし設定が反映されていなかったら，`csrutil disable` で再起動し，System Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${esc_off}"
-    pb=/usr/libexec/PlistBuddy
-    plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/Resources/KeySetting_Default.plist
-
-    function keyCharExistence {
-
-      val=$("${pb}" -c "Print :keys:${1}:${2}:character" "${plistis}" 2>/dev/null || true)
-
-      if [ "${val}" = "" ]; then
-        # echo "add"
-        "${pb}" -c "Add :keys:${1}:${2}:character string ${3}" "${plistis}"
-      else
-        # echo "set(modify)"
-        "${pb}" -c "Set :keys:${1}:${2}:character ${3}" "${plistis}"
-      fi
-    }
-
-    sudo cp -f "${plistis}" "$HOME/KeySetting_Default.plist.org"
-
-    sudo "${pb}" -c "Set :keys:before_typing:\'' \'':character ' '" "${plistis}" # 　   space
-    #sudo "${pb}" -c "Set :keys:*:\''-\'':character '-'" "${plistis}"            # －   minus
-    #sudo "${pb}" -c "Set :keys:*:\''[\'':character '['" "${plistis}"            # 「」 bracket
-    #sudo "${pb}" -c "Set :keys:*:\'']\'':character ']'" "${plistis}"
-    sudo "${pb}" -c "Set :keys:*:\''|\'':character '|'" "${plistis}"             # ｜   vertical bar
-    sudo "${pb}" -c "Set :keys:*:\''\!\'':character '\!'" "${plistis}"           # ！   exclamation
-    sudo "${pb}" -c "Set :keys:*:\''"'\"'"\'':character '"'\"'"'" "${plistis}"   # ”   double quotation
-    sudo "${pb}" -c "Set :keys:*:\''#\'':character '#'" "${plistis}"             # ＃   sharp
-    sudo "${pb}" -c "Set :keys:*:\''$\'':character '$'" "${plistis}"             # ＄   dollar
-    sudo "${pb}" -c "Set :keys:*:\''%\'':character '%'" "${plistis}"             # ％   percent
-    sudo "${pb}" -c "Set :keys:*:\''&\'':character '&'" "${plistis}"             # ＆   ampersand
-    sudo "${pb}" -c "Set :keys:*:\''\'\'':character '\''" "${plistis}"           # ’   apostrophe(single quotation)
-    sudo "${pb}" -c "Set :keys:*:\''(\'':character '('" "${plistis}"             # （） parentheses
-    sudo "${pb}" -c "Set :keys:*:\'')\'':character ')'" "${plistis}"
-    sudo "${pb}" -c "Set :keys:*:\''*\'':character '*'" "${plistis}"             # ＊   asterisk
-    sudo "${pb}" -c "Set :keys:*:\''+\'':character '+'" "${plistis}"             # ＋   plus
-    sudo "${pb}" -c "Set :keys:*:\''\:\'':character ':'" "${plistis}"            # ：   colon
-    sudo "${pb}" -c "Set :keys:*:\'';\'':character ';'" "${plistis}"             # ；   semicolon
-    sudo "${pb}" -c "Set :keys:*:\''<\'':character '<'" "${plistis}"             # ＜＞ angle bracket
-    sudo "${pb}" -c "Set :keys:*:\''>\'':character '>'" "${plistis}"
-    sudo "${pb}" -c "Set :keys:*:\''=\'':character '='" "${plistis}"             # ＝   equals
-    sudo "${pb}" -c "Set :keys:*:\''?\'':character '?'" "${plistis}"             # ？   question
-    sudo "${pb}" -c "Set :keys:*:\''@\'':character '@'" "${plistis}"             # ＠   at
-    sudo "${pb}" -c "Set :keys:*:\''^\'':character '^'" "${plistis}"             # ＾   caret
-    sudo "${pb}" -c "Set :keys:*:\''_\'':character '_'" "${plistis}"             # ＿   underscore
-    sudo "${pb}" -c "Set :keys:*:\''\`\'':character '\`'" "${plistis}"           # ‘   back quote
-    keyCharExistence "before_typing" "\''/\''" "'/'"                             # ／ slash (solidus)
-    keyCharExistence "typing" "\''/\''" "'/'"
-    keyCharExistence "before_typing" "\''\\\\\''" "'\\\'"                        # ＼ backslash (reverse solidus)
-    keyCharExistence "typing" "\''\\\\\''" "'/'"
 fi
 
 if ask 'Input: ライブ変換，要らないっ．' Y; then
@@ -491,11 +443,12 @@ fi
 
 ## menubar
 if ask 'Finder: メニューバー設定．' Y; then
-    for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
-        defaults write "${domain}" dontAutoLoad -array \
-        "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
-        "/System/Library/CoreServices/Menu Extras/User.menu"
-    done
+    #TODO: wait, wait, wait... `com.apple.systemuiserver.*.〜` ?! a...aster is whaaaat ?!
+    # for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
+    #     defaults write "${domain}" dontAutoLoad -array \
+    #     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
+    #     "/System/Library/CoreServices/Menu Extras/User.menu"
+    # done
     defaults write com.apple.systemuiserver menuExtras -array \
         "/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
         "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
