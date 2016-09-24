@@ -457,36 +457,6 @@ if ask 'Finder: メニューバー設定．' Y; then
         "/System/Library/CoreServices/Menu Extras/Clock.menu"
 fi
 
-#TODO:
-### timemachine
-#if ask 'Time Machine: バックアップは $HOME のみにする．' Y; then
-#    # TODO; "Unknown error while attempting to change exclusion setting."
-#    # sudo tmutil addexclusion \
-#    #   "/Applications" \
-#    #   "/Library" \
-#    #   "/opt" \
-#    #   "/usr" \
-#    #   "/bin" \
-#    #   "/private" \
-#    #   "/System" \
-#    #   "/cores" \
-#    #   "/sbin" \
-#
-#    sudo tmutil removeexclusion "${HOME}"
-#
-#    sudo tmutil addexclusion \
-#      "$HOME/Applications" \
-#      "$HOME/Desktop" \
-#      "$HOME/Downloads" \
-#      "$HOME/Library" \
-#      "$HOME/Public" \
-#      "$HOME/tmp" \
-#
-#    #対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
-#    #対象外の確認: ls -l@
-#fi
-
-
 if ask 'Time Machine: ローカルスナップショットを無効にする．' Y; then
     sudo tmutil disablelocal
     # (none)
