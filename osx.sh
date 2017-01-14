@@ -1,19 +1,100 @@
 #!/bin/bash -u
-
-set -e
-######################################################################
+#
+# @(#) macos.sh ver.0.0.0 2014.05.18
+#
+# Usage:
+#   macos.sh [mode]
+#     arg1 - 処理のモード．
+#            0: $MODE_MINIMAL  必要最小限 "minimal" の設定処理を行う．
+#            1: $MODE_COMPLETE すべての "complete" 設定処理を行う．
+#            mode を設定しない場合は，"1" としてのモードで処理を行う．
+#            定数 $MODE_MINIMAL，$MODE_COMPLETE は，functions.sh で定義され
+#            ており，`source functions.sh` により取り込まれるもの．
+#
+# Description:
+#   macOS の各種設定を行う．
+#
 # This script been referred to ;
 #  - [dotfiles .osx at master - mathiasbynens dotfiles](https://github.com/mathiasbynens/dotfiles/blob/master/.osx)
 #  - [OSX For Hackers](https://gist.github.com/DAddYE/2108403)
 # Thank you very much mathiasbynens, DAddYE
-######################################################################
+###########################################################################
 
-# Your Configration {{
-# スクリーンショットの保存先
-dir_screenshoots="${HOME}/Pictures/screenshoots"
-# デスクトップに使用するデータ
-desktopPicture="/Library/Desktop Pictures/Solid Colors/Solid Gray Pro Ultra Dark.png"
-# }} Your Configration
+set -eu
+
+#
+# PREPARE
+#
+
+# Check the files required for this process
+readonly FILE_FUNC="$(dirname $0)/functions.sh"
+readonly FILE_CONF="$(dirname $0)/configurations.sh"
+
+function check_files() {
+  local esc_red='\033[0;31m'
+  local esc_reset='\033[0m'
+  # local esc_reset=`tput sgr0`
+
+  local file_is=$1
+
+  # existense check
+  if [ ! -e $1 ]; then
+    # error message
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      There is not the file \"$1\". \
+      Check the file \"${1##*/}\". \
+      Process will be canceled.
+      exit 1
+  fi
+
+  # read
+  if ! source ${file_is}; then
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      Couldnot read the file \"$(basename $1)\". \
+      The file itself or the content may be incurrect. \
+      Process will be canceled.
+    exit 1
+  fi
+}
+
+check_files $FILE_FUNC
+check_files $FILE_CONF
+
+
+# Check mode minimal or complete
+# -> The constants been defined in `function.sh` ;
+#    MODE_MINIMAL  (0)
+#    MODE_COMPLETE (1)
+
+#case $# in
+#  0) readonly MODE_IS=$MODE_COMPLETE ;;
+#  1)
+#    case $1 in
+#      0) readonly MODE_IS=$MODE_MINIMAL ;;
+#      1) readonly MODE_IS=$MODE_COMPLETE ;;
+#      *) readonly MODE_IS=-1 ;;
+#    esac
+#    ;;
+#  *) readonly MODE_IS=-1 ;;
+#esac
+#
+#case $MODE_IS in
+#  $MODE_MINIMAL)
+#    echo -e ${PREFIX} Start to set the minimal settings.
+#    ;;
+#  $MODE_COMPLETE)
+#    echo -e ${PREFIX} Start to set the complete settings.
+#    ;;
+#  *)
+#    echo -e ${PREFIX} ${ESC_RED}ERROR: ${ESC_OFF}Argument is incurrect. \
+#      You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
+#      Process will be canceled.
+#    exit 1
+#    ;;
+#esac
+
+get_mode $@
+# echo "Mode is $MODE_IS."
 
 # Ask for the administrator password upfront
 sudo -v
@@ -21,266 +102,241 @@ sudo -v
 # Keep-alive: update existing `sudo` time stamp until `.osx` has finished
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
-case $1 in
-  "-s" | "-y" | "--silent" | "silent" )
-    echo "Running in silent mode..."
-    auto=Y
-    shift 1
-    ;;
-  *)
-    auto=N
-    if [ ! -t 0 ]; then
-      echo "Interactive mode needs terminal!" >&2
-      exit 1
-    fi
-    ;;
-esac
 
-function ask {
-  while true; do
-
-    if [ "$2" == "Y" ]; then
-      prompt="\033[1;32mY\033[0m/n"
-      default=Y
-    elif [ "$2" == "N" ]; then
-      prompt="y/\033[1;32mN\033[0m"
-      default=N
-    else
-      prompt="y/n"
-      default=
-    fi
-
-    printf "$prefix $1 [$prompt] "
-
-    yn=""
-    if [ "$auto" == "Y" ]; then
-      echo
-    else
-      read yn
-    fi
-
-    if [ -z "$yn" ]; then
-      yn=$default
-    fi
-
-    case $yn in
-      [Yy]*) return 0 ;;
-      [Nn]*) return 1 ;;
+#
+# FUNCTIONS
+#
+function do_set() {
+  if [ $MODE_IS -eq $MODE_MINIMAL ]; then
+    case $# in
+     1) return 1 ;;
+     2)
+       if [ $2 -eq $MODE_COMPLETE ]; then
+         return 1
+       fi
+       ;;
+     *) return 1 ;;
     esac
-  done
+  fi
+
+  echo -e ${PREFIX} - $1
 }
 
 
 
 #
-# PREPARE
-#
-filename_func=$(dirname $0)/functions.sh
-if [ ! -e ${filename_func} ]; then
-    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${filename_func}' ?)"
-    exit 1
-fi
-source ${filename_func}
-
-
-
-#
-# SET OSX DEFAULT
+# SET MACOS DEFAULTS
 #
 
 ## Finder
 
-if ask 'Finder: ファイルの拡張子を表示する．' Y; then
+if do_set 'Finder: ファイルの拡張子を表示する．'; then
     defaults write -g AppleShowAllExtensions -bool true
     # [Finder の環境設定 > 詳細 > すべてのファイル名拡張子を表示] => "ON"
 fi
 
-if ask 'Finder: スクリーンショットでついてくるウィンドウの影を抑制．' Y; then
+if do_set 'Finder: スクリーンショットでついてくるウィンドウの影を抑制．' $MODE_MINIMAL; then
     defaults write com.apple.screencapture disable-shadow -bool true
     # (none)
 fi
 
-if ask 'Finder: スクリーンショットの保存先．' Y; then
-    [ ! -e "${dir_screenshoots}" ] && mkdir "${dir_screenshoots}"
-    defaults write com.apple.screencapture location -string "${dir_screenshoots}"
+if do_set 'Finder: スクリーンショットの保存先．' $MODE_MINIMAL; then
+    [ ! -e "$DIR_SCREENSHOOTS" ] && mkdir "$DIR_SCREENSHOOTS"
+    defaults write com.apple.screencapture location -string "$DIR_SCREENSHOOTS"
     # (none)
 fi
 
-if ask 'Finder: 保存ダイアログの拡張．' Y; then
+if do_set 'Finder: 保存ダイアログの拡張．'; then
     defaults write -g NSNavPanelExpandedStateForSaveMode -bool true
     defaults write -g NSNavPanelExpandedStateForSaveMode2 -bool true
     # (none)
 fi
 
-if ask 'Finder: .DS_Store を作らない．' Y; then
+if do_set 'Finder: .DS_Store を作らない．' $MODE_MINIMAL; then
     defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
     # (none)
 fi
 
-if ask 'Finder: Finderのタイトルバーにフルパスを表示する．' Y; then
+if do_set 'Finder: Finderのタイトルバーにフルパスを表示する．' $MODE_MINIMAL; then
     defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
     # (none)
 fi
 
-if ask 'Finder: QuickLook のコンテンツを選択できるようにする．' Y; then
+if do_set 'Finder: QuickLook のコンテンツを選択できるようにする．'; then
     defaults write com.apple.finder QLEnableTextSelection -bool true
     # (none)
 fi
 
-if ask 'Finder: ダイアログ表示やウィンドウリサイズ速度を速くする．' Y; then
+if do_set 'Finder: ダイアログ表示やウィンドウリサイズ速度を速くする．'; then
     defaults write -g NSWindowResizeTime -float 0.001
     # (none)
 fi
 
-if ask 'Finder: Finderのアニメーション効果を全て無効にする．' Y; then
+if do_set 'Finder: Finderのアニメーション効果を全て無効にする．'; then
     defaults write com.apple.finder DisableAllAnimations -bool true
     # (none)
 fi
 
-if ask 'Finder: ファイルを開くときのアニメーションを無効にする．' Y; then
+if do_set 'Finder: ファイルを開くときのアニメーションを無効にする．'; then
     defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
     # (none)
 fi
 
-if ask 'Finder: ダウンロードアプリケーションを開く際の警告ダイアログを無効にする．' Y; then
+if do_set 'Finder: ダウンロードアプリケーションを開く際の警告ダイアログを無効にする．'; then
     defaults write com.apple.LaunchServices LSQuarantine -bool false
     # (none)
 fi
 
-#if ask 'Finder: クラッシュリポーターを無効にする．' Y; then
+#if do_set 'Finder: クラッシュリポーターを無効にする．'; then
 #    defaults write com.apple.CrashReporter DialogType -string "none"
 #    # (none)
 #fi
 
-if ask 'Finder: ヘルプを non-floating mode にする．' Y; then
+if do_set 'Finder: ヘルプを non-floating mode にする．'; then
     defaults write com.apple.helpviewer DevMode -bool true
     # (none)
 fi
 
-if ask 'Finder: ファイル保存先のデフォルトはローカルに(icloudではない)．' Y; then
+if do_set 'Finder: ファイル保存先のデフォルトはローカルに(icloudではない)．'; then
     defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
     # (none)
 fi
 
-if ask 'Finder: 拡張子変更時のアラートを抑制する．' Y; then
+if do_set 'Finder: 拡張子変更時のアラートを抑制する．'; then
     defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
     # (none)
 fi
 
-if ask 'Finder: 外付けメディアをセットしたら、それの中身を表示する．' Y; then
+if do_set 'Finder: 外付けメディアをセットしたら、その中身を表示する．'; then
     defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
     defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true
     defaults write com.apple.finder OpenWindowForNewRemovableDisk -bool true
     # (none)
 fi
 
-if ask 'Finder: Finder ウィンドウは、リスト形式でデフォルト表示する．' Y; then
+if do_set 'Finder: Finder ウィンドウは、リスト形式でデフォルト表示する．'; then
     defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
     # (none)
     # Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
 fi
 
-if ask 'Finder: 新規 Finder ウィンドウのデフォルトは `$HOME` ホームディレクトリ．' Y; then
+if do_set 'Finder: 新規 Finder ウィンドウのデフォルトは `$HOME` ホームディレクトリ．' $MODE_MINIMAL; then
     defaults write com.apple.finder NewWindowTarget -string "PfHm"
     defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
     # Finder > 環境設定 > 一般 > 新規 Findoer ウィンドウを表示] = `$HOME`
 fi
 
+if do_set 'Finder: メニューバー設定．' $MODE_MINIMAL; then
+    #TODO: wait, wait, wait... `com.apple.systemuiserver.*.〜` ?! a...aster is whaaaat ?!
+    for domain in "~/Library/Preferences/ByHost/com.apple.systemuiserver.*"; do
+        defaults write "${domain}" dontAutoLoad -array \
+        "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
+        "/System/Library/CoreServices/Menu Extras/User.menu"
+    done
+    defaults write com.apple.systemuiserver menuExtras -array \
+        "/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
+        "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
+        "/System/Library/CoreServices/Menu Extras/Volume.menu" \
+        "/System/Library/CoreServices/Menu Extras/Battery.menu" \
+        "/System/Library/CoreServices/Menu Extras/Clock.menu"
+fi
+
+
 ## Dock
 
-if ask 'Dock: Dock の位置を下にする．' Y; then
+if do_set 'Dock  : Dock の位置を下にする．' $MODE_MINIMAL; then
     defaults write com.apple.dock orientation -string "bottom"
     # [システム環境設定 > Dock > 画面上の位置] => "下"
     #defaults write com.apple.dock pinning -string start
     # (none, osx yosemite になって無くなった様子．ref.https://discussions.apple.com/thread/6600902)
 fi
 
-if ask 'Dock: Dock を隠す．' Y; then
+if do_set 'Dock  : Dock を隠す．' $MODE_MINIMAL; then
     defaults write com.apple.dock autohide -bool true
     # [システム環境設定 > Dock > Dock を自動的に隠す/表示] => "ON"
 fi
 
-if ask 'Dock: Dock の大きさをセットする．(36)' Y; then
+if do_set 'Dock  : Dock の大きさをセットする．(36)'; then
     defaults write com.apple.dock tilesize -int 36
     # [システム環境設定 > Dock > 大きさ] = sld[サイズ] 1/8 くらい
 fi
 
-if ask 'Dock: グリッド表示時の Dock のスタック上のマウスオーバー時，ハイライトする．' Y; then
+if do_set 'Dock  : グリッド表示時の Dock のスタック上のマウスオーバー時，ハイライトする．'; then
     defaults write com.apple.dock mouse-over-hilite-stack -bool true
     # (none)
 fi
 
-if ask 'Dock: Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．' Y; then
+if do_set 'Dock  : Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．'; then
     defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
     # (none)
 fi
 
-if ask 'Dock: Dock の起動しているアプリケーションにインジケータ・ランプを表示する．' Y; then
+if do_set 'Dock  : Dock の起動しているアプリケーションにインジケータ・ランプを表示する．'; then
     defaults write com.apple.dock show-process-indicators -bool true
     # [システム環境設定 > Dock > 起動済みのアプリケーションにインジケータ・ランプを表示] => "オン"
 fi
 
-if ask 'Dock: Dock のコンテンツを真っ新にする．' Y; then
+if do_set 'Dock  : Dock のコンテンツを真っ新にする．'; then
     defaults write com.apple.dock persistent-apps -array ""
     # (none)
 fi
 
-if ask 'Dock: 起動中，またはステータスが変わった Dock のアプリケーションをアニメーションさせない．' Y; then
+if do_set 'Dock  : 起動中，またはステータスが変わった Dock のアプリケーションをアニメーションさせない．'; then
     defaults write com.apple.dock launchanim -bool false
     # [システム環境設定 > Dock > 起動中のアプリケーションをアニメーションで表示] => "OFF"
 fi
 
-if ask 'Dock: mission control への移行アニメーション速度 を 0.1 秒にする．' Y; then
+if do_set 'Dock  : mission control への移行アニメーション速度 を 0.1 秒にする．'; then
     defaults write com.apple.dock expose-animation-duration -float 0.1
     # (none)
 fi
 
-if ask 'Dock: dashboard を無効にする' Y; then
+if do_set 'Dock  : dashboard を無効にする'; then
     defaults write com.apple.dashboard mcx-disabled -bool true
     # (none)
 fi
 
-if ask 'Dock: Dashboard を操作スペースとして表示しない．' Y; then
+if do_set 'Dock  : Dashboard を操作スペースとして表示しない．'; then
     defaults write com.apple.dock dashboard-in-overlay -bool true
     # [システム環境設定 > Mission Control > Dashboard を操作スペースとして表示] => "ON"
 fi
 
-if ask 'Dock: Mission Control の操作スペースを自動的に並べ替えない．' Y; then
+if do_set 'Dock  : Mission Control の操作スペースを自動的に並べ替えない．'; then
     defaults write com.apple.dock mru-spaces -bool false
     # [システム環境設定 > Mission Control > 最新の使用状況に基づいて操作スペースを自動的に並び替える] => "OFF"
 fi
 
-if ask 'Dock: Dock の表示/表示速度を 0 秒にする．' Y; then
+if do_set 'Dock  : Dock の表示/表示速度を 0 秒にする．'; then
     defaults write com.apple.dock autohide-delay -float 0
     # (none)
 fi
 
-if ask 'Dock: Dock の表示/非表示のアニメーション速度を 0 秒にする．' Y; then
+if do_set 'Dock  : Dock の表示/非表示のアニメーション速度を 0 秒にする．'; then
     defaults write com.apple.dock autohide-time-modifier -float 0
     # (none)
 fi
 
-if ask 'Dock: launchpad をリセット' Y; then
+if do_set 'Dock  : launchpad をリセット'; then
     find ~/Library/Application\ Support/Dock -name "*.db" -maxdepth 1 -delete
     # (none)
 fi
 
-if ask 'Dock: 隠したアプリのDockアイコンを透過にする．' Y; then
+if do_set 'Dock  : 隠したアプリのDockアイコンを透過にする．'; then
     defaults write com.apple.dock showhidden -bool true
     # (none)
 fi
 
-if ask 'Dock: Dockにしまう時のアニメーションを「suck」にする．' Y; then
+if do_set 'Dock  : Dockにしまう時のアニメーションを「suck」にする．'; then
     defaults write com.apple.dock mineffect -string "suck"
     # (none)
 fi
 
-#if ask 'Dock: 起動中のアプリケーションのみ表示する．' Y; then
+#if do_set 'Dock  : 起動中のアプリケーションのみ表示する．'; then
 #    defaults write com.apple.dock static-only -boolean true
 #    # (none)
 #fi
 
-#if ask 'Dock: 起動中，通知がある時のアイコンの跳ねるアニメーションを無効にする．' Y; then
+#if do_set 'Dock  : 起動中，通知がある時のアイコンの跳ねるアニメーションを無効にする．'; then
 #    defaults write com.apple.dock no-bouncing -bool true
 #    # (none)
 #fi
@@ -290,12 +346,12 @@ fi
 ## Input
 
 # Input - Trackpad/Mouse
-if ask 'Input: トラックパッドのナチュラル・スクロールを止める．' Y; then
+if do_set 'Input : トラックパッドのナチュラル・スクロールを止める．' $MODE_MINIMAL; then
     defaults write -g com.apple.swipescrolldirection -bool false
     # [システム環境設定 > トラックパッド > スクロールとズーム > スクロールの方向 : ナチュラル] => "OFF"
 fi
 
-if ask 'Input: トラックパッドの副ボタン機能をアクティヴにし、右下端クリックに割り当てる... ' Y; then
+if do_set 'Input : トラックパッドの副ボタン機能をアクティヴにし、右下端クリックに割り当てる． ' $MODE_MINIMAL; then
     defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
     defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
     defaults -currentHost write NSGlobalDomain com.apple.trackpad.trackpadCornerClickBehavior -int 1
@@ -303,7 +359,7 @@ if ask 'Input: トラックパッドの副ボタン機能をアクティヴに�
     # [システム環境設定 > トラックパッド > ポイントオプションおよびクリックオプション > 副ボタンのクリック] = "ON"，[右下端をクリック]
 fi
 
-if ask 'マウスの副ボタン機能をアクティヴにし、右クリックに割り当てる．' Y; then
+if do_set 'Input : マウスの副ボタン機能をアクティヴにし、右クリックに割り当てる．' $MODE_MINIMAL; then
     defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseButtonMode "TwoButton"
     # [システム環境設定 > マウス > ポイントオプションおよびクリックオプション > 副ボタンのクリック] = "ON"，[右側をクリック]
 fi
@@ -314,7 +370,7 @@ keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk
 keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
 # Input - Keyboard - Modified key
-if ask 'Input: Caps Lock を Control キーにする．' Y; then
+if do_set 'Input : Caps Lock を Control キーにする．' $MODE_MINIMAL; then
    # CapsLock(2) -> Control(0)
    defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
    defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
@@ -322,7 +378,7 @@ if ask 'Input: Caps Lock を Control キーにする．' Y; then
 fi
 
 # Input - Keyboard - Shortcut
-if ask 'Input: Fn キーのショートカットとホットコーナーをすべて無効にする．' Y; then
+if do_set 'Input : Fn キーのショートカットとホットコーナーをすべて無効にする．' $MODE_MINIMAL; then
     defaults write com.apple.dock wvous-tl-corner -int 0
     defaults write com.apple.dock wvous-tl-modifier -int 0
     defaults write com.apple.dock wvous-tr-corner -int 0
@@ -334,56 +390,56 @@ if ask 'Input: Fn キーのショートカットとホットコーナーをす�
     # [システム環境設定]，[Mission Control] の [キーボードとマウスのショートカット] = "すべて無効"
 fi
 
-if ask 'Input: すべての Fn キーを標準にする．' Y; then
+if do_set 'Input : すべての Fn キーを標準にする．' $MODE_MINIMAL; then
     defaults write -g com.apple.keyboard.fnState -bool true
     # [システム環境設定 > キーボード > キーボード > F1，F2 などのすべてのキーを標準ファンクションキーとして使用] = "ON"
 fi
 
-if ask 'Input: すべてのコントロールを Tab キーで移動する．' Y; then
+if do_set 'Input : すべてのコントロールを Tab キーで移動する．' $MODE_MINIMAL; then
     defaults write -g AppleKeyboardUIMode -int 3
     # [システム環境設定 > キーボード > ショートカット > フルキーボードアクセス : Tab キーを押してウィンドウやダイアログ内の操作対象を移動する機能の適用範囲] = [すべてのコントロール]
 fi
 
-if ask 'Input: Dashbord を使わない．' Y; then
+if do_set 'Input : Dashbord を使わない．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 62 "<dict><key>enabled</key><false/></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 63 "<dict><key>enabled</key><false/></dict>"
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [Dashboard を表示] = "OFF"
 fi
 
-if ask 'Input: Mission Control を [F12] にマップする．' Y; then
+if do_set 'Input : Mission Control を [F12] にマップする．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 32 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 34 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [Mission Control] = "ON"，[F12]
 fi
 
-if ask 'Input: アプリケーションウィンドウの表示を [F11] にマップする．' Y; then
+if do_set 'Input : アプリケーションウィンドウの表示を [F11] にマップする．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 33 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 35 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [アプリケーションウィンドウ] = "ON"，[F11]
 fi
 
-if ask 'Input: デスクトップの表示を [F10] にマップする．' Y; then
+if do_set 'Input : デスクトップの表示を [F10] にマップする．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 37 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [デスクトップを表示] = "ON"，[F10]
 fi
 
-if ask 'Input: [F2] でメニューを操作する．' Y; then
+if do_set 'Input : [F2] でメニューを操作する．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > ショートカット > キーボード] の [メニューバーを操作対象にする] = "ON"，[F2]
 fi
 
-if ask 'Input: [F3] でツールバーを操作する．' Y; then
+if do_set 'Input : [F3] でツールバーを操作する．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 10 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>99</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > ショートカット > キーボード] の [ウィンドウのツールバーを操作対象にする] = "ON"，[F3]
 fi
 
-if ask 'Input: Spotlight のショートカットを無効にする．' Y; then
+if do_set 'Input : Spotlight のショートカットを無効にする．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/></dict>"
     # [システム環境設定 > キーボード > ショートカット > Spotlight] の [Spotlight 検索を表示] = "OFF"
 fi
 
-if ask 'Input: 入力ソースの切り替え “US-ひらがな”は command-space で行う．' Y; then
+if do_set 'Input : 入力ソースの切り替え “US-ひらがな”は command-space で行う．' $MODE_MINIMAL; then
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60  "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
     # [システム環境設定 > キーボード > 入力ソース] の [前の入力ソースを選択] = "ON", [⌘スペース]
     defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><false/></dict>"
@@ -391,27 +447,27 @@ if ask 'Input: 入力ソースの切り替え “US-ひらがな”は command-s
 fi
 
 # Input - Inputmethod JapaneseIM
-if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
+if do_set 'Input : 句読点は "．" と "，" を使う．'; then
     defaults write com.apple.inputmethod.Kotoeri JIMPrefPunctuationTypeKey -int 3
     # [システム環境設定 > キーボード > 入力ソース > 句読点の種類] = "．と，"
 fi
 
-if ask 'Input: スラッシュはスラッシュ．' Y; then
+if do_set 'Input : スラッシュはスラッシュ．' $MODE_MINIMAL; then
     defaults write com.apple.inputmethod.Kotoeri JIMPrefCharacterForSlashKey -int 0
     # [システム環境設定 > キーボード > 入力ソース > "/"キーで入力する文字] = "/ (スラッシュ)"
 fi
 
-if ask 'Input: バックスラッシュはバックスラッシュ．' Y; then
+if do_set 'Input : バックスラッシュはバックスラッシュ．' $MODE_MINIMAL; then
     defaults write com.apple.inputmethod.Kotoeri 'JIMPrefCharacterForYenKey' -int 1
     # [システム環境設定 > キーボード > 入力ソース > "\"キーで入力する文字] = "\ (バックスラッシュ)"
 fi
 
-if ask 'Input: 数字は常に半角．' Y; then
+if do_set 'Input : 数字は常に半角．' $MODE_MINIMAL; then
     defaults write com.apple.inputmethod.Kotoeri 'JIMPrefFullWidthNumeralCharactersKey' -bool false
     # [システム環境設定 > キーボード > 入力ソース > 数字を全角入力] = "オフ"
 fi
 
-if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' Y; then
+if do_set 'Input : 言語切り替えは “US-ひらがな” のみ (カタカナなどは含まない)' $MODE_MINIMAL; then
     if defaults read ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources >/dev/null 2>&1; then
         defaults delete ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources
     fi
@@ -422,11 +478,12 @@ if ask 'Input: 言語切り替えは “US-ひらがな” のみ (カタカナ�
     # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
 fi
 
-if ask 'Input: 記号はシングルバイトでの入力にする．' Y; then
-    execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\nもし設定が反映されていなかったら，`csrutil disable` で再起動し，System Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${esc_off}"
+if do_set 'Input : 記号はシングルバイトでの入力にする．'; then
+    # execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\nSystem Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${esc_off}"
+    myecho "${ESC_YLW}NOTE: この設定は rootless 設定を無効にした上で行う費用があります．\nSystem Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${ESC_OFF}"
 fi
 
-if ask 'Input: ライブ変換，要らないっ．' Y; then
+if do_set 'Input : ライブ変換，要らないっ．' $MODE_MINIMAL; then
     defaults write -g JIMPrefLiveConversionKey -bool false
     # [システム環境設定 > キーボード > 入力ソース > ライブ変換] => "OFF"
 fi
@@ -437,64 +494,49 @@ fi
 #
 
 ## appearances (transparency)
-if ask 'Appearances: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)' Y; then
+if do_set 'Appearances: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)'; then
    defaults write com.apple.universalaccess reduceTransparency -bool true
 fi
 
-## menubar
-if ask 'Finder: メニューバー設定．' Y; then
-    #TODO: wait, wait, wait... `com.apple.systemuiserver.*.〜` ?! a...aster is whaaaat ?!
-    # for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
-    #     defaults write "${domain}" dontAutoLoad -array \
-    #     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
-    #     "/System/Library/CoreServices/Menu Extras/User.menu"
-    # done
-    defaults write com.apple.systemuiserver menuExtras -array \
-        "/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
-        "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
-        "/System/Library/CoreServices/Menu Extras/Volume.menu" \
-        "/System/Library/CoreServices/Menu Extras/Battery.menu" \
-        "/System/Library/CoreServices/Menu Extras/Clock.menu"
-fi
 
-if ask 'Time Machine: ローカルスナップショットを無効にする．' Y; then
+if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
     sudo tmutil disablelocal
     # (none)
 fi
 
-if ask 'Time Machine: 「Time Machine でバックアップを作成するために “(HD Name)” を使用しますか?」を出さない．' Y; then
+if do_set 'Time Machine: 「Time Machine でバックアップを作成するために “(HD Name)” を使用しますか?」を出さない．'; then
     defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
     # (none)
 fi
 
-if ask 'Time Machine: ローカルスナップショットを無効にする．' Y; then
+if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
     hash tmutil &> /dev/null && sudo tmutil disablelocal
     # (none)
 fi
 
-#if ask 'Time Machine: バッテリー電源が繋がっている時．' Y; then
+#if do_set 'Time Machine: バッテリー電源が繋がっている時．'; then
 #    defaults write com.apple.TimeMachine RequiresACPower 0
 #    # (none)
 #fi
 
 
 ## spotlight
-if ask 'Spotlight: 検索対象のデフォルトは、カレントフォルダ．' Y; then
+if do_set 'Spotlight: 検索対象のデフォルトは、カレントフォルダ．'; then
     defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
     # (none)
 fi
 
 
 ## updater
-if ask 'Updater: アップデートチェックは毎日．' Y; then
+if do_set 'Updater: アップデートチェックは毎日．'; then
     defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
     # (none)
 fi
 
 
 ## desktop
-if ask 'Desktop: デスクトップを変更する．' Y; then
-    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$desktopPicture"'"'
+if do_set 'Desktop: デスクトップを変更する．'; then
+    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$FILE_DESKTOPPICTURE"'"'
     # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
 fi
 
@@ -503,11 +545,10 @@ fi
 #
 # Fin
 #
-if ask "Killall to make the settings effective." Y; then
-  for app in cfprefsd Finder Dock SystemUIServer JapaneseIM; do
-    killall "$app" >/dev/null 2>&1
-  done
-fi
+echo -e "${ESC_BOLD}設定を有効にするために各コントロールを再起動する．${ESC_OFF}"
+for app in cfprefsd Finder Dock SystemUIServer JapaneseIM; do
+  killall "$app" >/dev/null 2>&1
+done
 
 
 ## Please restart

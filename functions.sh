@@ -1,120 +1,166 @@
 #!/bin/bash -u
+#
+# @(#) functions.sh ver.0.0.0 2014.05.18
+#
+# Usage:
+#   (source function.sh)
+#
+# Description:
+#   各シェルスクリプトで共有する定数や関数を定義．
+#
+###########################################################################
 
-iam=$(basename $0)
+set -eu
 
-esc='\033[1;32m'
-esc_uln='\033[4m'
-esc_bld='\033[1m'
-esc_rev='\033[7m'
-esc_ylw='\033[1;33m'
-esc_off='\033[0m'
+readonly IAM=$(basename $0)
+readonly PREFIX="$IAM) "
 
-prefix_str="${iam}==>"
-prefix="$esc${prefix_str}$esc_off"
+#
+# 定数
+#
 
-indent=$(tr [:print:] " " <<<${prefix_str})
+# Color and format of text
+readonly ESC_GRM='\033[1;32m'
+readonly ESC_YLW='\033[0;33m'
+readonly ESC_RED='\033[0;31m'
+readonly ESC_UNDR='\033[4m'
+readonly ESC_BOLD='\033[1m'
+readonly ESC_REVS='\033[7m'
+readonly ESC_OFF='\033[0m'
+# ref.https://gist.github.com/brandonb927/3195465#file-osx-for-hackers-sh-L12
 
-execho()
+# モード
+readonly MODE_MINIMAL=0
+readonly MODE_COMPLETE=1
+
+myecho()
 {
-    echo_usage=0
-
-    #echo msg
-    case $# in
-        1)
-            echo -e "${prefix} $1" ;;
-        2)
-            [ $1 == "err" ] && echo -e "${prefix} $2" 1>&2 || echo_usage=1 ;;
-        *)
-            echo_usage=1
-    esac
-
-    #usage?
-    if [ ${echo_usage} -ne 0 ]; then
-        echo -e "${prefix} usage: ${esc_bld}$0${esc_off} [err] ${esc_uln}msg${esc_off}"
-        exit 1
-    fi
+    echo -e "${PREFIX} $1"
 }
 
-ask_confirm()
+myecho_error()
 {
-    msg="$1"
-    msg_display="${prefix} ${msg}"
-    while true; do
-        # just wait user's response hitting enter key.
-        printf "${msg_display} (tap [enter] key)"
-        read res
-
-        if [ ${res} ]; then
-            execho "Sorry, please use ${esc_rev}enter${esc_off} key."
-            ask_confirm "${msg}"
-        fi
-        return 0
-    done
+    echo -e "${PREFIX} ${ESC_RED}ERROR:${ESC_OFF} $1"
 }
 
-ask_yesno()
-{
-    # yes/no
-    choice="[y(Yes)/n(No)] : "
+get_mode() {
+  local n=-1
 
-    msg="$1"
-    msg_display="${prefix} ${msg} ${choice}"
-    while true; do
-        printf "${msg_display}"
-        read res
+  case $# in
+    0) n=$MODE_COMPLETE ;;
+    1)
+      case $1 in
+        0) n=$MODE_MINIMAL ;;
+        1) n=$MODE_COMPLETE ;;
+        *) n=-1 ;;
+      esac
+      ;;
+    *) n=-1 ;;
+  esac
 
-        case ${res} in
-            [Yy]*) ret=0; return 0;;
-            [Nn]*) ret=1; return 1;;
-            *)
-                execho "Can't read your enter. try again."
-                ask_yesno "${msg}"
-                return ${ret};;
-        esac
-    done
-}
+  if [ $n -eq -1 ]; then
+    # echo -e ${PREFIX} ${ESC_RED}ERROR: ${ESC_OFF}Argument is incurrect. \
+    #   You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
+    #   Process will be canceled.
+    myecho_error Argument is incurrect. \
+      You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
+      Process will be canceled.
+    exit 1
+  fi
 
-ask_inputvalue()
-{
-    while true; do
-        printf "${prefix} $1"
-        read res
-
-        eval $2="\"${res}\""    # $2 is the variable name(")
-        return 0
-    done
-}
-
-check_existence_app()
-{
-    if [ $# -lt 1 ]; then
-        execho "usage: $0 ${esc_uln}App Name(*.app)${esc_off}" 1>&2
-        exit 1
-    fi
-
-    path_app=$(mdfind "kMDItemContentTypeTree==\"com.apple.application\" && kMDItemFSName==\"$1\"")
-
-    if [ -n "${path_app}" ]; then
-        [ $# -eq 2 ] && eval $2="\"${path_app}\""     #"
-        return 0
-    else
-        return 1
-    fi
-}
-
-check_existence_command()
-{
-    if [ $# -lt 1 ]; then
-        execho "usage: $0 ${esc_uln}Command Name${esc_off}" 1>&2
-        exit 1
-    fi
-
-    path_command=$(type -p $1)
-    if [ -n "${path_command}" ]; then
-        [ $# -eq 2 ] && eval $2="\"${path_command}\"" #"
-        return 0
-    else
-        return 1
-    fi
+  readonly MODE_IS=$n
 
 }
+
+
+
+# # 作業用に使用する一時的なディレクトリ
+# readonly DIR_TEMP="~/temp"
+# [ ! -e $DIR_TEMP ] && mkdir -p $DIR_TEMP
+
+
+# prefix="$esc${iam}==>$esc_off"
+#
+# ask_confirm()
+# {
+#     msg="$1"
+#     msg_display="${prefix} ${msg}"
+#     while true; do
+#         # just wait user's response hitting enter key.
+#         printf "${msg_display} (tap [enter] key)"
+#         read res
+#
+#         if [ ${res} ]; then
+#             execho "Sorry, please use ${esc_rev}enter${esc_off} key."
+#             ask_confirm "${msg}"
+#         fi
+#         return 0
+#     done
+# }
+#
+# ask_yesno()
+# {
+#     # yes/no
+#     choice="[y(Yes)/n(No)] : "
+#
+#     msg="$1"
+#     msg_display="${prefix} ${msg} ${choice}"
+#     while true; do
+#         printf "${msg_display}"
+#         read res
+#
+#         case ${res} in
+#             [Yy]*) return 0;;
+#             [Nn]*) return 1;;
+#             *)
+#                 execho "Can't read your enter. try again."
+#                 ask_yesno "${msg}"
+#         esac
+#     done
+# }
+#
+# ask_inputvalue()
+# {
+#     while true; do
+#         printf "${prefix} $1"
+#         read res
+#
+#         eval $2="\"${res}\""    # $2 is the variable name(")
+#         return 0
+#     done
+# }
+#
+# check_existence_app()
+# {
+#     if [ $# -lt 1 ]; then
+#         execho "usage: $0 ${esc_uln}App Name(*.app)${esc_off}" 1>&2
+#         exit 1
+#     fi
+#
+#     path_app=$(mdfind "kMDItemContentTypeTree==\"com.apple.application\" && kMDItemFSName==\"$1\"")
+#
+#     if [ -n "${path_app}" ]; then
+#         [ $# -eq 2 ] && eval $2="\"${path_app}\""     #"
+#         return 0
+#     else
+#         return 1
+#     fi
+# }
+#
+# check_existence_command()
+# {
+#     if [ $# -lt 1 ]; then
+#         execho "usage: $0 ${esc_uln}Command Name${esc_off}" 1>&2
+#         exit 1
+#     fi
+#
+#     path_command=$(type -p $1)
+#     if [ -n "${path_command}" ]; then
+#         [ $# -eq 2 ] && eval $2="\"${path_command}\"" #"
+#         return 0
+#     else
+#         return 1
+#     fi
+#
+# }
+#

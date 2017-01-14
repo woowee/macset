@@ -1,4 +1,5 @@
 config.sh
+configurations.sh
 *.tar.gz
 *.un~
 .DS_Store

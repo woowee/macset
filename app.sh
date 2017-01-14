@@ -1,19 +1,64 @@
-#!/bin/bash -u
-set -e
-
-sudo -v
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-dir_current=$(dirname $0)
-cd ${dir_current}
-
-source ${dir_current}/functions.sh
+#!/bin/bash -eu
+#
+# @(#) app.sh ver.1.0.0 ver.0.0.0 2014.05.18
+#
+# Usage:
+#   app.sh [mode]
+#     arg1 - 処理のモード．
+#            0: $MODE_MINIMAL  必要最小限 "minimal" の設定処理を行う．
+#            1: $MODE_COMPLETE すべての "complete" 設定処理を行う．
+#            mode を設定しない場合は，"1" としてのモードで処理を行う．
+#            定数 $MODE_MINIMAL，$MODE_COMPLETE は，functions.sh で定義され
+#            ており，`source functions.sh` により取り込まれるもの．
+#
+# Description:
+#   必要なソフトウェア，アプリケーションをインストールする．
+#   Homebrew および Homebrew-Cask 導入前提．
+#
+###########################################################################
 
 #
-# prepare template dir
+# PREPARE
 #
-dir_tmp="${HOME}/tmp"
-[ -e "${dir_tmp}" ] || mkdir -p "${dir_tmp}"
+
+# Check the files required for this process
+readonly FILE_FUNC="$(dirname $0)/functions.sh"
+readonly FILE_CONF="$(dirname $0)/configurations.sh"
+
+function check_files() {
+  local esc_red='\033[0;31m'
+  local esc_reset='\033[0m'
+
+  local file_is=$1
+
+  # existense check
+  if [ ! -e $1 ]; then
+    # error message
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      There is not the file \"$1\". \
+      Check the file \"${1##*/}\". \
+      Process will be canceled.
+      exit 1
+  fi
+
+  # read
+  if ! source ${file_is}; then
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      Couldnot read the file \"$(basename $1)\". \
+      The file itself or the content may be incurrect. \
+      Process will be canceled.
+    exit 1
+  fi
+}
+
+
+check_files $FILE_FUNC
+check_files $FILE_CONF
+
+[ ! -e ${DIR_TEMP} ] && mkdir -p ${DIR_TEMP}
+
+get_mode $@
+# echo "Mode is $MODE_IS."
 
 
 #
@@ -21,7 +66,7 @@ dir_tmp="${HOME}/tmp"
 #
 
 # homebrew
-bins=(\
+readonly BINS=(\
 zsh \
 tmux \
 git \
@@ -44,19 +89,23 @@ swftools \
 libdvdcss \
 ### homebrew/dupes
 rsync \
+### sanemat/font
+ricty \
 )
 
 # homebrew-cask
-apps=(\
-### caskroom/homebrew-cask
+readonly APPS_MINIMAL=(\
 alfred \
-google-chrome \
-google-chrome-canary \
-google-drive \
-firefox-ja \
-appcleaner \
 dropbox \
-evernote \
+google-chrome \
+### caskroom/versions
+macvim-kaoriya \
+)
+APPS=(\
+### caskroom/homebrew-cask
+google-drive \
+"firefox --language=ja" \
+appcleaner \
 iterm2 \
 vlc \
 handbrake \
@@ -66,8 +115,8 @@ inkscape \
 licecap \
 keycastr \
 ### woowee/mycask
-# mytracks \
-macvim-kaoriya \
+mytracks \
+# "$(brew --repository)/Library/Taps/caskroom/homebrew-cask/developer/bin/generate_cask_token" MyTracks
 )
 
 
@@ -75,45 +124,59 @@ macvim-kaoriya \
 # homebrew install, tap, and update
 #
 
-execho "installing homebrew..."
+myecho "install homebrew..."
 type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-execho "installing homebrew-cask..."
-brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
+myecho "install homebrew-cask..."
+# brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
+brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
+brew tap | grep caskroom/dupes >/dev/null || brew tap homebrew/dupes
+brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
+brew tap | grep woowee >/dev/null || brew tap woowee/mycask
+brew tap | grep sanemat >/dev/null || brew tap sanemat/font
 
-execho "brew tap..."
-brew tap homebrew/dupes
-brew tap caskroom/versions
-brew tap caskroom/fonts
-brew tap woowee/mycask
 
-execho "brew update & upgrade..."
+myecho "brew update & upgrade..."
 brew update && brew upgrade
 
-execho "brew cask update..."
-brew upgrade brew-cask || true
-brew cask update
 
 # for ricty installation
-execho "installing xquartz(x11) ..."
+myecho "install xquartz(x11) ..."
 brew cask install "xquartz"
 
 
 #
-# brew
+# installation
 #
-execho "brew install commands..."
-for bin in "${bins[@]}"; do
-    brew install "${bin}"
-    # some process as needed
-done
+function installation()
+{
+  local cmd=$1
+  shift
+  local stuffs=($@)
 
+  for stuff in ${stuffs[@]}
+  do
+    echo "${PREFIX} $cmd $stuff"
+    eval "${cmd} ${stuff}"
+    # ref. http://labs.opentone.co.jp/?p=5651
+  done
 
-#
-# cask
-#
-execho "brew cask install apps..."
-for app in "${apps[@]}"; do brew cask install "${app}"; done
+  # ref.http://labs.opentone.co.jp/?p=5890
+}
+
+IFS_ORG=$IFS; IFS=$'\n'
+
+echo -e "${PREFIX} Install commands..."
+installation "brew install" ${BINS[@]}
+echo -e "${PREFIX} Install apps..."
+installation "brew cask install" ${APPS_MINIMAL[@]}
+if [ $MODE_IS -eq $MODE_COMPLETE ]; then
+  installation "brew cask install" ${APPS[@]}
+fi
+
+IFS=$IFS_ORG
+
 
 
 #
@@ -123,8 +186,8 @@ for app in "${apps[@]}"; do brew cask install "${app}"; done
 # shell
 path_zsh=$(find $(brew --prefix)/bin -name zsh)
 if [ -n ${path_zsh} ]; then
-    execho "setting shell..."
-    execho "zsh: ${path_zsh}"
+    myecho "setting shell..."
+    myecho "zsh: ${path_zsh}"
     # add zsh
     echo ${path_zsh} | sudo tee -a /etc/shells
     # set zsh
@@ -135,42 +198,43 @@ fi
 # ref. app4bootstrap.sh
 
 # terminal.app
-execho "setting terminal..."
+myecho "set terminal..."
 # エンコーディングは UTF-8 のみ。
 defaults write com.apple.terminal StringEncodings -array 4
 # 環境設定 > エンコーディング = [Unicode (UTF-8)]
 
-cd "${dir_tmp}"
+cd "${DIR_TEMP}"
 
 # Use a modified version of the Solarized Dark theme by default in Terminal.app
 curl -o "Solarized Dark.terminal" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/efa793e6e9f0a89b11c743db6aafa33b93293608/Solarized%2520Dark.terminal
 sleep 1; # Wait a bit...
-term_profile='Solarized Dark'
-current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
-if [ "${current_profile}" != "${term_profile}" ]; then
-    open "${dir_tmp}/${term_profile}.terminal"
-    sleep 1; # Wait a bit to make sure the theme is loaded
-    defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
-    defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
-    killall "Terminal"
-fi;
+
+#TODO:
+# term_profile='Solarized Dark'
+# current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
+# if [ "${current_profile}" != "${term_profile}" ]; then
+#     open "${dir_tmp}/${term_profile}.terminal"
+#     sleep 1; # Wait a bit to make sure the theme is loaded
+#     defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
+#     defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
+#     killall "Terminal"
+# fi;
 
 # LESS
 if check_existence_command 'npm'; then
-  execho "setting LESS..."
+  myecho "setting LESS..."
   npm install --global less
 else
-  execho "npm has not been installed. can't use LESS but is that okay?"
+  myecho "npm has not been installed. can't use LESS but is that okay?"
 fi
 
-## font
-execho "installing ricty-diminished..."
-brew cask install font-ricty-diminished &&:
+#TODO:
+### font
+#execho "installing ricty-diminished..."
+#brew cask install font-ricty-diminished &&:
 
 # python
-execho "setting python..."
-# brew link --overwrite python
-# pip install --upgrade setuptools && pip install --upgrade pip || true
+myecho "setting python..."
 pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 
 #TODO:
@@ -190,11 +254,12 @@ pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 #     fi
 # fi
 
-cd ${dir_current}
+#TODO:
+# cd ${dir_current}
 
 
 # photos.app
-execho "setting photos.app..."
+myecho "set photos.app..."
 defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 
