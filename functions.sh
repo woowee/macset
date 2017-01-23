@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -eu
 #
 # @(#) functions.sh ver.0.0.0 2014.05.18
 #
@@ -10,14 +10,13 @@
 #
 ###########################################################################
 
-set -eu
-
-readonly IAM=$(basename $0)
-readonly PREFIX="$IAM) "
 
 #
 # 定数
 #
+
+readonly IAM=$(basename $0)
+readonly PREFIX="$IAM) "
 
 # Color and format of text
 readonly ESC_GRM='\033[1;32m'
@@ -59,9 +58,6 @@ get_mode() {
   esac
 
   if [ $n -eq -1 ]; then
-    # echo -e ${PREFIX} ${ESC_RED}ERROR: ${ESC_OFF}Argument is incurrect. \
-    #   You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
-    #   Process will be canceled.
     myecho_error Argument is incurrect. \
       You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
       Process will be canceled.
@@ -74,35 +70,30 @@ get_mode() {
 
 
 
-# # 作業用に使用する一時的なディレクトリ
-# readonly DIR_TEMP="~/temp"
-# [ ! -e $DIR_TEMP ] && mkdir -p $DIR_TEMP
+ask_confirm()
+{
+    local msg="$1"
+    local msg_display="${PREFIX} ${msg}"
+    while true; do
+        # just wait user's response hitting enter key.
+        printf "${msg_display} (tap [enter] key)"
+        read res
 
+        if [ ${res} ]; then
+            myecho "Sorry, please use [enter] key."
+            ask_confirm "${msg}"
+        fi
+        return 0
+    done
+}
 
-# ask_confirm()
-# {
-#     msg="$1"
-#     msg_display="${prefix} ${msg}"
-#     while true; do
-#         # just wait user's response hitting enter key.
-#         printf "${msg_display} (tap [enter] key)"
-#         read res
-#
-#         if [ ${res} ]; then
-#             execho "Sorry, please use ${esc_rev}enter${esc_off} key."
-#             ask_confirm "${msg}"
-#         fi
-#         return 0
-#     done
-# }
-#
 ask_yesno()
 {
     # yes/no
     local choice="[y(Yes)/n(No)] : "
 
     local msg="$1"
-    local msg_display="${prefix} ${msg} ${choice}"
+    local msg_display="${PREFIX} ${msg} ${choice}"
     while true; do
         printf "${msg_display}"
         read res
@@ -120,7 +111,7 @@ ask_yesno()
 ask_inputvalue()
 {
     while true; do
-        printf "${prefix} $1"
+        printf "$1"
         read res
 
         eval $2="\"${res}\""    # $2 is the variable name(")
@@ -128,37 +119,57 @@ ask_inputvalue()
     done
 }
 
-# check_existence_app()
-# {
-#     if [ $# -lt 1 ]; then
-#         execho "usage: $0 ${esc_uln}App Name(*.app)${esc_off}" 1>&2
-#         exit 1
-#     fi
-#
-#     path_app=$(mdfind "kMDItemContentTypeTree==\"com.apple.application\" && kMDItemFSName==\"$1\"")
-#
-#     if [ -n "${path_app}" ]; then
-#         [ $# -eq 2 ] && eval $2="\"${path_app}\""     #"
-#         return 0
-#     else
-#         return 1
-#     fi
-# }
-#
-# check_existence_command()
-# {
-#     if [ $# -lt 1 ]; then
-#         execho "usage: $0 ${esc_uln}Command Name${esc_off}" 1>&2
-#         exit 1
-#     fi
-#
-#     path_command=$(type -p $1)
-#     if [ -n "${path_command}" ]; then
-#         [ $# -eq 2 ] && eval $2="\"${path_command}\"" #"
-#         return 0
-#     else
-#         return 1
-#     fi
-#
-# }
-#
+check_app()
+{
+    if [ $# -lt 1 -o $# -gt 2 ]; then
+        myecho "usage: $0 ${ESC_UNDR}App Name${ESC_OFF} [path(return value)]" 1>&2
+        exit 1
+    fi
+
+    #local app=$(brew cask info $1 \
+    #  | grep -A1 "==> Artifacts" | grep -v "==> Artifacts" \
+    #  | awk '{$NF=""; print}' | tr -d ' ')
+    brew cask info $1
+    local app=$(echo $(brew cask info $1 \
+      | grep -A1 "==> Artifacts" | grep -v "==> Artifacts" \
+      | awk '{$NF=""; print}'))
+
+    local retry=0
+    while true; do
+      # echo mdfind -onlyin "/Applications" "kMDItemFSName==\"$app\""
+      local path_app=$(mdfind -onlyin "/Applications" "kMDItemFSName==\"$app\"")
+
+      if [ -n "${path_app}" ]; then
+        [ $# -eq 2 ] && eval $2="\"${path_app}\""     #"
+        return 0
+        # break
+      elif [ $retry -gt 3 ]; then
+        # myecho_error "Could not find \"$appis\"."
+        return 1
+        # break
+      else
+        sleep 1
+        retry=$(($retry+1))
+      fi
+
+    done
+
+}
+
+check_command()
+{
+    if [ $# -lt 1 -o $# -gt 2 ]; then
+        myecho "usage: $0 ${ESC_UNDR}Command Name${ESC_OFF} [path(return value)]" 1>&2
+        exit 1
+    fi
+
+    local cmd=$(type -p $1)
+    if [ -n "${cmd}" ]; then
+        [ $# -eq 2 ] && eval $2="\"${cmd}\"" #"
+        return 0
+    else
+        return 1
+    fi
+
+}
+

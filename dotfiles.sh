@@ -1,32 +1,58 @@
-#!/bin/bash -u
-
-set -e
-
-#sudo -v
-#while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-dir_current=$(dirname $0)
-cd ${dir_current}
+#!/bin/bash -eu
+#
+# @(#) dotfiles.sh ver.1.0.0 ver.0.0.0 2014.05.18
+#
+# Usage:
+#   dotfiles.sh
+#     arg - なし
+#
+# Description:
+#   dotfiles をダウンロード。
+#
+###########################################################################
 
 #
-# check file configration
+# PREPARE
 #
-filename_conf="configurations.sh"
-filename_func="functions.sh"
 
-filename_check="check4running.sh"
-if [ ! -e "${dir_current}/${filename_check}" ]; then
-    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${dir_current}/${filename_check}' ?)"
+# Check the files required for this process
+readonly FILE_FUNC="$(dirname $0)/functions.sh"
+readonly FILE_CONF="$(dirname $0)/configurations.sh"
+
+function check_files() {
+  local esc_red='\033[0;31m'
+  local esc_reset='\033[0m'
+
+  local file_is=$1
+
+  # existense check
+  if [ ! -e $1 ]; then
+    # error message
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      There is not the file \"$1\". \
+      Check the file \"${1##*/}\". \
+      Process will be canceled.
+      exit 1
+  fi
+
+  # read
+  if ! source ${file_is}; then
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      Couldnot read the file \"$(basename $1)\". \
+      The file itself or the content may be incurrect. \
+      Process will be canceled.
     exit 1
-fi
+  fi
+}
 
-${dir_current}/${filename_check} ${filename_conf} ${filename_func}
 
-# read configuraton
-source ${dir_current}/${filename_conf}
+check_files $FILE_FUNC
+check_files $FILE_CONF
 
-# read functions
-source ${dir_current}/${filename_func}
+[ ! -e ${DIR_TEMP} ] && mkdir -p ${DIR_TEMP}
+
+get_mode $@
+# echo "Mode is $MODE_IS."
 
 
 #
@@ -45,6 +71,9 @@ ln -fs ${dotfiles}/.vimrc ${HOME}/.vimrc
 ln -fs ${dotfiles}/.gvimrc ${HOME}/.gvimrc
 ln -fs ${dotfiles}/.zshrc ${HOME}/.zshrc
 ln -fs ${dotfiles}/.gitignore ${HOME}/.gitignore
+
+# TODO:
+ln -fs ${dotfiles}/dein.toml ${HOME}/dein.toml
 
 if [ -e ${HOME}/.gitconfig ]; then
     if ! $(grep "excludesfile.*\.gitignore" ${HOME}/.gitconfig >/dev/null); then

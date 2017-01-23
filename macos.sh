@@ -1,4 +1,4 @@
-#!/bin/bash -u
+#!/bin/bash -eu
 #
 # @(#) macos.sh ver.0.0.0 2014.05.18
 #
@@ -15,12 +15,10 @@
 #   macOS の各種設定を行う．
 #
 # This script been referred to ;
-#  - [dotfiles .osx at master - mathiasbynens dotfiles](https://github.com/mathiasbynens/dotfiles/blob/master/.osx)
+#  - [mathiasbynens/dotfiles - mathiasbynens dotfiles](https://github.com/mathiasbynens/dotfiles/blob/master/.macos)
 #  - [OSX For Hackers](https://gist.github.com/DAddYE/2108403)
 # Thank you very much mathiasbynens, DAddYE
 ###########################################################################
-
-set -eu
 
 #
 # PREPARE
@@ -65,33 +63,6 @@ check_files $FILE_CONF
 # -> The constants been defined in `function.sh` ;
 #    MODE_MINIMAL  (0)
 #    MODE_COMPLETE (1)
-
-#case $# in
-#  0) readonly MODE_IS=$MODE_COMPLETE ;;
-#  1)
-#    case $1 in
-#      0) readonly MODE_IS=$MODE_MINIMAL ;;
-#      1) readonly MODE_IS=$MODE_COMPLETE ;;
-#      *) readonly MODE_IS=-1 ;;
-#    esac
-#    ;;
-#  *) readonly MODE_IS=-1 ;;
-#esac
-#
-#case $MODE_IS in
-#  $MODE_MINIMAL)
-#    echo -e ${PREFIX} Start to set the minimal settings.
-#    ;;
-#  $MODE_COMPLETE)
-#    echo -e ${PREFIX} Start to set the complete settings.
-#    ;;
-#  *)
-#    echo -e ${PREFIX} ${ESC_RED}ERROR: ${ESC_OFF}Argument is incurrect. \
-#      You can specify argument is 0 \(as \"minimal\"\) or 1 \(as \"complete\"\). \
-#      Process will be canceled.
-#    exit 1
-#    ;;
-#esac
 
 get_mode $@
 # echo "Mode is $MODE_IS."
@@ -227,7 +198,6 @@ if do_set 'Finder: 新規 Finder ウィンドウのデフォルトは `$HOME` �
 fi
 
 if do_set 'Finder: メニューバー設定．' $MODE_MINIMAL; then
-    #TODO: wait, wait, wait... `com.apple.systemuiserver.*.〜` ?! a...aster is whaaaat ?!
     for domain in "~/Library/Preferences/ByHost/com.apple.systemuiserver.*"; do
         defaults write "${domain}" dontAutoLoad -array \
         "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
@@ -369,13 +339,23 @@ keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk 
 keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
 keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
-#TODO:
+#CHECK:
 # Input - Keyboard - Modified key
 if do_set 'Input : Caps Lock を Control キーにする．' $MODE_MINIMAL; then
-  # CapsLock(2) -> Control(0)
-  defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
-  defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
+  # CapsLock(30064771129) -> Control(30064771296)
+  # defaults -currentHost read -g com.apple.keyboard.modifiermapping.${keyboardid}
+
+#defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} '({HIDKeyboardModifierMappingDst = 30064771296; HIDKeyboardModifierMappingSrc = 30064771129;})'
+  #ref: http://apple.stackexchange.com/questions/266665/how-to-define-an-array-with-a-single-defaults-command/266667#266667
   # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
+  defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add "
+    <dict>
+      <key>HIDKeyboardModifierMappingDst</key>\
+      <integer>30064771296</integer>\
+      <key>HIDKeyboardModifierMappingSrc</key>\
+      <integer>30064771129</integer>\
+    </dict>
+    "
 fi
 
 # Input - Keyboard - Shortcut
@@ -408,42 +388,197 @@ if do_set 'Input : Dashbord を使わない．' $MODE_MINIMAL; then
 fi
 
 if do_set 'Input : Mission Control を [F12] にマップする．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 32 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 34 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>111</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 32 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>111</integer>
+            <integer>0</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 34 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>111</integer>
+            <integer>131072</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [Mission Control] = "ON"，[F12]
 fi
+# ref. https://github.com/diimdeep/dotfiles/blob/master/osx/configure/hotkeys.sh#L58
 
 if do_set 'Input : アプリケーションウィンドウの表示を [F11] にマップする．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 33 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 35 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>103</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 33 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>103</integer>
+            <integer>0</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 35 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>103</integer>
+            <integer>131072</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [アプリケーションウィンドウ] = "ON"，[F11]
 fi
 
 if do_set 'Input : デスクトップの表示を [F10] にマップする．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 37 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>109</integer><integer>131072</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>109</integer>
+            <integer>0</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 37 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>109</integer>
+            <integer>131072</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > Mission Control] の [デスクトップを表示] = "ON"，[F10]
 fi
 
 if do_set 'Input : [F2] でメニューを操作する．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>120</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 7 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>120</integer>
+            <integer>0</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > キーボード] の [メニューバーを操作対象にする] = "ON"，[F2]
 fi
 
 if do_set 'Input : [F3] でツールバーを操作する．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 10 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>99</integer><integer>0</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 10 "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>99</integer>
+            <integer>0</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > キーボード] の [ウィンドウのツールバーを操作対象にする] = "ON"，[F3]
 fi
 
 if do_set 'Input : Spotlight のショートカットを無効にする．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "
+      <dict>
+        <key>enabled</key>
+        <false/>
+      </dict>
+      "
     # [システム環境設定 > キーボード > ショートカット > Spotlight] の [Spotlight 検索を表示] = "OFF"
 fi
 
 if do_set 'Input : 入力ソースの切り替え “US-ひらがな”は command-space で行う．' $MODE_MINIMAL; then
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60  "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60  "
+      <dict>
+        <key>enabled</key>
+        <true/>
+        <key>value</key>
+        <dict>
+          <key>parameters</key>
+          <array>
+            <integer>65535</integer>
+            <integer>49</integer>
+            <integer>1048576</integer>
+          </array>
+          <key>type</key>
+          <string>standard</string>
+        </dict>
+      </dict>
+      "
     # [システム環境設定 > キーボード > 入力ソース] の [前の入力ソースを選択] = "ON", [⌘スペース]
-    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><false/></dict>"
+    defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "
+      <dict>
+        <key>enabled</key>
+        <false/>
+      </dict>
+      "
     # [システム環境設定 > キーボード > 入力ソース] の [入力メニューの次のソースを選択] = "OFF"
 fi
 
@@ -472,10 +607,14 @@ if do_set 'Input : 言語切り替えは “US-ひらがな” のみ (カタカ
     if defaults read ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources >/dev/null 2>&1; then
         defaults delete ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources
     fi
-    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Japanese"; InputSourceKind = "Input Mode";}'
-    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";"Input Mode" = "com.apple.inputmethod.Roman";InputSourceKind = "Input Mode";}'
-    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.inputmethod.Kotoeri";InputSourceKind = "Keyboard Input Method";}'
-    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '{"Bundle ID" = "com.apple.50onPaletteIM";InputSourceKind = "Non Keyboard Input Method";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '
+      {"Bundle ID" = "com.apple.inputmethod.Kotoeri"; "Input Mode" = "com.apple.inputmethod.Japanese"; InputSourceKind = "Input Mode";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '
+      {"Bundle ID" = "com.apple.inputmethod.Kotoeri"; "Input Mode" = "com.apple.inputmethod.Roman";InputSourceKind = "Input Mode";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '
+      {"Bundle ID" = "com.apple.inputmethod.Kotoeri"; InputSourceKind = "Keyboard Input Method";}'
+    defaults write ~/Library/Preferences/com.apple.HIToolbox AppleEnabledInputSources -array-add '
+      {"Bundle ID" = "com.apple.50onPaletteIM"; InputSourceKind = "Non Keyboard Input Method";}'
     # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
 fi
 
@@ -546,6 +685,8 @@ fi
 #
 # Fin
 #
+
+#TODO:
 echo -e "${ESC_BOLD}設定を有効にするために各コントロールを再起動する．${ESC_OFF}"
 for app in cfprefsd Finder Dock SystemUIServer JapaneseIM; do
   killall "$app" >/dev/null 2>&1
@@ -553,15 +694,23 @@ done
 
 
 ## Please restart
-cat << END
+msg="\n\n\
+**************************************************\n\
+               NOW IT\'S DONE\
+"
 
+# if mode is complete...
+if [ ${MODE_IS} -eq ${MODE_COMPLETE} ]; then
+  msg="${msg}\n\n\
+   Some changes needs a reboot to take effect.\n\
+     (e.g., [Command] + [Control] + [EJECT])\
+"
+fi
 
-**************************************************
-               NOW IT'S DONE.
+msg="$msg\n\
+**************************************************\n\
+\n\n\
+"
 
-   Some changes needs a reboot to take effect.
-     (c.g., [Command] + [Control] + [EJECT])
-**************************************************
+echo -e "$msg"
 
-
-END

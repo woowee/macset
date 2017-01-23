@@ -1,148 +1,194 @@
-#!/bin/bash -u
-
-set -e
-
-#sudo -v
-#while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-dir_current=$(dirname $0)
-cd ${dir_current}
+#!/bin/bash -eu
+#
+# @(#) github.sh ver.0.0.0 2014.05.18
+#
+# Usage:
+#   github.sh
+#     arg1 - なし
+#
+# Description:
+#   github のアカウント設定を行う．
+#
+#
+# references:
+# - https://help.github.com/articles/checking-for-existing-ssh-keys/
+# - https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/
+###########################################################################
 
 #
-# check file configration
+# PREPARE
 #
-filename_conf="config.sh"
-filename_func="functions.sh"
 
-filename_check="check4running.sh"
-if [ ! -e "${dir_current}/${filename_check}" ]; then
-    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${dir_current}/${filename_check}' ?)"
+# Check the files required for this process
+readonly FILE_FUNC="$(dirname $0)/functions.sh"
+readonly FILE_CONF="$(dirname $0)/configurations.sh"
+
+function check_files() {
+  local esc_red='\033[0;31m'
+  local esc_reset='\033[0m'
+  # local esc_reset=`tput sgr0`
+
+  local file_is=$1
+
+  # existense check
+  if [ ! -e $1 ]; then
+    # error message
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      There is not the file \"$1\". \
+      Check the file \"${1##*/}\". \
+      Process will be canceled.
+      exit 1
+  fi
+
+  # read
+  if ! source ${file_is}; then
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      Couldnot read the file \"$(basename $1)\". \
+      The file itself or the content may be incurrect. \
+      Process will be canceled.
     exit 1
-fi
+  fi
+}
 
-${dir_current}/${filename_check} ${filename_conf} ${filename_func}
+check_files $FILE_FUNC
+check_files $FILE_CONF
+
 
 # read configuraton
-source ${dir_current}/${filename_conf}
-MyGITHUB_USERNAME="${GITHUB_USERNAME}"
-MyGITHUB_EMAIL="${GITHUB_EMAIL}"
+username_is="${GITHUB_USERNAME}"
+email_is="${GITHUB_EMAIL}"
 
-# read functions
-source ${dir_current}/${filename_func}
-
-
-#
-# FUNCTIONS {
-#
-set_githubaccountinfo()
-{
-    ask_inputvalue "  Enter your Github user name                     : " MyGITHUB_USERNAME
-    ask_inputvalue "  Enter your email address registered with Github : " MyGITHUB_EMAIL
-    echo ""
-}
-confirm_githubaccountinfo()
-{
-    choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
-    msg="$1"
-
-    msg_display="${prefix} ${msg} ${choice}"
-    while true; do
-        printf "${msg_display}"
-        read res
-
-        case "${res}" in
-            a) return 0;;
-            r)
-                execho "Tell me your information of Github."
-                set_githubaccountinfo
-
-                execho "Check the contents ..."
-                execho "  - User Name       : ${MyGITHUB_USERNAME}"
-                execho "  - E-mail address  : ${MyGITHUB_EMAIL}"
-                echo ""
-                confirm_githubaccountinfo "${msg}"
-                return 0;;
-            x)
-                return 1;;
-            *)
-                echo "I can note read your input..."
-                confirm_githubaccountinfo "${msg}"
-                return 0;;
-        esac
-    done
-}
-
-#
-# } FUNCTIONS
-#
 
 
 #
 # Generating SSH Keys for Github
 #
 
-MySSH_KEYNAME="github_rsa"
-MySSH_FILE="${HOME}/.ssh/${MySSH_KEYNAME}"
+readonly SSHKEY_NAME="github_rsa"
+readonly SSHKEY_FILE="${HOME}/.ssh/${SSHKEY_NAME}"
 
-cat << DATA
-Check the contents ...
-  - User Name       : ${MyGITHUB_USERNAME}
-  - E-mail address  : ${MyGITHUB_EMAIL}
+# account infomation
+while true; do
+  cat << DATA
+
+    - User Name       : ${username_is}
+    - E-mail address  : ${email_is}
 
 DATA
 
-confirm_githubaccountinfo "Are you sure want to set using above infomation for your GitHub?"
+    printf "${PREFIX} Are you sure you want to set your GitHub account with the above content ? [a(Apply)/r(Redo)/x(eXit this work.)]: "
+
+    read res
+
+    case "${res}" in
+      a)
+        break
+        ;;
+      r)
+        echo -e "\n  Enter your GitHub account.;"
+        ask_inputvalue "      Enter your user name      : " username_is
+        ask_inputvalue "      Enter your e-mail address : " email_is
+        ;;
+      x)
+        exit 1
+        ;;
+      *)
+        myecho "Can't read your enter. try again."
+        ;;
+    esac
+  done
+
+
+[ ! -e ${HOME}/.ssh ] && mkdir -p ${HOME}/.ssh
 
 # generating
-ssh-keygen -t rsa -f ${MySSH_FILE} -C "${MyGITHUB_EMAIL}"
-# save the key (/c/Users/you/.ssh/id_rsa): ${HOME}/.ssh/github_rsa
+# ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C "${email_is}"
+echo GITHUB_PASSWORD=${GITHUB_PASSWORD}
+expect -c "
+  spawn ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C ${email_is}
+  expect \"Enter passphrase (empty for no passphrase):\"
+  send \"${GITHUB_PASSWORD}\n\"
+  expect \"Enter same passphrase again:\"
+  send \"${GITHUB_PASSWORD}\n\"
+  interact"
 
-# % Enter passphrase (empty for no passphrase): *****
-# % Enter same passphrase again: *****
+
+# start the ssh-agent in the background
+# eval $(ssh-agent -s)
 
 # add your new key to the ssh-agent
-ssh-add ${MySSH_FILE}
+# ssh-add ${SSHKEY_FILE}
+expect -c "
+  spawn ssh-add ${SSHKEY_FILE}
+  expect \"Enter passphrase for ${SSHKEY_FILE}:\"
+  send \"${GITHUB_PASSWORD}\n\"
+  interact"
 
 # Copies the contents of the id_rsa.pub file to your clipboard
-pbcopy < "${MySSH_FILE}.pub"
-sudo chmod 600 "${MySSH_FILE}.pub"    # just in case...'
+pbcopy < "${SSHKEY_FILE}.pub"
+#sudo chmod 600 "${SSHKEY_FILE}.pub"    # just in case...'
+expect -c "
+  spawn sudo chmod 600 ${SSHKEY_FILE}.pub
+  expect \"Password:\"
+  send \"${PASSWORD}\n\"
+  interact"
 
 echo ""
-execho "ok, now open browser, \033[1;4;32m\"Safari\"\033[0m just now ?"
-ask_confirm "you should register your ssh pub key to your account settings of github.\n"
+myecho "ok, now open browser ${ESC_REVS}\"Safari\"${ESC_OFF}."
+ask_confirm "
+  you should register your ssh pub key to your account settings of github.\n \
+  when you finish settings it, then type '${ESC_UNDR}done${ESC_OFF}'.;"
 
-execho "opening Safari ..."
-open -a Safari "https://github.com/settings/ssh"
+open -a Safari "https://github.com/settings/ssh" &
+pid=$!
+wait ${pid}
 
-execho "when you finish settings it, then type '\033[1;4mdone\033[0m'.;"
 while true; do
     read res
     if [ "${res}" == "done" ]; then
         break
     else
-        execho "finish settings? so type 'done'."
+        myecho "finish settings? so type 'done'."
     fi
 done
-
+# Are you sure you want to continue connecting (yes/no)?
 # make config file
 cat << EOF > "${HOME}/.ssh/config"
-Host github.com
-Hostname github.com
-Identityfile ${MySSH_FILE}
+Host github github.com
+  Hostname github.com
+  Identityfile ${SSHKEY_FILE}
+  User git
 EOF
 
-#
-ssh -T git@github.com &&:
+cat << EOF >> "${HOME}/.gitconfig"
+[url "github:"]
+    InsteadOf = https://github.com/
+    InsteadOf = git@github.com:
+EOF
 
-# Are you sure you want to continue connecting (yes/no)?
-#
-# Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+# test!
+# ssh -T git@github.com &&:
+expect -c "
+  spawn ssh -T git@github.com &&:
+  expect \"Are you sure you want to continue connecting (yes/no)?\"
+  send \"yes\n\"
+  interact
+"
+
 
 # to set your account's default identity.
 # Omit --global to set the identity only in this repository.
-git config --global user.name "${MyGITHUB_USERNAME}"
-git config --global user.email "${MyGITHUB_EMAIL}"
+git config --global user.name "${username_is}"
+git config --global user.email "${email_is}"
 
 
-#fin
-execho "${esc_ylw}DONE: SSH Keys for Github Generating${esc_off}"
+# fin
+cat << END
+
+
+**************************************************
+         GitHub settings been completed.
+**************************************************
+
+
+END

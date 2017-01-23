@@ -60,65 +60,6 @@ check_files $FILE_CONF
 get_mode $@
 # echo "Mode is $MODE_IS."
 
-
-#
-# staff to install
-#
-
-# homebrew
-readonly BINS=(\
-zsh \
-tmux \
-git \
-wget \
-openssl \
-w3m \
-ag \
-go \
-# python \
-python3 \
-### for LESS
-node \
-### for radiko
-rtmpdump \
-ffmpeg \
-base64 \
-swftools \
-# eyeD3 \  TODO: hey, "Error: No formulae found in taps." ?
-### for handbrake
-libdvdcss \
-### homebrew/dupes
-rsync \
-### sanemat/font
-ricty \
-)
-
-# homebrew-cask
-readonly APPS_MINIMAL=(\
-alfred \
-dropbox \
-google-chrome \
-### caskroom/versions
-macvim-kaoriya \
-)
-APPS=(\
-### caskroom/homebrew-cask
-google-drive \
-"firefox --language=ja" \
-appcleaner \
-iterm2 \
-vlc \
-handbrake \
-shiftit \
-gimp \
-inkscape \
-licecap \
-keycastr \
-### woowee/mycask
-mytracks \
-)
-
-
 #
 # homebrew install, tap, and update
 #
@@ -138,134 +79,289 @@ myecho "brew update & upgrade..."
 brew update && brew upgrade
 
 
-# for ricty installation
-myecho "install xquartz(x11) ..."
-brew cask install "xquartz"
-
-
 #
 # installation
 #
-function installation()
-{
-  local cmd=$1
-  shift
-  local stuffs=($@)
+myecho "install xquartz(x11) ..."
+brew cask install "xquartz"            # for ricty
 
-  for stuff in ${stuffs[@]}
-  do
-    echo "${PREFIX} $cmd $stuff"
-    eval "${cmd} ${stuff}"
-    # ref. http://labs.opentone.co.jp/?p=5651
-  done
+myecho "Install commands..."
+brew install \
+  zsh \
+  tmux \
+  git \
+  wget \
+  openssl \
+  w3m \
+  ag \
+  node \
+  go \
+  python3 \
+  boost \
+  expect \
+  rsync \
+  ricty
 
-  # ref.http://labs.opentone.co.jp/?p=5890
-}
-
-IFS_ORG=$IFS; IFS=$'\n'
-
-echo -e "${PREFIX} Install commands..."
-installation "brew install" ${BINS[@]}
-echo -e "${PREFIX} Install apps..."
-installation "brew cask install" ${APPS_MINIMAL[@]}
 if [ $MODE_IS -eq $MODE_COMPLETE ]; then
-  installation "brew cask install" ${APPS[@]}
+  brew install \
+    libdvdcss \
+    rtmpdump \
+    ffmpeg \
+    base64 \
+    swftools \
+    eye-d3
 fi
 
-IFS=$IFS_ORG
+brew cask install \
+  alfred \
+  dropbox \
+  google-chrome \
+  iterm2 \
+  macvim-kaoriya
+
+if [ $MODE_IS -eq $MODE_COMPLETE ]; then
+  brew cask install \
+    google-drive \
+    appcleaner \
+    vlc \
+    handbrake \
+    shiftit \
+    gimp \
+    inkscape \
+    licecap \
+    keycastr \
+    mytracks
+fi
+
 
 
 
 #
 # settings
 #
+#
+# settings
+#
 
 # shell
-path_zsh=$(find $(brew --prefix)/bin -name zsh)
-if [ -n ${path_zsh} ]; then
-    myecho "setting shell..."
-    myecho "zsh: ${path_zsh}"
-    # add zsh
-    echo ${path_zsh} | sudo tee -a /etc/shells
-    # set zsh
-    chsh -s ${path_zsh}
+myecho "Change log-in shell to zsh."
+#CHECK:
+# path_zsh=$(find $(brew --prefix)/bin -name zsh)
+if check_command zsh path_is; then
+  #echo ${path_is} | sudo tee -a /etc/shells
+  expect -c "
+    spawn echo ${path_is} | sudo tee -a /etc/shells
+    expect \"Password:\"
+    send \"${PASSWORD}\n\"
+    interact
+  "
+  # set zsh
+  #chsh -s ${path_is}
+  expect -c "
+    spawn chsh -s ${path_is}
+    expect \"Password for $(id -u -n):\"
+    send \"${PASSWORD}\n\"
+    interact
+    "
+else
+  myecho "Could not find zsh. Settings for zsh was skipped."
 fi
 
-# iterm2
-# ref. app4bootstrap.sh
 
-# terminal.app
-myecho "set terminal..."
-# エンコーディングは UTF-8 のみ。
-defaults write com.apple.terminal StringEncodings -array 4
-# 環境設定 > エンコーディング = [Unicode (UTF-8)]
-
-cd "${DIR_TEMP}"
-
-# Use a modified version of the Solarized Dark theme by default in Terminal.app
-curl -o "Solarized Dark.terminal" https://gist.githubusercontent.com/woowee/3ff014f5a969e9cfc3a7/raw/efa793e6e9f0a89b11c743db6aafa33b93293608/Solarized%2520Dark.terminal
-sleep 1; # Wait a bit...
-
-#TODO:
-# term_profile='Solarized Dark'
-# current_profile="$(defaults read com.apple.terminal 'Default Window Settings')";
-# if [ "${current_profile}" != "${term_profile}" ]; then
-#     open "${dir_tmp}/${term_profile}.terminal"
-#     sleep 1; # Wait a bit to make sure the theme is loaded
-#     defaults write com.apple.terminal 'Default Window Settings' -string "${term_profile}"
-#     defaults write com.apple.terminal 'Startup Window Settings' -string "${term_profile}"
-#     killall "Terminal"
-# fi;
-
-# LESS
-if check_existence_command 'npm'; then
-  myecho "setting LESS..."
+#
+# "LESS"
+#
+myecho "Set LESS"
+if check_command 'npm'; then
   npm install --global less
 else
-  myecho "npm has not been installed. can't use LESS but is that okay?"
+  myecho  "Could not find npm. npm been installed ?"
 fi
 
-#TODO:
-### font
-#execho "installing ricty-diminished..."
-#brew cask install font-ricty-diminished &&:
 
-# python
-myecho "setting python..."
+#
+# "Python"
+#
+myecho "Set Python"
 pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 
-#TODO:
-# # mutagen (to use mid3v2)
-# if ! check_existence_command 'mid3v2'; then
-#     execho "setting mutagen..."
-#     if ! pip install mutagen; then
-#         [ ! -e $HOME/tmp ] || mkdir -p $HOME/tmp
-#         mutagen_url="https://pypi.python.org/packages/source/m/mutagen/mutagen-1.22.tar.gz"
-#         mutagen_name=${mutagen_url##*/}
-#         cd $HOME/tmp
-#         curl --location --remote-name "${mutagen_url}"
-#         tar zxvf "${mutagen_name}"
-#         cd $(basename $mutagen_name .tar.gz)
-#         python setup.py build
-#         sudo python setup.py install
-#     fi
-# fi
-
-#TODO:
-# cd ${dir_current}
+# mutagen (to use mid3v2)
+if ! check_command 'mid3v2'; then
+    myecho "setting mutagen..."
+    pip3 install mutagen
+fi
 
 
-# photos.app
-myecho "set photos.app..."
+#
+# "Terminal"
+#
+if [ ${MODE_IS} -eq ${MODE_COMPLETE} ]; then
+  myecho "Set Terminal"
+  # エンコーディングは UTF-8 のみ。
+  defaults write com.apple.terminal StringEncodings -array 4
+  # 環境設定 > エンコーディング = [Unicode (UTF-8)]
+  readonly TERMINAL_PROFILE="Iceberg"
+  curl http://cocopon.me/app/vim-iceberg/Iceberg.terminal \
+    -o "${DIR_TEMP}/Iceberg.terminal"
+
+  open "${DIR_TEMP}/Iceberg.terminal"
+
+  defaults delete com.apple.Terminal "Default Window Settings"
+  defaults write com.apple.Terminal "Default Window Settings" -string "$TERMINAL_PROFILE"
+  defaults delete com.apple.Terminal "Startup Window Settings"
+  defaults write com.apple.Terminal "Startup Window Settings" -string "$TERMINAL_PROFILE"
+  defaults read com.apple.Terminal
+  # ref: http://apple.stackexchange.com/questions/226524/detect-terminal-color-theme-from-command-line
+fi
+
+
+#
+# "Photos"
+#
+myecho "Set photos"
 defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 
+#
+# "Alfred"
+#
+if check_app "alfred" path_is ; then
+  myecho "Set Alfred"
+  appname=$(basename "${path_is}")
+  open -a "${appname}" &
+  pid=$!
+  wait ${pid}
+else
+  myecho_error "Could not find \"Alfred\". \"Alfred\" been installed ?"
+fi
 
+
+#
+# "Dropbox"
+#
+if check_app "dropbox" path_is ; then
+  myecho "Set Dropbox"
+  appname=$(basename "${path_is}")
+  open -a "${appname}" &
+  pid=$!
+  wait ${pid}
+else
+  myecho_error "Could not find \"Dropbox\". \"Dropbox\" been installed ?"
+fi
+
+
+
+#
+# "iTerm2"
+#
+if check_app iterm2 path_is ; then
+  myecho "Set iTerm2"
+  appname=$(basename "${path_is}")
+
+  # color ir_black
+  url_is="https://gist.githubusercontent.com/meqif/1238378/raw/f4ae214d493826af7135eb94f6f3b1061049be4e/IR_Black.itermcolors"
+  curl "${url_is}" \
+  -o "${DIR_TEMP}/$(basename $url_is)"
+  # color iceberg
+  url_is="https://raw.githubusercontent.com/Arc0re/Iceberg-iTerm2/master/iceberg.itermcolors"
+  curl "${url_is}" \
+  -o "${DIR_TEMP}/$(basename $url_is)"
+
+  # plist
+  url_is="https://gist.githubusercontent.com/woowee/9efd41d68bca10363d2083902ebc2f43/raw/d307b0261ec954063e2132d7beef4917a43e6f2d/com.googlecode.iterm2.xml"
+  curl "${url_is}" \
+    -o "${DIR_TEMP}/$(basename $url_is)"
+
+  plutil -convert xml1 ${DIR_TEMP}/com.googlecode.iterm2.xml \
+    -o ${DIR_TEMP}/com.googlecode.iterm2.plist
+
+  mv -f ${DIR_TEMP}/com.googlecode.iterm2.plist ~/Library/Preferences/
+
+  defaults read com.googlecode.iterm2
+  # ref.https://github.com/databus23/dotfiles/blob/master/osx
+else
+  myecho_error "Could not find \"iTerm2\". \"iTerm2\" been installed ?"
+fi
+
+
+#
+# font "Ricty"
+#
+myecho "Set Ricty font..."
+
+readonly DIR_GENERATED_RICTY=$(brew --prefix)/opt/ricty/share/fonts
+readonly DIR_FONTS=${HOME}/Library/Fonts/
+echo "DIR_GENERATED_RICTY=$DIR_GENERATED_RICTY"
+if (ls ${DIR_GENERATED_RICTY}/Ricty*.ttf >/dev/null 2>&1); then
+  [ ! -e ${DIR_FONTS} ] && mkdir ~/Library/Fonts
+  cp -f ${DIR_GENERATED_RICTY}/Ricty*.ttf $DIR_FONTS
+  fc-cache -vf
+fi
+echo "ricty ok"
+
+
+#
+# "MacVim"
+#
+if check_app macvim-kaoriya path_is ; then
+  myecho "Set MacVim"
+
+  readonly DIR_SRC="${HOME}/dots/vimset"
+  readonly DIR_DST="${HOME}/.vim"
+
+  if [ -e ${DIR_SRC} ]; then
+    [ ! -e ${DIR_DST} ] && mkdir -p ${DIR_DST}
+
+    # once get the path of `DIR_SRC` is absolute
+    readonly DIR_SRC_FQPN=$(cd $(dirname $DIR_SRC) && pwd)/$(basename $DIR_SRC)
+    # all items under `DIR_SRC` are targets...
+    readonly PATTERN=$(echo $DIR_SRC | perl -pe "s/\//\\\\\//g")
+
+    # migration !!
+    find "${DIR_SRC_FQPN}" | while read item; do
+      # make path
+      item_is=$(echo "${item}" | perl -pe "s/"${PATTERN}"//")
+
+      # blank?
+      [ -z "${item_is}" ] && continue
+
+      if [ -d "${item}" ]; then
+      # the case of directory
+        if [ ! -e "${DIR_DST}/${item_is}" ]; then
+          mkdir "${DIR_DST}/${item_is}" \
+            && echo "  Made the directory. \"${item_is}\""
+        fi
+      else
+        # make symlink
+        if ! [ "${item##*/}" = ".DS_Store" -o "${item##*.}" = "un~" ]; then
+          ln -fs "${item}" "${DIR_DST}/${item_is}" \
+            && echo "  Created symlink.    \"{item_is}\""
+        fi
+      fi
+    done
+
+    # for item in "$DIR_SRC/*"; do
+    #   # make symlink
+    #   if ! [ "${item##*/}" = ".DS_Store" -o "${item##*.}" = "un~" ]; then
+    #     ln -fs "${item}" "${DIR_DST}/${item_is}" \
+    #       && echo "  Created symlink. \"${item_is}\""
+    #   fi
+    # done
+  fi
+
+  defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+fi
+
+
+#CHECK::
+defaults write com.apple.finder AppleShowAllFiles -boolean true
+
+# fin
 cat << END
 
 
 **************************************************
-NOW IT'S DONE.
+               NOW IT'S DONE.
 **************************************************
 
 

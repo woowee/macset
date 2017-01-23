@@ -57,59 +57,13 @@ get_mode $@
 #
 # config
 #
-readonly MyCOMPUTERNAME="${COMPUTERNAME}"
-readonly MyHOSTNAME="${HOSTNAME}"
-readonly MyLOCALHOSTNAME="${LOCALHOSTNAME}"
+computername_is=${COMPUTERNAME}
+hostname_is=${HOSTNAME}
+localhostname_is=${LOCALHOSTNAME}
 
-readonly MyGITHUB_USERNAME="${GITHUB_USERNAME}"
-readonly MyGITHUB_EMAIL="${GITHUB_EMAIL}"
+# readonly MyGITHUB_USERNAME="${GITHUB_USERNAME}"
+# readonly MyGITHUB_EMAIL="${GITHUB_EMAIL}"
 
-
-#
-# FUNCTIONS {
-#
-## Computer Account
-set_systeminfo()
-{
-    ask_inputvalue "  Enter your computer name   : " MyCOMPUTERNAME
-    ask_inputvalue "  Enter your hostname        : " MyHOSTNAME
-    ask_inputvalue "  Enter your local host name : " MyLOCALHOSTNAME
-    echo ""
-}
-confirm_systeminfo()
-{
-    local choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
-    local msg="$1"
-
-    local msg_display="${prefix} ${msg} ${choice}"
-    while true; do
-        printf "${msg_display}"
-        read res
-
-        case "${res}" in
-            a) return 0;;
-            r)
-                myecho "Set your system information."
-                set_systeminfo
-
-                myecho "Check the contents ..."
-                myecho "  - Computer Name   : ${MyCOMPUTERNAME}"
-                myecho "  - Hostname        : ${MyHOSTNAME}.local"
-                myecho "  - Local Host Name : ${MyLOCALHOSTNAME}"
-                echo ""
-                confirm_systeminfo "${msg}"
-                return 0;;
-            x)
-                return 1;;
-            *)
-                myecho "I can not read your input..."
-                confirm_systeminfo "${msg}"
-        esac
-    done
-}
-#
-# } FUNCTIONS
-#
 
 
 sudo -v
@@ -121,21 +75,43 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 echo -e "${ESC_BOLD}######################### System Information #########################${ESC_OFF}"
 if ask_yesno "Do you want to set the system information ?"; then
 
+  while true; do
     cat << DATA
-Check the contents ... ;
-  - Computer Name   : ${MyCOMPUTERNAME}
-  - Hostname        : ${MyHOSTNAME}.local
-  - Local Host Name : ${MyLOCALHOSTNAME}
+
+    - Computer Name   : ${computername_is}
+    - Hostname        : ${hostname_is}.local
+    - Local Host Name : ${localhostname_is}
 
 DATA
-    confirm_systeminfo "Are you sure want to set using above infomation?"
 
-    sudo scutil --set ComputerName "${MyCOMPUTERNAME}"
-    sudo scutil --set HostName "${MyHOSTNAME}.local"
-    sudo scutil --set LocalHostName "${MyLOCALHOSTNAME}"
+    printf "${PREFIX} Are you sure you want to set system information with the above content ? [a(Apply)/r(Redo)/x(eXit this work.)]: "
 
-    #fin
-    myecho "${esc_ylw}DONE: System/Account Information Settings${esc_off}"
+    read res
+
+    case "${res}" in
+      a)
+        break
+        ;;
+      r)
+        echo -e "\n  Enter your system information.;"
+        ask_inputvalue "      Enter your computer name   : " computername_is
+        ask_inputvalue "      Enter your hostname        : " hostname_is
+        ask_inputvalue "      Enter your local host name : " localhostname_is
+        ;;
+      x)
+        exit 1
+        ;;
+      *)
+        myecho "Can't read your enter. try again."
+        ;;
+    esac
+  done
+
+  echo "sudo scutil --set ComputerName ${computername_is}"
+  echo "sudo scutil --set HostName ${hostname_is}.local"
+  echo "sudo scutil --set LocalHostName ${localhostname_is}"
+
+  myecho "${ESC_YLW}DONE: System/Account Information Settings${ESC_OFF}"
 fi
 
 
@@ -163,6 +139,7 @@ echo -e "${ESC_BOLD}########################### macOS Settings #################
 ask_confirm "Sets OSX defaults."; ./macos.sh ${MODE_MINIMAL}
 
 
+
 #
 # Applications
 #
@@ -175,7 +152,7 @@ cat << END
 
 
 **************************************************
-               NOW IT'S DONE.
+           THE PROCESS BEEN COMPLETED.
 
    You Should RESTART to activate the settings.
      (c.g., [Command] + [Control] + [EJECT])
