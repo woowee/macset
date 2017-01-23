@@ -11,7 +11,7 @@ cd ${dir_current}
 #
 # check file configration
 #
-filename_conf="config.sh"
+filename_conf="configurations.sh"
 filename_func="functions.sh"
 
 filename_check="check4running.sh"
@@ -61,4 +61,4 @@ EOF
 fi
 
 
-execho "${esc_ylw}DONE: Dotfiles settings.${esc_off}"
+myecho "${ESC_YLW}DONE: Dotfiles settings.${ESC_OFF}"

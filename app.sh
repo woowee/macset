@@ -116,7 +116,6 @@ licecap \
 keycastr \
 ### woowee/mycask
 mytracks \
-# "$(brew --repository)/Library/Taps/caskroom/homebrew-cask/developer/bin/generate_cask_token" MyTracks
 )
 
 
@@ -126,10 +125,8 @@ mytracks \
 
 myecho "install homebrew..."
 type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-# /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 myecho "install homebrew-cask..."
-# brew tap | grep caskroom/cask >/dev/null || brew install caskroom/cask/brew-cask
 brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
 brew tap | grep caskroom/dupes >/dev/null || brew tap homebrew/dupes
 brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions

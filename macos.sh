@@ -369,12 +369,13 @@ keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk 
 keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
 keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
+#TODO:
 # Input - Keyboard - Modified key
 if do_set 'Input : Caps Lock を Control キーにする．' $MODE_MINIMAL; then
-   # CapsLock(2) -> Control(0)
-   defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
-   defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
-   # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
+  # CapsLock(2) -> Control(0)
+  defaults -currentHost delete -g com.apple.keyboard.modifiermapping.${keyboardid}
+  defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add '<dict><key>HIDKeyboardModifierMappingDst</key><integer>2</integer><key>HIDKeyboardModifierMappingSrc</key><integer>0</integer></dict>'
+  # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
 fi
 
 # Input - Keyboard - Shortcut

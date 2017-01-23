@@ -29,7 +29,7 @@ fi
 #
 filename_conf="$1"
 
-dir_tmp="${HOME}/tmp"
+dir_tmp="${HOME}/temp"
 if [ -e "${dir_current}/${filename_conf}" ]; then
     file_conf="${dir_current}/${filename_conf}"
 elif [ -e "${dir_tmp}/${filename_conf}" ]; then

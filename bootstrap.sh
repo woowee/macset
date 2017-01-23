@@ -1,35 +1,68 @@
-#!/bin/bash -u
-
-set -e
-
-dir_current=$(dirname $0)
-cd ${dir_current}
+#!/bin/bash -eu
+#
+# @(#) bootstrap.sh ver.1.0.0 ver.0.0.0 2014.05.18
+#
+# Usage:
+#   bootstrap.sh [mode]
+#
+# Description:
+#   必要なソフトウェア，アプリケーションをインストールする．
+#   Homebrew および Homebrew-Cask 導入前提．
+#
+###########################################################################
 
 #
-# check file configration
+# PREPARE
 #
-filename_conf="config.sh"
-filename_func="functions.sh"
 
-filename_check="check4running.sh"
-if [ ! -e "${dir_current}/${filename_check}" ]; then
-    echo -e "\033[1;32m$(basename $0)==>\033[0m Cannot run because some necessary information or files is missing. Check your execution enviroment. (Is there '${dir_current}/${filename_check}' ?)"
+# Check the files required for this process
+readonly FILE_FUNC="$(dirname $0)/functions.sh"
+readonly FILE_CONF="$(dirname $0)/configurations.sh"
+
+function check_files() {
+  local esc_red='\033[0;31m'
+  local esc_reset='${ESC_OFF}'
+
+  local file_is=$1
+
+  # existense check
+  if [ ! -e $1 ]; then
+    # error message
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      There is not the file \"$1\". \
+      Check the file \"${1##*/}\". \
+      Process will be canceled.
+      exit 1
+  fi
+
+  # read
+  if ! source ${file_is}; then
+    echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
+      Couldnot read the file \"$(basename $1)\". \
+      The file itself or the content may be incurrect. \
+      Process will be canceled.
     exit 1
-fi
+  fi
+}
 
-${dir_current}/${filename_check} ${filename_conf} ${filename_func}
 
-# read configuraton
-source ${dir_current}/${filename_conf}
-MyCOMPUTERNAME="${COMPUTERNAME}"
-MyHOSTNAME="${HOSTNAME}"
-MyLOCALHOSTNAME="${LOCALHOSTNAME}"
+check_files $FILE_FUNC
+check_files $FILE_CONF
 
-MyGITHUB_USERNAME="${GITHUB_USERNAME}"
-MyGITHUB_EMAIL="${GITHUB_EMAIL}"
+[ ! -e ${DIR_TEMP} ] && mkdir -p ${DIR_TEMP}
 
-# read functions
-source ${dir_current}/${filename_func}
+get_mode $@
+# echo "Mode is $MODE_IS."
+
+#
+# config
+#
+readonly MyCOMPUTERNAME="${COMPUTERNAME}"
+readonly MyHOSTNAME="${HOSTNAME}"
+readonly MyLOCALHOSTNAME="${LOCALHOSTNAME}"
+
+readonly MyGITHUB_USERNAME="${GITHUB_USERNAME}"
+readonly MyGITHUB_EMAIL="${GITHUB_EMAIL}"
 
 
 #
@@ -45,10 +78,10 @@ set_systeminfo()
 }
 confirm_systeminfo()
 {
-    choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
-    msg="$1"
+    local choice="[a(Apply)/r(Redo)/x(eXit this work.)] : "
+    local msg="$1"
 
-    msg_display="${prefix} ${msg} ${choice}"
+    local msg_display="${prefix} ${msg} ${choice}"
     while true; do
         printf "${msg_display}"
         read res
@@ -56,20 +89,20 @@ confirm_systeminfo()
         case "${res}" in
             a) return 0;;
             r)
-                execho "Set your system information."
+                myecho "Set your system information."
                 set_systeminfo
 
-                execho "Check the contents ..."
-                execho "  - Computer Name   : ${MyCOMPUTERNAME}"
-                execho "  - Hostname        : ${MyHOSTNAME}.local"
-                execho "  - Local Host Name : ${MyLOCALHOSTNAME}"
+                myecho "Check the contents ..."
+                myecho "  - Computer Name   : ${MyCOMPUTERNAME}"
+                myecho "  - Hostname        : ${MyHOSTNAME}.local"
+                myecho "  - Local Host Name : ${MyLOCALHOSTNAME}"
                 echo ""
                 confirm_systeminfo "${msg}"
                 return 0;;
             x)
                 return 1;;
             *)
-                execho "I can not read your input..."
+                myecho "I can not read your input..."
                 confirm_systeminfo "${msg}"
         esac
     done
@@ -85,7 +118,7 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 #
 # Systen Settings
 #
-echo -e "\033[1m######################### System Information #########################\033[0m"
+echo -e "${ESC_BOLD}######################### System Information #########################${ESC_OFF}"
 if ask_yesno "Do you want to set the system information ?"; then
 
     cat << DATA
@@ -102,7 +135,7 @@ DATA
     sudo scutil --set LocalHostName "${MyLOCALHOSTNAME}"
 
     #fin
-    execho "${esc_ylw}DONE: System/Account Information Settings${esc_off}"
+    myecho "${esc_ylw}DONE: System/Account Information Settings${esc_off}"
 fi
 
 
@@ -110,7 +143,7 @@ fi
 #
 # Generating SSH Keys for Github
 #
-echo -e "\033[1m############################### GitHub ###############################\033[0m"
+echo -e "${ESC_BOLD}############################### GitHub ###############################${ESC_OFF}"
 ask_yesno "Do you generate a SSH key for GitHub ?" && ./github.sh
 
 
@@ -118,7 +151,7 @@ ask_yesno "Do you generate a SSH key for GitHub ?" && ./github.sh
 #
 # Dotfiles
 #
-echo -e "\033[1m############################## Dotfiles ##############################\033[0m"
+echo -e "${ESC_BOLD}############################## Dotfiles ##############################${ESC_OFF}"
 ask_yesno "Do you want to clone dotfiles ?" && ./dotfiles.sh
 
 
@@ -126,15 +159,15 @@ ask_yesno "Do you want to clone dotfiles ?" && ./dotfiles.sh
 #
 # OSX Settings
 #
-echo -e "\033[1m############################ OSX Settings ############################\033[0m"
-ask_confirm "Sets OSX defaults."; ./osx4bootstrap.sh --silent
+echo -e "${ESC_BOLD}########################### macOS Settings ###########################${ESC_OFF}"
+ask_confirm "Sets OSX defaults."; ./macos.sh ${MODE_MINIMAL}
 
 
 #
 # Applications
 #
-echo -e "\033[1m######################## Install Applications ########################\033[0m"
-ask_yesno "Do you want to install applications, alfred, chrome, and macvim-kaoriya ?" && ./app4bootstrap.sh
+echo -e "${ESC_BOLD}######################## Install Applications ########################${ESC_OFF}"
+ask_yesno "Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?" && ./app.sh ${MODE_MINIMAL}
 
 
 ## Please restart

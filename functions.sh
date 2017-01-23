@@ -79,8 +79,6 @@ get_mode() {
 # [ ! -e $DIR_TEMP ] && mkdir -p $DIR_TEMP
 
 
-# prefix="$esc${iam}==>$esc_off"
-#
 # ask_confirm()
 # {
 #     msg="$1"
@@ -98,38 +96,38 @@ get_mode() {
 #     done
 # }
 #
-# ask_yesno()
-# {
-#     # yes/no
-#     choice="[y(Yes)/n(No)] : "
-#
-#     msg="$1"
-#     msg_display="${prefix} ${msg} ${choice}"
-#     while true; do
-#         printf "${msg_display}"
-#         read res
-#
-#         case ${res} in
-#             [Yy]*) return 0;;
-#             [Nn]*) return 1;;
-#             *)
-#                 execho "Can't read your enter. try again."
-#                 ask_yesno "${msg}"
-#         esac
-#     done
-# }
-#
-# ask_inputvalue()
-# {
-#     while true; do
-#         printf "${prefix} $1"
-#         read res
-#
-#         eval $2="\"${res}\""    # $2 is the variable name(")
-#         return 0
-#     done
-# }
-#
+ask_yesno()
+{
+    # yes/no
+    local choice="[y(Yes)/n(No)] : "
+
+    local msg="$1"
+    local msg_display="${prefix} ${msg} ${choice}"
+    while true; do
+        printf "${msg_display}"
+        read res
+
+        case ${res} in
+            [Yy]*) return 0;;
+            [Nn]*) return 1;;
+            *)
+                myecho "Can't read your enter. try again."
+                ask_yesno "${msg}"
+        esac
+    done
+}
+
+ask_inputvalue()
+{
+    while true; do
+        printf "${prefix} $1"
+        read res
+
+        eval $2="\"${res}\""    # $2 is the variable name(")
+        return 0
+    done
+}
+
 # check_existence_app()
 # {
 #     if [ $# -lt 1 ]; then
