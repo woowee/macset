@@ -67,6 +67,21 @@ check_files $FILE_CONF
 get_mode $@
 # echo "Mode is $MODE_IS."
 
+
+#
+# Confirmation start
+#
+echo -e "
+                        macOS System Settings
+----------------------------------------------------------------------
+"
+
+if ! ask_yesno "Do you want to set macOS system ?" ; then
+  myecho "This process been canceled."
+  exit 1
+fi
+
+
 # Ask for the administrator password upfront
 sudo -v
 
@@ -211,102 +226,112 @@ if do_set 'Finder: メニューバー設定．' $MODE_MINIMAL; then
         "/System/Library/CoreServices/Menu Extras/Clock.menu"
 fi
 
+if do_set 'Finder: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)'; then
+   defaults write com.apple.universalaccess reduceTransparency -bool true
+fi
+
+if do_set 'Finder: デスクトップを変更する．'; then
+    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$FILE_DESKTOPPICTURE"'"'
+    # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
+fi
+
+
 
 ## Dock
 
-if do_set 'Dock  : Dock の位置を下にする．' $MODE_MINIMAL; then
+if do_set 'Dock   : Dock の位置を下にする．' $MODE_MINIMAL; then
     defaults write com.apple.dock orientation -string "bottom"
     # [システム環境設定 > Dock > 画面上の位置] => "下"
     #defaults write com.apple.dock pinning -string start
     # (none, osx yosemite になって無くなった様子．ref.https://discussions.apple.com/thread/6600902)
 fi
 
-if do_set 'Dock  : Dock を隠す．' $MODE_MINIMAL; then
+if do_set 'Dock   : Dock を隠す．' $MODE_MINIMAL; then
     defaults write com.apple.dock autohide -bool true
     # [システム環境設定 > Dock > Dock を自動的に隠す/表示] => "ON"
 fi
 
-if do_set 'Dock  : Dock の大きさをセットする．(36)'; then
+if do_set 'Dock   : Dock の大きさをセットする．(36)'; then
     defaults write com.apple.dock tilesize -int 36
     # [システム環境設定 > Dock > 大きさ] = sld[サイズ] 1/8 くらい
 fi
 
-if do_set 'Dock  : グリッド表示時の Dock のスタック上のマウスオーバー時，ハイライトする．'; then
+if do_set 'Dock   : グリッド表示時の Dock のスタック上のマウスオーバー時，ハイライトする．'; then
     defaults write com.apple.dock mouse-over-hilite-stack -bool true
     # (none)
 fi
 
-if do_set 'Dock  : Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．'; then
+if do_set 'Dock   : Dock への drag & drop で起動/開く機能 (スプリングフォルダの dock 版) を利用する．'; then
     defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
     # (none)
 fi
 
-if do_set 'Dock  : Dock の起動しているアプリケーションにインジケータ・ランプを表示する．'; then
+if do_set 'Dock   : Dock の起動しているアプリケーションにインジケータ・ランプを表示する．'; then
     defaults write com.apple.dock show-process-indicators -bool true
     # [システム環境設定 > Dock > 起動済みのアプリケーションにインジケータ・ランプを表示] => "オン"
 fi
 
-if do_set 'Dock  : Dock のコンテンツを真っ新にする．'; then
+if do_set 'Dock   : Dock のコンテンツを真っ新にする．'; then
     defaults write com.apple.dock persistent-apps -array ""
     # (none)
 fi
 
-if do_set 'Dock  : 起動中，またはステータスが変わった Dock のアプリケーションをアニメーションさせない．'; then
+if do_set 'Dock   : 起動中，またはステータスが変わった Dock のアプリケーションをアニメーションさせない．'; then
     defaults write com.apple.dock launchanim -bool false
     # [システム環境設定 > Dock > 起動中のアプリケーションをアニメーションで表示] => "OFF"
 fi
 
-if do_set 'Dock  : mission control への移行アニメーション速度 を 0.1 秒にする．'; then
+if do_set 'Dock   : mission control への移行アニメーション速度 を 0.1 秒にする．'; then
     defaults write com.apple.dock expose-animation-duration -float 0.1
     # (none)
 fi
 
-if do_set 'Dock  : dashboard を無効にする'; then
+if do_set 'Dock   : dashboard を無効にする'; then
     defaults write com.apple.dashboard mcx-disabled -bool true
     # (none)
 fi
 
-if do_set 'Dock  : Dashboard を操作スペースとして表示しない．'; then
+if do_set 'Dock   : Dashboard を操作スペースとして表示しない．'; then
     defaults write com.apple.dock dashboard-in-overlay -bool true
     # [システム環境設定 > Mission Control > Dashboard を操作スペースとして表示] => "ON"
 fi
 
-if do_set 'Dock  : Mission Control の操作スペースを自動的に並べ替えない．'; then
+if do_set 'Dock   : Mission Control の操作スペースを自動的に並べ替えない．'; then
     defaults write com.apple.dock mru-spaces -bool false
     # [システム環境設定 > Mission Control > 最新の使用状況に基づいて操作スペースを自動的に並び替える] => "OFF"
 fi
 
-if do_set 'Dock  : Dock の表示/表示速度を 0 秒にする．'; then
+if do_set 'Dock   : Dock の表示/表示速度を 0 秒にする．'; then
     defaults write com.apple.dock autohide-delay -float 0
     # (none)
 fi
 
-if do_set 'Dock  : Dock の表示/非表示のアニメーション速度を 0 秒にする．'; then
+if do_set 'Dock   : Dock の表示/非表示のアニメーション速度を 0 秒にする．'; then
     defaults write com.apple.dock autohide-time-modifier -float 0
     # (none)
 fi
 
-if do_set 'Dock  : launchpad をリセット'; then
+if do_set 'Dock   : launchpad をリセット'; then
     find ~/Library/Application\ Support/Dock -name "*.db" -maxdepth 1 -delete
     # (none)
 fi
 
-if do_set 'Dock  : 隠したアプリのDockアイコンを透過にする．'; then
+if do_set 'Dock   : 隠したアプリのDockアイコンを透過にする．'; then
     defaults write com.apple.dock showhidden -bool true
     # (none)
 fi
 
-if do_set 'Dock  : Dockにしまう時のアニメーションを「suck」にする．'; then
+if do_set 'Dock   : Dockにしまう時のアニメーションを「suck」にする．'; then
     defaults write com.apple.dock mineffect -string "suck"
     # (none)
 fi
 
-#if do_set 'Dock  : 起動中のアプリケーションのみ表示する．'; then
+#if do_set 'Dock   : 起動中のアプリケーションのみ表示する．'; then
 #    defaults write com.apple.dock static-only -boolean true
 #    # (none)
 #fi
 
-#if do_set 'Dock  : 起動中，通知がある時のアイコンの跳ねるアニメーションを無効にする．'; then
+#if do_set 'Dock   : 起動中，通知がある時のアイコンの跳ねるアニメーションを無効にする．'; then
 #    defaults write com.apple.dock no-bouncing -bool true
 #    # (none)
 #fi
@@ -618,10 +643,9 @@ if do_set 'Input : 言語切り替えは “US-ひらがな” のみ (カタカ
     # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
 fi
 
-if do_set 'Input : 記号はシングルバイトでの入力にする．'; then
-    # execho "${esc_ylw}NOTE: rootless 設定を無効にしたうえで行う必要があります．\nSystem Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${esc_off}"
-    myecho "${ESC_YLW}NOTE: この設定は rootless 設定を無効にした上で行う費用があります．\nSystem Integrity Protection を無効にしたうえで osx5input.sh を実行してください．${ESC_OFF}"
-fi
+# if do_set 'Input : 記号はシングルバイトでの入力にする．'; then
+#     myecho "${ESC_YLW}NOTE: この設定は rootless 設定を無効にした上で行う費用があります．\nSystem Integrity Protection を無効にしたうえで osx4input.sh を実行してください．${ESC_OFF}"
+# fi
 
 if do_set 'Input : ライブ変換，要らないっ．' $MODE_MINIMAL; then
     defaults write -g JIMPrefLiveConversionKey -bool false
@@ -632,12 +656,6 @@ fi
 #
 # misc
 #
-
-## appearances (transparency)
-if do_set 'Appearances: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)'; then
-   defaults write com.apple.universalaccess reduceTransparency -bool true
-fi
-
 
 if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
     sudo tmutil disablelocal
@@ -674,14 +692,6 @@ if do_set 'Updater: アップデートチェックは毎日．'; then
 fi
 
 
-## desktop
-if do_set 'Desktop: デスクトップを変更する．'; then
-    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$FILE_DESKTOPPICTURE"'"'
-    # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
-fi
-
-
-
 #
 # Fin
 #
@@ -693,24 +703,20 @@ for app in cfprefsd Finder Dock SystemUIServer JapaneseIM; do
 done
 
 
-## Please restart
-msg="\n\n\
-**************************************************\n\
-               NOW IT\'S DONE\
+## fin & Please restart
+echo -e "
+
+----------------------------------------------------------------------
+                     Process has been completed.
 "
 
-# if mode is complete...
-if [ ${MODE_IS} -eq ${MODE_COMPLETE} ]; then
-  msg="${msg}\n\n\
-   Some changes needs a reboot to take effect.\n\
-     (e.g., [Command] + [Control] + [EJECT])\
+if [ $MODE_IS -eq $MODE_MINIMAL ]; then
+  echo -e "${ESC_BOLD}
+             You should RESTART to activate the settings.
+               (c.g., [Command] + [Control] + [EJECT])
+           ${ESC_OFF}
+
+
 "
 fi
-
-msg="$msg\n\
-**************************************************\n\
-\n\n\
-"
-
-echo -e "$msg"
 

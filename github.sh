@@ -53,6 +53,25 @@ function check_files() {
 check_files $FILE_FUNC
 check_files $FILE_CONF
 
+[ ! -e ${DIR_TEMP} ] && mkdir -p ${DIR_TEMP}
+
+get_mode $@
+# echo "Mode is $MODE_IS."
+
+
+#
+# Confirmation start
+#
+echo -e "
+                                Github
+----------------------------------------------------------------------
+"
+if ! ask_yesno "Do you generate a SSH key for GitHub ?" ; then
+  myecho "This process been canceled."
+  exit 1
+fi
+
+
 
 # read configuraton
 username_is="${GITHUB_USERNAME}"
@@ -103,14 +122,14 @@ DATA
 
 # generating
 # ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C "${email_is}"
-echo GITHUB_PASSWORD=${GITHUB_PASSWORD}
 expect -c "
   spawn ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C ${email_is}
   expect \"Enter passphrase (empty for no passphrase):\"
   send \"${GITHUB_PASSWORD}\n\"
   expect \"Enter same passphrase again:\"
   send \"${GITHUB_PASSWORD}\n\"
-  interact"
+  interact
+"
 
 
 # start the ssh-agent in the background
@@ -122,16 +141,12 @@ expect -c "
   spawn ssh-add ${SSHKEY_FILE}
   expect \"Enter passphrase for ${SSHKEY_FILE}:\"
   send \"${GITHUB_PASSWORD}\n\"
-  interact"
+  interact
+"
 
 # Copies the contents of the id_rsa.pub file to your clipboard
 pbcopy < "${SSHKEY_FILE}.pub"
-#sudo chmod 600 "${SSHKEY_FILE}.pub"    # just in case...'
-expect -c "
-  spawn sudo chmod 600 ${SSHKEY_FILE}.pub
-  expect \"Password:\"
-  send \"${PASSWORD}\n\"
-  interact"
+sudo chmod 600 "${SSHKEY_FILE}.pub"    # just in case...'
 
 echo ""
 myecho "ok, now open browser ${ESC_REVS}\"Safari\"${ESC_OFF}."
@@ -167,13 +182,7 @@ cat << EOF >> "${HOME}/.gitconfig"
 EOF
 
 # test!
-# ssh -T git@github.com &&:
-expect -c "
-  spawn ssh -T git@github.com &&:
-  expect \"Are you sure you want to continue connecting (yes/no)?\"
-  send \"yes\n\"
-  interact
-"
+ssh -T git@github.com &&:
 
 
 # to set your account's default identity.
@@ -183,12 +192,12 @@ git config --global user.email "${email_is}"
 
 
 # fin
-cat << END
+echo -e "
+
+----------------------------------------------------------------------
+                     Process has been completed.
 
 
-**************************************************
-         GitHub settings been completed.
-**************************************************
 
+"
 
-END

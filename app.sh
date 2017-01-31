@@ -60,6 +60,90 @@ check_files $FILE_CONF
 get_mode $@
 # echo "Mode is $MODE_IS."
 
+
+readonly BINS_MINIMAL=(\
+  zsh \
+  tmux \
+  git \
+  wget \
+  openssl \
+  w3m \
+  ag \
+  ### for LESS
+  node \
+  go \
+  # python \
+  python3 \
+  boost \
+  expect \
+  ### homebrew/dupes
+  rsync \
+  ### sanemat/font
+  "--powerline --vim-powerline ricty" \
+)
+
+readonly BINS=(\
+  ### for handbrake
+  libdvdcss \
+  ### for radiko
+  rtmpdump \
+  ffmpeg \
+  base64 \
+  swftools \
+  eye-d3 \
+)
+
+
+# homebrew-cask
+readonly APPS_MINIMAL=(\
+  alfred \
+  dropbox \
+  google-chrome \
+  iterm2 \
+  ### caskroom/versions
+  macvim-kaoriya \
+)
+
+APPS=(\
+  ### caskroom/homebrew-cask
+  google-drive \
+  "firefox --language=ja" \
+  appcleaner \
+  vlc \
+  handbrake \
+  shiftit \
+  gimp \
+  inkscape \
+  licecap \
+  keycastr \
+  ### woowee/mycask
+  mytracks \
+)
+
+
+#
+# Confirmation start
+#
+echo -e "
+                Application Installations and Settings
+----------------------------------------------------------------------
+"
+
+if [ $MODE_IS = $MODE_MINIMAL ]; then
+  if ! ask_yesno "Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?" ; then
+    myecho "This process been canceled."
+    exit 1
+  fi
+else
+  if ! ask_yesno \
+    "Do you want to insall applications ?" ; then
+    myecho "This process been canceled."
+    exit 1
+  fi
+fi
+
+
+
 #
 # homebrew install, tap, and update
 #
@@ -85,60 +169,81 @@ brew update && brew upgrade
 myecho "install xquartz(x11) ..."
 brew cask install "xquartz"            # for ricty
 
-myecho "Install commands..."
-brew install \
-  zsh \
-  tmux \
-  git \
-  wget \
-  openssl \
-  w3m \
-  ag \
-  node \
-  go \
-  python3 \
-  boost \
-  expect \
-  rsync \
-  ricty
-
-if [ $MODE_IS -eq $MODE_COMPLETE ]; then
-  brew install \
-    libdvdcss \
-    rtmpdump \
-    ffmpeg \
-    base64 \
-    swftools \
-    eye-d3
-fi
-
-brew cask install \
-  alfred \
-  dropbox \
-  google-chrome \
-  iterm2 \
-  macvim-kaoriya
-
-if [ $MODE_IS -eq $MODE_COMPLETE ]; then
-  brew cask install \
-    google-drive \
-    appcleaner \
-    vlc \
-    handbrake \
-    shiftit \
-    gimp \
-    inkscape \
-    licecap \
-    keycastr \
-    mytracks
-fi
-
-
-
-
+# myecho "Install commands..."
+# brew install \
+#   zsh \
+#   tmux \
+#   git \
+#   wget \
+#   openssl \
+#   w3m \
+#   ag \
+#   node \
+#   go \
+#   python3 \
+#   boost \
+#   expect \
+#   rsync \
+#   ricty
 #
-# settings
+# if [ $MODE_IS -eq $MODE_COMPLETE ]; then
+#   brew install \
+#     libdvdcss \
+#     rtmpdump \
+#     ffmpeg \
+#     base64 \
+#     swftools \
+#     eye-d3
+# fi
+
+# brew cask install \
+#   alfred \
+#   dropbox \
+#   google-chrome \
+#   iterm2 \
+#   macvim-kaoriya
 #
+# if [ $MODE_IS -eq $MODE_COMPLETE ]; then
+#   brew cask install \
+#     google-drive \
+#     appcleaner \
+#     vlc \
+#     handbrake \
+#     shiftit \
+#     gimp \
+#     inkscape \
+#     licecap \
+#     keycastr \
+#     mytracks
+# fi
+function installation()
+{
+  local cmd=$1
+  shift
+  local stuffs=($@)
+
+  for stuff in ${stuffs[@]}
+  do
+    echo "${PREFIX} $cmd $stuff"
+    eval "${cmd} ${stuff}"
+    # ref. http://labs.opentone.co.jp/?p=5651
+  done
+
+  # ref.http://labs.opentone.co.jp/?p=5890
+}
+
+IFS_ORG=$IFS; IFS=$'\n'
+
+# TODO:
+myecho -e "Install commands..."
+installation "brew install" ${BINS_MINIMAL[@]}
+[ $MODE_IS -eq $MODE_COMPLETE ] && installation "brew install" ${BINS[@]}
+
+myecho -e "Install apps..."
+installation "brew cask install" ${APPS_MINIMAL[@]}
+[ $MODE_IS -eq $MODE_COMPLETE ] && installation "brew cask install" ${APPS[@]}
+
+
 #
 # settings
 #
@@ -357,12 +462,12 @@ fi
 defaults write com.apple.finder AppleShowAllFiles -boolean true
 
 # fin
-cat << END
+echo -e "
+
+----------------------------------------------------------------------
+                     Process has been completed.
 
 
-**************************************************
-               NOW IT'S DONE.
-**************************************************
 
+"
 
-END

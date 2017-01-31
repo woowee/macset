@@ -56,6 +56,19 @@ get_mode $@
 
 
 #
+# Confirmation start
+#
+echo -e "
+                        Dotfiles (Hiddenfiles)
+----------------------------------------------------------------------
+"
+
+if ! ask_yesno "Do you want to clone dotfiles ?" ; then
+  myecho "This process been canceled."
+  exit 1
+fi
+
+#
 # Dotfiles
 #
 dotfiles="${HOME}/dots"
@@ -90,4 +103,13 @@ EOF
 fi
 
 
-myecho "${ESC_YLW}DONE: Dotfiles settings.${ESC_OFF}"
+# fin
+echo -e "
+
+----------------------------------------------------------------------
+                     Process has been completed.
+
+
+
+"
+
