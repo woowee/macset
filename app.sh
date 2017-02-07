@@ -169,53 +169,7 @@ brew update && brew upgrade
 myecho "install xquartz(x11) ..."
 brew cask install "xquartz"            # for ricty
 
-# myecho "Install commands..."
-# brew install \
-#   zsh \
-#   tmux \
-#   git \
-#   wget \
-#   openssl \
-#   w3m \
-#   ag \
-#   node \
-#   go \
-#   python3 \
-#   boost \
-#   expect \
-#   rsync \
-#   ricty
-#
-# if [ $MODE_IS -eq $MODE_COMPLETE ]; then
-#   brew install \
-#     libdvdcss \
-#     rtmpdump \
-#     ffmpeg \
-#     base64 \
-#     swftools \
-#     eye-d3
-# fi
 
-# brew cask install \
-#   alfred \
-#   dropbox \
-#   google-chrome \
-#   iterm2 \
-#   macvim-kaoriya
-#
-# if [ $MODE_IS -eq $MODE_COMPLETE ]; then
-#   brew cask install \
-#     google-drive \
-#     appcleaner \
-#     vlc \
-#     handbrake \
-#     shiftit \
-#     gimp \
-#     inkscape \
-#     licecap \
-#     keycastr \
-#     mytracks
-# fi
 function installation()
 {
   local cmd=$1
@@ -315,7 +269,7 @@ if [ ${MODE_IS} -eq ${MODE_COMPLETE} ]; then
   defaults write com.apple.Terminal "Default Window Settings" -string "$TERMINAL_PROFILE"
   defaults delete com.apple.Terminal "Startup Window Settings"
   defaults write com.apple.Terminal "Startup Window Settings" -string "$TERMINAL_PROFILE"
-  defaults read com.apple.Terminal
+  defaults read com.apple.Terminal >/dev/null
   # ref: http://apple.stackexchange.com/questions/226524/detect-terminal-color-theme-from-command-line
 fi
 
@@ -382,7 +336,7 @@ if check_app iterm2 path_is ; then
 
   mv -f ${DIR_TEMP}/com.googlecode.iterm2.plist ~/Library/Preferences/
 
-  defaults read com.googlecode.iterm2
+  defaults read com.googlecode.iterm2 >/dev/null
   # ref.https://github.com/databus23/dotfiles/blob/master/osx
 else
   myecho_error "Could not find \"iTerm2\". \"iTerm2\" been installed ?"
