@@ -348,24 +348,23 @@ if check_app iterm2 path_is ; then
   myecho "Set iTerm2"
   appname=$(basename "${path_is}")
 
-  # color ir_black
-  url_is="https://gist.githubusercontent.com/meqif/1238378/raw/f4ae214d493826af7135eb94f6f3b1061049be4e/IR_Black.itermcolors"
-  curl "${url_is}" \
-  -o "${DIR_TEMP}/$(basename $url_is)"
-  # color iceberg
-  url_is="https://raw.githubusercontent.com/Arc0re/Iceberg-iTerm2/master/iceberg.itermcolors"
-  curl "${url_is}" \
-  -o "${DIR_TEMP}/$(basename $url_is)"
+  # reset
+  if [ -e ${HOME}/Library/com.googlecode.iterm2.plist ]; then
+    mv ${HOME}/Library/com.googlecode.iterm2.plist \
+      ${DIR_TEMP}/com.googlecode.iterm2.plist.$(date '+%Y%m%d%H%M')
+  fi
 
-  # plist
+  # your plist
   url_is="https://gist.githubusercontent.com/woowee/9efd41d68bca10363d2083902ebc2f43/raw/d307b0261ec954063e2132d7beef4917a43e6f2d/com.googlecode.iterm2.xml"
+  ## get plist
   curl "${url_is}" \
     -o "${DIR_TEMP}/$(basename $url_is)"
-
+  ## convert the type
   plutil -convert xml1 ${DIR_TEMP}/com.googlecode.iterm2.xml \
     -o ${DIR_TEMP}/com.googlecode.iterm2.plist
-
-  mv -f ${DIR_TEMP}/com.googlecode.iterm2.plist ~/Library/Preferences/
+  ## overwrite
+  cp -f ${DIR_TEMP}/com.googlecode.iterm2.plist \
+    ${HOME}/Library/Preferences/
 
   defaults read com.googlecode.iterm2 >/dev/null
   # ref.https://github.com/databus23/dotfiles/blob/master/osx
