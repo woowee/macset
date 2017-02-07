@@ -259,18 +259,49 @@ if [ ${MODE_IS} -eq ${MODE_COMPLETE} ]; then
   # エンコーディングは UTF-8 のみ。
   defaults write com.apple.terminal StringEncodings -array 4
   # 環境設定 > エンコーディング = [Unicode (UTF-8)]
-  readonly TERMINAL_PROFILE="Iceberg"
-  curl http://cocopon.me/app/vim-iceberg/Iceberg.terminal \
-    -o "${DIR_TEMP}/Iceberg.terminal"
 
-  open "${DIR_TEMP}/Iceberg.terminal"
+  #
+  # set the default
+  #
 
+  # plistbuddy
+  readonly PB=/usr/libexec/PlistBuddy
+  readonly PLISTIS=${HOME}/Library/Preferences/com.apple.Terminal.plist
+
+
+  IFS_ORG=$IFS
+  IFS=$'\n'
+
+  # get the themes
+  url_is=http://cocopon.me/app/vim-iceberg/Iceberg.terminal
+  profile_is=$(basename ${url_is} .terminal)
+
+  curl "${url_is}" \
+    -o "${DIR_TEMP}/$(basename ${url_is})"
+
+  # remove the tmemes you do not need
+  for key in $(${PB} -c "print: 'Window Settings'" ${PLISTIS} | \
+                         grep -aE "name =" | \
+                         awk -F'=' '{name_is=$2; sub(";","",name_is); gsub(/^[[:space:]]*|[[:space:]]*$/,"",name_is); \
+                         print name_is}')
+  do
+    if [ "$key" != "Pro" ]; then
+      # echo "remove the key: ${key}"
+      ${PB} -c "Delete :\"Window Settings\":\"${key}\"" ${PLISTIS}
+    fi
+  done
+  IFS=$IFS_ORG
+
+  # apply the theme
+  open "${DIR_TEMP}/$(basename ${url_is})"
+  sleep 1
+
+  # set defaults
   defaults delete com.apple.Terminal "Default Window Settings"
-  defaults write com.apple.Terminal "Default Window Settings" -string "$TERMINAL_PROFILE"
+  defaults write com.apple.Terminal "Default Window Settings" -string "${profile_is}"
   defaults delete com.apple.Terminal "Startup Window Settings"
-  defaults write com.apple.Terminal "Startup Window Settings" -string "$TERMINAL_PROFILE"
-  defaults read com.apple.Terminal >/dev/null
-  # ref: http://apple.stackexchange.com/questions/226524/detect-terminal-color-theme-from-command-line
+  defaults write com.apple.Terminal "Startup Window Settings" -string "${profile_is}"
+
 fi
 
 
