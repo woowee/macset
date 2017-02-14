@@ -126,18 +126,15 @@ check_app()
         exit 1
     fi
 
-    #local app=$(brew cask info $1 \
-    #  | grep -A1 "==> Artifacts" | grep -v "==> Artifacts" \
-    #  | awk '{$NF=""; print}' | tr -d ' ')
-    brew cask info $1
-    local app=$(echo $(brew cask info $1 \
+    local app=$(brew cask info $1 \
       | grep -A1 "==> Artifacts" | grep -v "==> Artifacts" \
-      | awk '{$NF=""; print}'))
+      | awk '{$NF=""; gsub(/^[[:space:]]*|[[:space:]]*$/,"",$0); print $0}')
+    # echo "functions: ${app}"
 
     local retry=0
     while true; do
-      # echo mdfind -onlyin "/Applications" "kMDItemFSName==\"$app\""
       local path_app=$(mdfind -onlyin "/Applications" "kMDItemFSName==\"$app\"")
+      # echo "functions: $path_app"
 
       if [ -n "${path_app}" ]; then
         [ $# -eq 2 ] && eval $2="\"${path_app}\""     #"
