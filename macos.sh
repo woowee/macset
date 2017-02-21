@@ -364,15 +364,9 @@ keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk 
 keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
 keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
-#CHECK:
 # Input - Keyboard - Modified key
 if do_set 'Input : Caps Lock を Control キーにする．' $MODE_MINIMAL; then
   # CapsLock(30064771129) -> Control(30064771296)
-  # defaults -currentHost read -g com.apple.keyboard.modifiermapping.${keyboardid}
-
-#defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} '({HIDKeyboardModifierMappingDst = 30064771296; HIDKeyboardModifierMappingSrc = 30064771129;})'
-  #ref: http://apple.stackexchange.com/questions/266665/how-to-define-an-array-with-a-single-defaults-command/266667#266667
-  # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
   defaults -currentHost write -g com.apple.keyboard.modifiermapping.${keyboardid} -array-add "
     <dict>
       <key>HIDKeyboardModifierMappingDst</key>\
@@ -381,6 +375,7 @@ if do_set 'Input : Caps Lock を Control キーにする．' $MODE_MINIMAL; then
       <integer>30064771129</integer>\
     </dict>
     "
+  # [システム環境設定 > キーボード > 修飾キー > Caps Lock キー] => [^ Control]
 fi
 
 # Input - Keyboard - Shortcut
