@@ -69,6 +69,8 @@ readonly BINS_MINIMAL=(\
   openssl \
   w3m \
   ag \
+  ripgrep \
+  the_platinum_searcher \
   ### for LESS
   node \
   go \
