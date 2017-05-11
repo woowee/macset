@@ -25,7 +25,7 @@ source "${dir_macset}/functions.sh"
 
 
 if [ ! $# -eq 2 ]; then
-    execho "usage: $0 {source} {destination}" 1>&2
+    echo "usage: $0 {source} {destination}" 1>&2
     exit 1
 fi
 
