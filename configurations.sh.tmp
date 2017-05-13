@@ -7,3 +7,9 @@ LOCALHOSTNAME=
 # GitHub Account Settings
 GITHUB_USERNAME=
 GITHUB_EMAIL=
+
+# Path of a Temporary Working Directories
+DIR_TEMP=
+# Path of Screenshot Save Location
+DIR_SCREENSHOTS=
+

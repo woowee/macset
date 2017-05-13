@@ -127,8 +127,8 @@ if do_set 'Finder: スクリーンショットでついてくるウィンドウ�
 fi
 
 if do_set 'Finder: スクリーンショットの保存先．' $MODE_MINIMAL; then
-    [ ! -e "$DIR_SCREENSHOOTS" ] && mkdir "$DIR_SCREENSHOOTS"
-    defaults write com.apple.screencapture location -string "$DIR_SCREENSHOOTS"
+    [ ! -e "$DIR_SCREENSHOTS" ] && mkdir "$DIR_SCREENSHOTS"
+    defaults write com.apple.screencapture location -string "$DIR_SCREENSHOTS"
     # (none)
 fi
 
