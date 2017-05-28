@@ -159,6 +159,7 @@ brew tap | grep caskroom/dupes >/dev/null || brew tap homebrew/dupes
 brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
 brew tap | grep woowee >/dev/null || brew tap woowee/mycask
 brew tap | grep sanemat >/dev/null || brew tap sanemat/font
+brew tap | grep delphinus >/dev/null || brew tap delphinus/macvim-kaoriya
 
 
 myecho "brew update & upgrade..."
@@ -426,18 +427,10 @@ if check_app macvim-kaoriya path_is ; then
         # make symlink
         if ! [ "${item##*/}" = ".DS_Store" -o "${item##*.}" = "un~" ]; then
           ln -fs "${item}" "${DIR_DST}/${item_is}" \
-            && echo "  Created symlink.    \"{item_is}\""
+            && echo "  Created symlink.    \"${item_is}\""
         fi
       fi
     done
-
-    # for item in "$DIR_SRC/*"; do
-    #   # make symlink
-    #   if ! [ "${item##*/}" = ".DS_Store" -o "${item##*.}" = "un~" ]; then
-    #     ln -fs "${item}" "${DIR_DST}/${item_is}" \
-    #       && echo "  Created symlink. \"${item_is}\""
-    #   fi
-    # done
   fi
 
   defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
