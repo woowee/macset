@@ -219,7 +219,7 @@ if check_command zsh path_is; then
   # set zsh
   #chsh -s ${path_is}
   expect -c "
-    spawn chsh -s ${path_is}
+    spawn bash -c \"echo ${path_is} | sudo tee -a /etc/shells\"
     expect \"Password for $(id -u -n):\"
     send \"${PASSWORD}\n\"
     interact
