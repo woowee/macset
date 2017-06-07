@@ -65,7 +65,7 @@ rsync -vv -az "${dir_SRC}" "${dir_DST}" >>"${logfile}"
 # 終了
 #
 
-execho "${esc_bld}Now it's done.${esc_off}"
+myecho "${ESC_BOLD}Now it's done.${ESC_OFF}"
 
 # ログファイルを開く
 open "${logfile}"
