@@ -124,24 +124,20 @@ APPS=(\
 
 
 #
-# Confirmation start
+#################### Application Installations and Settings ####################
 #
-echo -e "
-                Application Installations and Settings
-----------------------------------------------------------------------
-"
-
 if [ $MODE_IS = $MODE_MINIMAL ]; then
-  if ! ask_yesno "Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?" ; then
-    myecho "This process been canceled."
-    exit 1
-  fi
+  message="Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?"
 else
-  if ! ask_yesno \
-    "Do you want to insall applications ?" ; then
-    myecho "This process been canceled."
-    exit 1
-  fi
+  message="Do you want to insall applications ?"
+fi
+
+if ! when_its_starting \
+      "Application Installations and Settings" \
+      "${message}" \
+      "$(ps h -o command= $PPID)" \
+      "$(basename $(echo $SHELL))"; then
+  exit 1
 fi
 
 

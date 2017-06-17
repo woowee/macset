@@ -184,14 +184,45 @@ generate_title()
   #
   # Title
   #
-  printf "\n\n\n"
+  # printf "\n\n\n"
   length=80
 
   repeat=$(($((${length} - $((${#1} + 2)) )) / 2 ))
-  printf ' %.0s' $(eval echo {1..${repeat}}); printf "${ESC_BOLD}${ESC_LYLW}$1${ESC_OFF}\n"
+  # printf ' %.0s' $(eval echo {1..${repeat}}); printf "${ESC_BOLD}${ESC_LYLW}$1${ESC_OFF}\n"
+  bar=$(printf '#%.0s' $(eval echo {1..${repeat}});)
 
-  char="-"
-  printf -- "${ESC_BOLD}${ESC_LYLW}${char}%.s${ESC_OFF}" $(eval echo {1..$length}); printf "\n"
-  printf "\n\n"
+  myecho "\n\n\n${ESC_BOLD}$bar $1 $bar${ESC_OFF}\n\n"
 
 }
+
+when_its_starting()
+{
+# args;
+# $1:   Title to display.
+# $2:   Message type, "yesno", "confirm".
+# $3:   Message statement.
+# $4:   Parent PID command name.
+# $5:   Substring to evaluate where was called from.
+
+  parentProcess="$3"
+  parentProcess="${parentProcess##*/}"
+  parentProcess="${parentProcess%.*}"
+  substring=$4
+
+  #
+  # the process been kicked at where?
+  #
+  if [ "${parentProcess#*$substring}" != "$parentProcess" ]; then
+    # run the target script at the terminal directly.
+
+    # title
+    generate_title "$1"
+
+    # confirmation
+    if ! ask_yesno "$2" ; then
+      myecho "Been canceled."
+      return 1
+    fi
+  fi
+}
+

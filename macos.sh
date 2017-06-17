@@ -69,15 +69,13 @@ get_mode $@
 
 
 #
-# Confirmation start
+################################ macOS Settings ################################
 #
-echo -e "
-                        macOS System Settings
-----------------------------------------------------------------------
-"
-
-if ! ask_yesno "Do you want to set macOS system ?" ; then
-  myecho "This process been canceled."
+if ! when_its_starting \
+      "macOS Settings" \
+      "Do you want to set macOS system ?" \
+      "$(ps h -o command= $PPID)" \
+      "$(basename $(echo $SHELL))"; then
   exit 1
 fi
 

@@ -72,7 +72,7 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 #
 # Systen Settings
 #
-echo -e "${ESC_BOLD}######################### System Information #########################${ESC_OFF}"
+generate_title "System Information"
 if ask_yesno "Do you want to set the system information ?"; then
 
   while true; do
@@ -119,32 +119,32 @@ fi
 #
 # Generating SSH Keys for Github
 #
-echo -e "${ESC_BOLD}############################### GitHub ###############################${ESC_OFF}"
-ask_yesno "Do you generate a SSH key for GitHub ?" && ./github.sh
+generate_title "GitHub"
+ask_yesno "Do you want to generate a SSH key for GitHub ?" && $(dirname $0)/github.sh
 
 
 
 #
 # Dotfiles
 #
-echo -e "${ESC_BOLD}############################## Dotfiles ##############################${ESC_OFF}"
-ask_yesno "Do you want to clone dotfiles ?" && ./dotfiles.sh
+generate_title "Dotfiles"
+ask_yesno "Do you want to clone dotfiles ?" && $(dirname $0)/dotfiles.sh
 
 
 
 #
 # OSX Settings
 #
-echo -e "${ESC_BOLD}########################### macOS Settings ###########################${ESC_OFF}"
-ask_confirm "Sets OSX defaults."; ./macos.sh ${MODE_MINIMAL}
+generate_title "macOS Settings"
+ask_yesno "Do you want to set macOS system ?" && $(dirname $0)/macos.sh ${MODE_MINIMAL}
 
 
 
 #
 # Applications
 #
-echo -e "${ESC_BOLD}######################## Install Applications ########################${ESC_OFF}"
-ask_yesno "Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?" && ./app.sh ${MODE_MINIMAL}
+generate_title "Install Minimal Applications"
+ask_yesno "Do you want to install applications, alfred, chrome, dropbox, and macvim-kaoriya ?" && $(dirname $0)/app.sh ${MODE_MINIMAL}
 
 
 ## Please restart

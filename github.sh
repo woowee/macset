@@ -60,14 +60,13 @@ get_mode $@
 
 
 #
-# Confirmation start
+#################################### GitHub ####################################
 #
-echo -e "
-                                Github
-----------------------------------------------------------------------
-"
-if ! ask_yesno "Do you generate a SSH key for GitHub ?" ; then
-  myecho "This process been canceled."
+if ! when_its_starting \
+      "GitHub" \
+      "Do you want to generate a SSH key for GitHub ?" \
+      "$(ps h -o command= $PPID)" \
+      "$(basename $(echo $SHELL))"; then
   exit 1
 fi
 

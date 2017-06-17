@@ -56,15 +56,13 @@ get_mode $@
 
 
 #
-# Confirmation start
+################################# Dotfiles ###################################
 #
-echo -e "
-                        Dotfiles (Hiddenfiles)
-----------------------------------------------------------------------
-"
-
-if ! ask_yesno "Do you want to clone dotfiles ?" ; then
-  myecho "This process been canceled."
+if ! when_its_starting \
+      "Dotfiles" \
+      "Do you want to clone dotfiles ?" \
+      "$(ps h -o command= $PPID)" \
+      "$(basename $(echo $SHELL))"; then
   exit 1
 fi
 
