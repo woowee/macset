@@ -16,7 +16,7 @@
 #
 
 readonly IAM=$(basename $0)
-readonly PREFIX="$IAM) "
+readonly PREFIX="$IAM >  "
 
 # Color and format of text
 readonly ESC_GRM='\033[1;32m'
