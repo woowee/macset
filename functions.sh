@@ -170,3 +170,28 @@ check_command()
 
 }
 
+generate_title()
+{
+#
+# args;
+# $1:   Title strings.
+#
+  if [ $# -ne 1 ]; then
+    myecho "usage: ${ESC_BOLD}${FUNCNAME}${ESC_OFF} ${ESC_UNDR}\"Title to display\"${ESC_OFF}" 1>&2
+    exit 1
+  fi
+
+  #
+  # Title
+  #
+  printf "\n\n\n"
+  length=80
+
+  repeat=$(($((${length} - $((${#1} + 2)) )) / 2 ))
+  printf ' %.0s' $(eval echo {1..${repeat}}); printf "${ESC_BOLD}${ESC_LYLW}$1${ESC_OFF}\n"
+
+  char="-"
+  printf -- "${ESC_BOLD}${ESC_LYLW}${char}%.s${ESC_OFF}" $(eval echo {1..$length}); printf "\n"
+  printf "\n\n"
+
+}
