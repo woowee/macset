@@ -19,14 +19,16 @@ readonly IAM=$(basename $0)
 readonly PREFIX="$IAM >  "
 
 # Color and format of text
-readonly ESC_GRM='\033[1;32m'
+readonly ESC_GRN='\033[1;32m'
 readonly ESC_YLW='\033[0;33m'
+readonly ESC_LYLW='\033[1;33m'
 readonly ESC_RED='\033[0;31m'
+readonly ESC_LRED='\033[1;31m'
 readonly ESC_UNDR='\033[4m'
 readonly ESC_BOLD='\033[1m'
 readonly ESC_REVS='\033[7m'
 readonly ESC_OFF='\033[0m'
-# ref.https://gist.github.com/brandonb927/3195465#file-osx-for-hackers-sh-L12
+# c.f.; https://gist.github.com/brandonb927/3195465#file-osx-for-hackers-sh-L12
 
 # モード
 readonly MODE_MINIMAL=0
