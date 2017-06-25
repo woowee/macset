@@ -109,7 +109,7 @@ readonly APPS_MINIMAL=(\
 APPS=(\
   ### caskroom/homebrew-cask
   google-drive \
-  "firefox --language=ja" \
+  firefox \
   appcleaner \
   vlc \
   handbrake \

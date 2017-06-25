@@ -42,7 +42,7 @@ function ask {
       default=
     fi
 
-    printf "$prefix $1 [$prompt] "
+    printf "$PREFIX $1 [$prompt] "
 
     yn=""
     if [ "$auto" == "Y" ]; then
