@@ -87,7 +87,7 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
   wait
   echo "...終了．"
 
-  plistis=$(sudo locate  "KeySetting_Default.plist")
+  plistis=$(sudo locate  "KeySetting_Default.plist" | grep "/System/.*/KeySetting_Default.plist$")
   if [ -z "${plistis}" ]; then
     echo "'KeySetting_Default.plist' が見つかりませんでした。処理を中断しました。"
     exit 1
@@ -95,14 +95,11 @@ if ask 'Input: 数字，記号はシングルバイトでの入力にする．' 
 
   function keyCheck {
 
-    echo "${pb}" -c "Print :keys:${1}:${2}:character" "${plistis}"
     val=$("${pb}" -c "Print :keys:${1}:${2}:character" "${plistis}" 2>/dev/null || true)
 
     if [ "${val}" = "" ]; then
-      echo "add ${2}"
       sudo "${pb}" -c "Add :keys:${1}:${2}:character string ${3}" "${plistis}"
     else
-      echo "set(modify) ${2}"
       sudo "${pb}" -c "Set :keys:${1}:${2}:character ${3}" "${plistis}"
     fi
   }
