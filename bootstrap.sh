@@ -107,9 +107,9 @@ DATA
     esac
   done
 
-  echo "sudo scutil --set ComputerName ${computername_is}"
-  echo "sudo scutil --set HostName ${hostname_is}.local"
-  echo "sudo scutil --set LocalHostName ${localhostname_is}"
+  sudo scutil --set ComputerName "${computername_is}"
+  sudo scutil --set HostName "${hostname_is}.local"
+  sudo scutil --set LocalHostName "${localhostname_is}"
 
   myecho "${ESC_YLW}DONE: System/Account Information Settings${ESC_OFF}"
 fi
