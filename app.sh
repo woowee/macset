@@ -82,6 +82,8 @@ readonly BINS_MINIMAL=(\
   rsync \
   ### sanemat/font
   "--powerline --vim-powerline ricty" \
+  ### caskformula/caskformula/inkscape
+  caskformula/caskformula/inkscape
 )
 
 readonly BINS=(\
@@ -115,7 +117,6 @@ APPS=(\
   handbrake \
   shiftit \
   gimp \
-  inkscape \
   licecap \
   keycastr \
   ### woowee/mycask
@@ -156,6 +157,7 @@ brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
 brew tap | grep woowee >/dev/null || brew tap woowee/mycask
 brew tap | grep sanemat >/dev/null || brew tap sanemat/font
 brew tap | grep delphinus >/dev/null || brew tap delphinus/macvim-kaoriya
+brew tap | grep caskformula >/dev/null || brew tap caskformula/caskformula
 
 
 myecho "brew update & upgrade..."
