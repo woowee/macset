@@ -210,7 +210,7 @@ myecho "Change log-in shell to zsh."
 if check_command zsh path_is; then
   #echo ${path_is} | sudo tee -a /etc/shells
   expect -c "
-    spawn echo ${path_is} | sudo tee -a /etc/shells
+    spawn bash -c \"echo ${path_is} | sudo tee -a /etc/shells\"
     expect \"Password:\"
     send \"${PASSWORD}\n\"
     interact
@@ -218,7 +218,7 @@ if check_command zsh path_is; then
   # set zsh
   #chsh -s ${path_is}
   expect -c "
-    spawn bash -c \"echo ${path_is} | sudo tee -a /etc/shells\"
+    spawn chsh -s ${path_is}
     expect \"Password for $(id -u -n):\"
     send \"${PASSWORD}\n\"
     interact
