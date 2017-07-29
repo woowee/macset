@@ -1,15 +1,44 @@
-#!/bin/bash
+#!/bin/bash -eu
+#
+# @(#) configurations.sh ver.0.0.0 2014.05.18
+#
+# Usage:
+#   (source function.sh)
+#
+# Description:
+#   設定値を定義。
+#
+###########################################################################
 
+#
+# common
+#
+
+# 作業用に使用する一時的なディレクトリ
+readonly DIR_TEMP=
+
+#
 # Computer Account Settings
-COMPUTERNAME=
-HOSTNAME=
-LOCALHOSTNAME=
+#
+readonly COMPUTERNAME=
+readonly HOSTNAME=
+readonly LOCALHOSTNAME=
+readonly PASSWORD=
+
+#
 # GitHub Account Settings
-GITHUB_USERNAME=
-GITHUB_EMAIL=
+#
+readonly GITHUB_USERNAME=
+readonly GITHUB_EMAIL=
+readonly GITHUB_PASSWORD=
+readonly GITHUB_SSHKEY_NAME=
 
-# Path of a Temporary Working Directories
-DIR_TEMP=
-# Path of Screenshot Save Location
-DIR_SCREENSHOTS=
 
+#
+# macos.sh
+#
+
+# スクリーンショットの保存先
+readonly DIR_SCREENSHOTS=
+# デスクトップに使用するデータ
+readonly FILE_DESKTOPPICTURE=
