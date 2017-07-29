@@ -73,28 +73,23 @@ fi
 
 
 # read configuraton
-username_is="${GITHUB_USERNAME}"
-email_is="${GITHUB_EMAIL}"
+readonly USERNAME="${GITHUB_USERNAME}"  # from  $FILE_CONF (configurations.sh)
+readonly EMAIL="${GITHUB_EMAIL}"        # from  $FILE_CONF (configurations.sh)
 
+readonly SSHKEY_NAME="${GITHUB_SSHKEY_NAME:-id_rsa}"
+readonly SSHKEY_FILEPATH_PRIVATE="${HOME}/.ssh/${SSHKEY_NAME}"
 
-
-#
-# Generating SSH Keys for Github
-#
-
-readonly SSHKEY_NAME="github_rsa"
-readonly SSHKEY_FILE="${HOME}/.ssh/${SSHKEY_NAME}"
 
 # account infomation
 while true; do
   cat << DATA
 
-    - User Name       : ${username_is}
-    - E-mail address  : ${email_is}
+    - User Name       : ${USERNAME}
+    - E-mail address  : ${EMAIL}
 
 DATA
 
-    printf "${PREFIX} Are you sure you want to set your GitHub account with the above content ? [a(Apply)/r(Redo)/x(eXit this work.)]: "
+    printf "${PREFIX}Are you sure you want to set your GitHub account with the above content ? [a(Apply)/r(Redo)/x(eXit this work.)]: "
 
     read res
 
@@ -104,8 +99,8 @@ DATA
         ;;
       r)
         echo -e "\n  Enter your GitHub account.;"
-        ask_inputvalue "      Enter your user name      : " username_is
-        ask_inputvalue "      Enter your e-mail address : " email_is
+        ask_inputvalue "      Enter your user name      : " USERNAME
+        ask_inputvalue "      Enter your e-mail address : " EMAIL
         ;;
       x)
         exit 1
@@ -117,12 +112,35 @@ DATA
   done
 
 
-[ ! -e ${HOME}/.ssh ] && mkdir -p ${HOME}/.ssh
+#
+# CHECKING FOR EXISTING SSH KEYS
+#
+letsGenerateKey=0     # off
+
+if [ ! -e ${SSHKEY_FILEPATH_PRIVATE%/*} ]; then
+  mkdir -p ${SSHKEY_FILEPATH_PRIVATE%/*}
+  letsGenerateKey=1   # on
+elif [ ! -e ${SSHKEY_FILEPATH_PRIVATE} -o ! -e ${SSHKEY_FILEPATH_PRIVATE}.pub ]; then
+  letsGenerateKey=2   # on
+fi
+
+# TODO:
+# if [ $letsGenerateKey -eq 0 ]; then
+#   #
+# fi
+
+
+
+#
+# GENERATING A NEW SSH KEY AND ADDING IT TO THE SSH-AGENT
+#
 
 # generating
-# ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C "${email_is}"
+# ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C "${EMAIL}"
 expect -c "
-  spawn ssh-keygen -t rsa -b 4096 -f ${SSHKEY_FILE} -C ${email_is}
+  spawn ssh-keygen -t rsa -b 4096 -C "${EMAIL}"
+  expect \"Enter file in which to save the key (${SSHKEY_FILEPATH_PRIVATE}):\"
+  send \n
   expect \"Enter passphrase (empty for no passphrase):\"
   send \"${GITHUB_PASSWORD}\n\"
   expect \"Enter same passphrase again:\"
@@ -130,22 +148,39 @@ expect -c "
   interact
 "
 
-
 # start the ssh-agent in the background
-# eval $(ssh-agent -s)
+eval "$(ssh-agent -s)"
+sleep 1
+
+
+# incantation to automatically load keys into the ssh-agent (by AddKeysToAgent)
+# and store the passphrase into keychain (by UseKeychain)
+cat << EOF > "${HOME}/.ssh/config"
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ${SSHKEY_FILEPATH_PRIVATE}
+EOF
+
 
 # add your new key to the ssh-agent
-# ssh-add ${SSHKEY_FILE}
+# ssh-add -K ${SSHKEY_FILE}
 expect -c "
-  spawn ssh-add ${SSHKEY_FILE}
-  expect \"Enter passphrase for ${SSHKEY_FILE}:\"
+  spawn ssh-add -K ${SSHKEY_FILEPATH_PRIVATE}
+  expect \"Enter passphrase for ${SSHKEY_FILEPATH_PRIVATE}:\"
   send \"${GITHUB_PASSWORD}\n\"
   interact
 "
 
+
+
+#
+# ADDING A NEW SSH KEY TO THE GITHUB ACCOUNT
+#
+
 # Copies the contents of the id_rsa.pub file to your clipboard
-pbcopy < "${SSHKEY_FILE}.pub"
-sudo chmod 600 "${SSHKEY_FILE}.pub"    # just in case...'
+pbcopy < "${SSHKEY_FILEPATH_PRIVATE}.pub"
+chmod 600 "${SSHKEY_FILEPATH_PRIVATE}.pub"    # just in case...'
 
 echo ""
 myecho "ok, now open browser ${ESC_REVS}\"Safari\"${ESC_OFF}."
@@ -158,27 +193,14 @@ pid=$!
 wait ${pid}
 
 while true; do
-    read res
-    if [ "${res}" == "done" ]; then
-        break
-    else
-        myecho "finish settings? so type 'done'."
-    fi
+  read res
+  if [ "${res}" == "done" ]; then
+      break
+  else
+      myecho "finish settings? so type 'done'."
+  fi
 done
-# Are you sure you want to continue connecting (yes/no)?
-# make config file
-cat << EOF > "${HOME}/.ssh/config"
-Host github github.com
-  Hostname github.com
-  Identityfile ${SSHKEY_FILE}
-  User git
-EOF
 
-cat << EOF >> "${HOME}/.gitconfig"
-[url "github:"]
-    InsteadOf = https://github.com/
-    InsteadOf = git@github.com:
-EOF
 
 # test!
 ssh -T git@github.com &&:
@@ -186,8 +208,8 @@ ssh -T git@github.com &&:
 
 # to set your account's default identity.
 # Omit --global to set the identity only in this repository.
-git config --global user.name "${username_is}"
-git config --global user.email "${email_is}"
+git config --global user.name "${USERNAME}"
+git config --global user.email "${EMAIL}"
 
 
 # fin
@@ -199,4 +221,3 @@ echo -e "
 
 
 "
-
