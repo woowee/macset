@@ -1,6 +1,9 @@
 #!/bin/bash -eu
 #
 # @(#) github.sh ver.0.0.0 2014.05.18
+#!/bin/bash -eu
+#
+# @(#) github.sh ver.0.0.0 2014.05.18
 #
 # Usage:
 #   github.sh
@@ -115,19 +118,17 @@ DATA
 #
 # CHECKING FOR EXISTING SSH KEYS
 #
-letsGenerateKey=0     # off
-
 if [ ! -e ${SSHKEY_FILEPATH_PRIVATE%/*} ]; then
   mkdir -p ${SSHKEY_FILEPATH_PRIVATE%/*}
-  letsGenerateKey=1   # on
-elif [ ! -e ${SSHKEY_FILEPATH_PRIVATE} -o ! -e ${SSHKEY_FILEPATH_PRIVATE}.pub ]; then
-  letsGenerateKey=2   # on
 fi
 
-# TODO:
-# if [ $letsGenerateKey -eq 0 ]; then
-#   #
-# fi
+if [ -e ${SSHKEY_FILEPATH_PRIVATE} ]; then
+  if ask_yesno "${SSHKEY_FILEPATH_PRIVATE} already exists.\nAre you sure you want to perform thie process?"; then
+    mv "${SSHKEY_FILEPATH_PRIVATE}" "${SSHKEY_FILEPATH_PRIVATE}~$(date '+%Y%m%d%H%M')"
+  else
+    exit 1
+  fi
+fi
 
 
 
@@ -140,7 +141,7 @@ fi
 expect -c "
   spawn ssh-keygen -t rsa -b 4096 -C "${EMAIL}"
   expect \"Enter file in which to save the key (${SSHKEY_FILEPATH_PRIVATE}):\"
-  send \n
+  send \"${SSHKEY_FILEPATH_PRIVATE}\n\"
   expect \"Enter passphrase (empty for no passphrase):\"
   send \"${GITHUB_PASSWORD}\n\"
   expect \"Enter same passphrase again:\"
