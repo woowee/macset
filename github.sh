@@ -37,18 +37,18 @@ function check_files() {
   if [ ! -e $1 ]; then
     # error message
     echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
-      There is not the file \"$1\". \
-      Check the file \"${1##*/}\". \
-      Process will be canceled.
+      処理に必要なファイル「$1」がありません。 \
+      「${1##*/}」の中に対象のファイルがあるか確認してください。 \
+      処理を中断します。
       exit 1
   fi
 
   # read
   if ! source ${file_is}; then
     echo -e $(basename $0)\)  ${esc_red}ERROR: ${esc_reset} \
-      Couldnot read the file \"$(basename $1)\". \
-      The file itself or the content may be incurrect. \
-      Process will be canceled.
+      ファイル「$(basename $1)」を読み込めませんでした。 \
+      ファイルが壊れているか、内容が正しくない可能性があります。 \
+      処理を中断します。
     exit 1
   fi
 }
@@ -67,7 +67,7 @@ get_mode $@
 #
 if ! when_its_starting \
       "GitHub" \
-      "Do you want to generate a SSH key for GitHub ?" \
+      "GitHub アカウントを作成します。よろしいですか？" \
       "$(ps h -o command= $PPID)" \
       "$(basename $(echo $SHELL))"; then
   exit 1
@@ -92,7 +92,7 @@ while true; do
 
 DATA
 
-    printf "${PREFIX}Are you sure you want to set your GitHub account with the above content ? [a(Apply)/r(Redo)/x(eXit this work.)]: "
+    printf "${PREFIX}この GitHub アカウントで SSH Key を作成します。よろしいですか？ [a(適用)/r(変更)/x(中止)]: "
 
     read res
 
@@ -101,7 +101,7 @@ DATA
         break
         ;;
       r)
-        echo -e "\n  Enter your GitHub account.;"
+        echo -e "\nGitHub アカウントを入力してください。;"
         ask_inputvalue "      Enter your user name      : " USERNAME
         ask_inputvalue "      Enter your e-mail address : " EMAIL
         ;;
@@ -109,7 +109,7 @@ DATA
         exit 1
         ;;
       *)
-        myecho "Can't read your enter. try again."
+        myecho "入力したキーが正しくありません。入力し直してください。"
         ;;
     esac
   done
@@ -123,7 +123,7 @@ if [ ! -e ${SSHKEY_FILEPATH_PRIVATE%/*} ]; then
 fi
 
 if [ -e ${SSHKEY_FILEPATH_PRIVATE} ]; then
-  if ask_yesno "${SSHKEY_FILEPATH_PRIVATE} already exists.\nAre you sure you want to perform thie process?"; then
+  if ask_yesno "「${SSHKEY_FILEPATH_PRIVATE}」は既にあるようです。\nこのまま処理を続けてもよろしいですか？"; then
     mv "${SSHKEY_FILEPATH_PRIVATE}" "${SSHKEY_FILEPATH_PRIVATE}~$(date '+%Y%m%d%H%M')"
   else
     exit 1
@@ -184,10 +184,11 @@ pbcopy < "${SSHKEY_FILEPATH_PRIVATE}.pub"
 chmod 600 "${SSHKEY_FILEPATH_PRIVATE}.pub"    # just in case...'
 
 echo ""
-myecho "ok, now open browser ${ESC_REVS}\"Safari\"${ESC_OFF}."
+myecho "Web ブラウザ ${ESC_REVS}\"Safari\"${ESC_OFF} を開き、GitHub へアクセスします。"
 ask_confirm "
-  you should register your ssh pub key to your account settings of github.\n \
-  when you finish settings it, then type '${ESC_UNDR}done${ESC_OFF}'.;"
+アカウントページの [Settings] ページの [SSH and GPG keys] で、生成したキーを追加してください。\n \
+終わったらこのターミナルに戻り、'${ESC_UNDR}done${ESC_OFF}' と入力してください。\n \
+接続テストを行います。;"
 
 open -a Safari "https://github.com/settings/ssh" &
 pid=$!
@@ -198,7 +199,7 @@ while true; do
   if [ "${res}" == "done" ]; then
       break
   else
-      myecho "finish settings? so type 'done'."
+      myecho "追加したら、'done' と入力してください。"
   fi
 done
 
@@ -217,7 +218,7 @@ git config --global user.email "${EMAIL}"
 echo -e "
 
 ----------------------------------------------------------------------
-                     Process has been completed.
+                           終了しました。
 
 
 
