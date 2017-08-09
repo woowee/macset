@@ -71,6 +71,7 @@ readonly BINS_MINIMAL=(\
   ag \
   ripgrep \
   the_platinum_searcher \
+  pwgen \
   ### for LESS
   node \
   go \
@@ -119,6 +120,8 @@ APPS=(\
   gimp \
   licecap \
   keycastr \
+  libreoffice \
+  libreoffice-language-pack \
   ### woowee/mycask
   mytracks \
 )
