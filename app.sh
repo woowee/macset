@@ -79,7 +79,6 @@ readonly BINS_MINIMAL=(\
   python3 \
   boost \
   expect \
-  ### homebrew/dupes
   rsync \
   ### caskformula/caskformula/inkscape
   caskformula/caskformula/inkscape
@@ -153,7 +152,6 @@ type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent
 
 myecho "install homebrew-cask..."
 brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
-brew tap | grep caskroom/dupes >/dev/null || brew tap homebrew/dupes
 brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
 brew tap | grep woowee >/dev/null || brew tap woowee/mycask
 brew tap | grep sanemat >/dev/null || brew tap sanemat/font
