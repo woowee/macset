@@ -189,11 +189,11 @@ function installation()
 IFS_ORG=$IFS; IFS=$'\n'
 
 # TODO:
-myecho -e "Install commands..."
+myecho "Install commands..."
 installation "brew install" ${BINS_MINIMAL[@]}
 [ $MODE_IS -eq $MODE_COMPLETE ] && installation "brew install" ${BINS[@]}
 
-myecho -e "Install apps..."
+myecho "Install apps..."
 installation "brew cask install" ${APPS_MINIMAL[@]}
 [ $MODE_IS -eq $MODE_COMPLETE ] && installation "brew cask install" ${APPS[@]}
 
