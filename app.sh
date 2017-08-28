@@ -81,8 +81,6 @@ readonly BINS_MINIMAL=(\
   expect \
   ### homebrew/dupes
   rsync \
-  ### sanemat/font
-  "--powerline --vim-powerline ricty" \
   ### caskformula/caskformula/inkscape
   caskformula/caskformula/inkscape
 )
@@ -380,17 +378,25 @@ fi
 #
 # font "Ricty"
 #
-myecho "Set Ricty font..."
-
-readonly DIR_GENERATED_RICTY=$(brew --prefix)/opt/ricty/share/fonts
-readonly DIR_FONTS=${HOME}/Library/Fonts/
-echo "DIR_GENERATED_RICTY=$DIR_GENERATED_RICTY"
-if (ls ${DIR_GENERATED_RICTY}/Ricty*.ttf >/dev/null 2>&1); then
-  [ ! -e ${DIR_FONTS} ] && mkdir ~/Library/Fonts
-  cp -f ${DIR_GENERATED_RICTY}/Ricty*.ttf $DIR_FONTS
-  fc-cache -vf
+brew cask install "--powerline --vim-powerline ricty" &&:
+#c.f. http://qiita.com/ngyuki/items/aefd47700a9522fada75
+result=$?
+#c.f. http://dqn.sakusakutto.jp/2013/10/shellscript_elif.html
+if [ $result -eq 0 ]; then
+  myecho "Install the font Ricty..."
+  readonly DIR_GENERATED_RICTY=$(brew --prefix)/opt/ricty/share/fonts
+  readonly DIR_FONTS=${HOME}/Library/Fonts/
+  if (ls ${DIR_GENERATED_RICTY}/Ricty*.ttf >/dev/null 2>&1); then
+    [ ! -e ${DIR_FONTS} ] && mkdir ~/Library/Fonts
+    cp -f ${DIR_GENERATED_RICTY}/Ricty*.ttf $DIR_FONTS
+    fc-cache -vf
+  fi
+  myecho "Installation of Ricty completed."
+else
+  brew tap caskroom/fonts
+  brew cask install font-ricty-diminished
+  myecho "Installed Ricty-Diminished instrad of Ricty."
 fi
-echo "ricty ok"
 
 
 #
