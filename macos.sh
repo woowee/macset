@@ -650,20 +650,16 @@ fi
 # misc
 #
 
-if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
-    sudo tmutil disablelocal
-    # (none)
-fi
-
 if do_set 'Time Machine: 「Time Machine でバックアップを作成するために “(HD Name)” を使用しますか?」を出さない．'; then
     defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
     # (none)
 fi
 
-if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
-    hash tmutil &> /dev/null && sudo tmutil disablelocal
-    # (none)
-fi
+#TODO: "disablelocal: Unrecognized verb." oh...
+#if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
+#    hash tmutil &> /dev/null && sudo tmutil disablelocal
+#    # (none)
+#fi
 
 #if do_set 'Time Machine: バッテリー電源が繋がっている時．'; then
 #    defaults write com.apple.TimeMachine RequiresACPower 0
