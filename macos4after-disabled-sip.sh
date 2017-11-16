@@ -61,7 +61,8 @@ function keyCheck {
 [ ! -e ${HOME}/temp ] && mkdir ${HOME}/temp
 sudo cp -f "${plistis}" "${HOME}/temp/KeySetting_Default.plist~$(date '+%Y%m%d%H%M')"
 
-sudo "${pb}" -c "Set :keys:before_typing:\'' \'':character ' '" "${plistis}"  # 　   space
+sudo "${pb}" -c "Set :keys:before_typing:\'' \'':command 'direct_input'" "${plistis}"  # 　   space
+sudo "${pb}" -c "Add :keys:before_typing:\'' \'':character string ' '" "${plistis}"    # 　   space
 sudo "${pb}" -c "Set :keys:*:\''|\'':character '|'" "${plistis}"              # ｜   vertical bar
 sudo "${pb}" -c "Set :keys:*:\''\!\'':character '\!'" "${plistis}"            # ！   exclamation
 sudo "${pb}" -c "Set :keys:*:\''"'\"'"\'':character '"'\"'"'" "${plistis}"    # ”   double quotation
