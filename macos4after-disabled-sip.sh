@@ -28,7 +28,7 @@ pb=$(mdfind -onlyin /usr/libexec -name Plistbuddy)
 # Store `KeySetting_Default.plist` path
 #
 # Expected Result:
-#     plistis=/System/Library/Input Methods/JapaneseIM.app/Contents/PlugIns/JapaneseIM.appex/Contents/Resources/KeySetting_Default.plist
+#     plistis=/System/Library/Input\ Methods/JapaneseIM.app/Contents/PlugIns/JapaneseIM.appex/Contents/Resources/KeySetting_Default.plist
 
 echo "'locate' コマンドの準備 1/2; データベースの生成..."
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist &
@@ -62,7 +62,7 @@ function keyCheck {
 sudo cp -f "${plistis}" "${HOME}/temp/KeySetting_Default.plist~$(date '+%Y%m%d%H%M')"
 
 sudo "${pb}" -c "Set :keys:before_typing:\'' \'':command 'direct_input'" "${plistis}"  # 　   space
-sudo "${pb}" -c "Add :keys:before_typing:\'' \'':character string ' '" "${plistis}"    # 　   space
+keyCheck "before_typing" "\'' \''" "' '"
 sudo "${pb}" -c "Set :keys:*:\''|\'':character '|'" "${plistis}"              # ｜   vertical bar
 sudo "${pb}" -c "Set :keys:*:\''\!\'':character '\!'" "${plistis}"            # ！   exclamation
 sudo "${pb}" -c "Set :keys:*:\''"'\"'"\'':character '"'\"'"'" "${plistis}"    # ”   double quotation
