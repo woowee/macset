@@ -1,4 +1,19 @@
-#!/bin/bash -u
+#!/bin/bash -eu
+#
+# @(#) macos4after-disabled-csrutil.sh
+#
+# Usage:
+#   ./macos4after-disabled-csrutil.sh
+#   (Don't need args.)
+#
+# Description:
+#    This script configures settings of macOs.
+#    All items to be set here, it is necessary to disable the System Integrity Protection (SIP).
+#    Disable SIP before run this script.
+#
+# c.f.
+#  - [Configuring System Integrity Protection](https://developer.apple.com/library/content/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html)
+###########################################################################
 
 #
 # PREPARE
