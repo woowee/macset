@@ -4,6 +4,14 @@
 # PREPARE
 #
 
+# Check the status of SIP
+checkStatus=$(csrutil status)
+if [ ${checkStatus#*disabled} = "$checkStatus" ]; then
+  # "Should set SIP to disable."
+  echo -e "SIP を無効にしてください．\n処理を中断します．"
+  exit 1
+fi
+
 filename_func=$(dirname $0)/functions.sh
 
 if [ ! -e ${filename_func} ]; then
