@@ -89,7 +89,7 @@ readonly BINS=(\
   libdvdcss \
   ### for radiko
   rtmpdump \
-  ffmpeg \
+  "ffmpeg --with-fdk-aac" \
   base64 \
   swftools \
   eye-d3 \
