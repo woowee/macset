@@ -376,7 +376,7 @@ fi
 #
 # font "Ricty"
 #
-brew cask install "--powerline --vim-powerline ricty" &&:
+brew install ricty --with-powerline &&:
 #c.f. http://qiita.com/ngyuki/items/aefd47700a9522fada75
 result=$?
 #c.f. http://dqn.sakusakutto.jp/2013/10/shellscript_elif.html
