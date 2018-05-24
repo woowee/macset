@@ -636,10 +636,6 @@ if do_set 'Input : 言語切り替えは “US-ひらがな” のみ (カタカ
     # [システム環境設定 > キーボード > 入力ソース > 入力モード > カタカナ] = "OFF"
 fi
 
-# if do_set 'Input : 記号はシングルバイトでの入力にする．'; then
-#     myecho "${ESC_YLW}NOTE: この設定は rootless 設定を無効にした上で行う費用があります．\nSystem Integrity Protection を無効にしたうえで osx4input.sh を実行してください．${ESC_OFF}"
-# fi
-
 if do_set 'Input : ライブ変換，要らないっ．' $MODE_MINIMAL; then
     defaults write -g JIMPrefLiveConversionKey -bool false
     # [システム環境設定 > キーボード > 入力ソース > ライブ変換] => "OFF"
@@ -655,16 +651,38 @@ if do_set 'Time Machine: 「Time Machine でバックアップを作成するた
     # (none)
 fi
 
-#TODO: "disablelocal: Unrecognized verb." oh...
-#if do_set 'Time Machine: ローカルスナップショットを無効にする．'; then
-#    hash tmutil &> /dev/null && sudo tmutil disablelocal
-#    # (none)
-#fi
 
-#if do_set 'Time Machine: バッテリー電源が繋がっている時．'; then
-#    defaults write com.apple.TimeMachine RequiresACPower 0
-#    # (none)
-#fi
+## Energy, Sleep
+if do_set echo -e 'Energy Saver: スクリーンセーバはオフ．'; then
+  defaults -currentHost write com.apple.screensaver idleTime -int 0
+  # [デスクトップとスクリーンセーバ > スクリーンセーバ > 開始までの時間] = 開始しない
+fi
+
+if do_set 'Energy Saver: 省エネルギー設定，AC アダプタ接続時はスリープさせない．'; then
+  sudo pmset -c sleep 0         # system sleep オフ
+  sudo pmset -c disksleep 0     # [コンピュータのスリープ]，オフ
+  sudo pmset -c displaysleep 0  # [ディスプレイのスリープ]，オフ
+  # [省エネルギー > 電源アダプタ]
+fi
+
+if do_set 'Energy Saver: 省エネルギー設定，バッテリ稼働時はスリープ．'; then
+  sudo pmset -b sleep 10        # system sleep オン
+  sudo pmset -b disksleep 3     # [コンピュータのスリープ]，10分
+  sudo pmset -b displaysleep 3  # [ディスプレイのスリープ]，10分
+  # [省エネルギー > バッテリー]
+fi
+
+if do_set 'Energy Saver: スリープ状態の設定．'; then
+  sudo pmset -a hibernatemode 3
+
+  # スタンバイモード
+  # sudo pmset -a stanby 1
+  # sudo pmset -a standbydelay 57600
+
+  # Wake on Demand オフ
+  sudo pmset -a womp 0
+  # [ネットワークアクセスによるスリープ解除] = オフ
+fi
 
 
 ## spotlight
