@@ -72,15 +72,12 @@ readonly BINS_MINIMAL=(\
   ripgrep \
   the_platinum_searcher \
   pwgen \
-  ### for LESS
   node \
   go \
-  # python \
   python3 \
   boost \
   expect \
   rsync \
-  ### caskformula/caskformula/inkscape
   caskformula/caskformula/inkscape
 )
 
@@ -90,6 +87,7 @@ readonly BINS=(\
   ### for radiko
   rtmpdump \
   "ffmpeg --with-fdk-aac" \
+  mp4v2 \
   base64 \
   swftools \
   eye-d3 \
