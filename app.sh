@@ -78,7 +78,7 @@ readonly BINS_MINIMAL=(\
   boost \
   expect \
   rsync \
-  caskformula/caskformula/inkscape
+## caskformula/caskformula/inkscape
 )
 
 readonly BINS=(\
