@@ -1,157 +1,54 @@
-#!/bin/bash -u
+#!/bin/zsh -eu
 
-set -e
 
 # 処理内容；
 #   バックアップ処理のスケジュール設定をする．
 #
 #
 #   * バックアップ処理の周期は、1 日 1 回。
-#   * 毎日 {sch_houris} 時に、スクリプトファイル {file_process} を実行し，
-#     {dir_SRC} の内容を {dir_DST} へバックアップする．
+#   * 毎日 {BACKUP_TIME} 時に、スクリプトファイル {BACKUP_SCRIPT} を実行し，
+#     {DIR_SOURCES} の内容を {DIR_DESTINATION} へバックアップする．
 #   * スケジューリング制御は launchd/launchctl による．
-#   * バックアップ処理の具体的な処理は，別途スクリプト {file_process} に設けている．
+#   * バックアップ処理の具体的な処理は，別途スクリプト {BACKUP_SCRIPT} に設けている．
 #     本スクリプト内にはその処理自身の記述はない。
 #
 # 使い方；
-#   setbackup.sh {dir_SRC} {dir_DST}
+#   setbackup.sh {DIR_SOURCES} {DIR_DESTINATION}
 #
 # 引数；
-#   01. dir_SRC ... バックアップ対象(デフォルト；$HOME)
-#   02. dir_DST ... バックアップ先(デフォルト；/Volumes/My\ Passport\ Studio/bkup/)
+#   なし．
+#
 
-
-source "../$(dirname $0)/functions.sh"
-
+source "$HOME/macset/functions.sh"
 
 #
 # 初期値(defaults); これら値は，ユーザー任意で変更可．
 #
 # バックアップを録る場所
-dir_SRC="$HOME/"
-# バックアップを置く場所(スペースは\エスケープしては駄目)
-dir_DST="/Volumes/My Passport Studio/bkup/"
+# readonly DIR_SOURCES="$HOME/"
+readonly DIR_SOURCES="$HOME/Documents/"
+# バックアップを置く場所
+# readonly DIR_DESTINATION="/Volumes/sioccala/rsyncedTimeMachine"
+readonly DIR_DESTINATION="$HOME/temp"
 
 # launchd の plist
-dir_launch="$HOME/Library/LaunchAgents"
+readonly DIR_LAUNCH="$HOME/Library/LaunchAgents"
 # パスの指定、リトライ回数
-retry=3
+readonly RETRY=3
 # バックアップ処理を実行する時刻(0-24)
-sch_houris=3    # 03:00 am
+readonly BACKUP_TIME=3    # 03:00 am
 
 # 実行するスクリプトファイル(実際のバックアップ処理が記述されている)
-file_process="$HOME/macset/backup.sh"
+readonly BACKUP_SCRIPT="$HOME/macset/tools/dobackup.sh"
 
+readonly SCRIPT_NAME=$(basename $0)
 
 #
 # Functions
 #
-check_existence_dir()
-{
-    if [ $# -lt 1 ]; then
-        execho "usage: $0 {pathToExistenceCheck}" 1>&2
-        return 1
-    fi
-
-    #init
-    diris=""
-    times="${retry}"
-
-    #check existence of $1 as the specified directory
-    if [ -e "$1" ]; then
-        diris=$1
-    else
-        while true; do
-            if [ "${times}" -le 0 ]; then
-                diris=""
-                break
-            fi
-
-            if [ "${times}" -eq "${retry}" ]; then
-                dir_err=$1
-            else
-                dir_err="${newpath}"
-            fi
-            ask_inputvalue "specified directory \"${dir_err}\" is incorrect. try to specify the path again. : " newpath
-
-            ((times--))
-
-            if [ -e "${newpath}" ]; then
-                diris="${newpath}"
-                break
-            fi
-        done
-    fi
-
-    eval $2="\"${diris}\""
-}
 
 
-#
-# 引数チェック
-#
 
-# 引数の数
-if [ $# -gt 2 ]; then
-}# エラー
-    execho "usage: $0 {sourcePath} {destinationPath}" 1>&2
-    exit 1
-fi
-flg_usedefaults=0
-# 引数なしの場合デフォルト値を使用?
-if [ $# -eq 0 ]; then
-  if ask_yesno "has been specified no args. do you want process using defaults value?\n\
-  source      : ${esc}${dir_SRC}${esc_off}\n\
-  destination : ${esc}${dir_DST}${esc_off}\n\n"; then
-    flg_usedefaults=1
-  else
-    execho "try to operate with specifing args again from the begining."
-    exit 1
-  fi
-fi
-
-#
-# バックアップ対象(元)
-#
-if [ $flg_usedefaults -eq 0 ]; then
-  check_existence_dir "$1" dir_checked
-  if [ -z "${dir_checked}" ]; then
-    execho "the sipecified \"${esc_uln}source${esc_off}\" path to backup does not exist or is  incorrect."
-    if ask_yesno "do you want use the default source path \"${dir_SRC}\" ?"; then
-      dir_checked="${dir_SRC}"
-    else
-      execho "check the path \"${esc_uln}source${esc_off}\". processing will be canceled."
-      exit 1
-    fi
-  fi
-  if [ "${dir_checked: -1}" != '/' ]; then
-    dir_checked="${dir_checked}/"
-  fi
-else
-  dir_checked="${dir_SRC}"
-fi
-dir_SRC="${dir_SRC}"
-# ref. http://qiita.com/uasi/items/82b7708d5da213ba7c31
-
-
-#
-# バックアップ先
-#
-if [ $flg_usedefaults -eq 0 ]; then
-  check_existence_dir "$2" dir_checked
-  if [ -z "${dir_checked}" ]; then
-    execho "the sipecified \"${esc_uln}destination${esc_off}\" path to backup does not exist or is  incorrect."
-    if ask_yesno "do you want use the default source path \"${dir_DST}\" ?"; then
-      dir_checked="${dir_DST}"
-    else
-      execho "check the path \"${esc_uln}destination${esc_off}\". processing will be canceled."
-      exit 1
-    fi
-  fi
-else
-  dir_checked="${dir_DST}"
-fi
-dir_DST="${dir_checked}"
 
 
 #
@@ -159,37 +56,37 @@ dir_DST="${dir_checked}"
 #
 
 # rsync コマンドの存在チェック
-if ! check_existence_command "rsync" dir_rsync ; then
-  execho "there is not `${esc_uln}rsync${esc_off}` command. check your operating enviroment. processing will be canceled."  #'(just only to escape)
+type rsync >/dev/null 2>&1; existence=$?
+if [ ! $existence -eq 0 ]; then
+  echo -e "$SCRIPT_NAME: there is not `${ESC_UNDR}rsync${ESC_OFF}` command. check your operating enviroment. processing will be canceled."  #'(just only to escape)
   exit 1
 fi
 
 # rsync コマンドのバージョンチェック (version 3.x を使わせる)
 if [ "$(rsync --version | awk 'NR==1 {print $3}')" -le 3.0 2>/dev/null ]; then
-  echo "the version of `rsync` is not 3.0 or later. processing will be canceled."
+  echo -e "$SCRIPT_NAME: the version of `rsync` is not 3.0 or later. processing will be canceled."
   exit 1
 fi
 
 # ~/Library/LaunchAgents の存在チェック
-if [ -z $dir_launch ]; then
-  execho "there is not \"${esc_uln}~/Library/LaunchAgents${esc_off}\". check your operating enviroment. processing will be canceled."   #'(just only to escape)
+if [ -z $DIR_LAUNCH ]; then
+  echo -e "$SCRIPT_NAME: there is not \"${ESC_UNDR}~/Library/LaunchAgents${ESC_OFF}\". check your operating enviroment. processing will be canceled."   #'(just only to escape)
   exit 1
 fi
 
 # シェルスクリプト存在チェック
-if [ ! -e "${file_process}" ]; then
-    execho "there is not the script \"${file_process}\". processing will be canceled.\nstart again from the beginning"
-    exit 1
+if [ ! -e "${BACKUP_SCRIPT}" ]; then
+  echo -e "$SCRIPT_NAME: there is not the script \"${BACKUP_SCRIPT}\". processing will be canceled.\nstart again from the beginning"
+  exit 1
 fi
 
 # 実行確認
 if ! ask_yesno "are you sure want to set as follows;\n\
-  source      : ${esc}${dir_SRC}${esc_off}\n\
-  destination : ${esc}${dir_DST}${esc_off}\n "; then
-    execho "processing will be canceled. try again first."
+  source      : ${ESC_OFF}${DIR_SOURCES}${ESC_OFF}\n\
+  destination : ${ESC_OFF}${DIR_DESTINATION}${ESC_OFF}\n "; then
+    echo -e "$SCRIPT_NAME: processing will be canceled. try again first."
     exit 1
 fi
-
 
 
 #
@@ -217,21 +114,21 @@ cat << END >> "${plist_filepath}"
   <string>${plist_label}</string>
   <key>ProgramArguments</key>
   <array>
-    <string>${file_process}</string>
-    <string>$dir_SRC</string>
-    <string>$dir_DST</string>
+    <string>${BACKUP_SCRIPT}</string>
+    <string>${DIR_SOURCES}</string>
+    <stritg>${DIR_DESTINATION}</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
-    <integer>${sch_houris}</integer>
+    <integer>${BACKUP_TIME}</integer>
     <key>Minute</key>
     <integer>0</integer>
   </dict>
   <key>StandardErrorPath</key>
-    <string>$(dirname $0)/${plist_label}_err.log</string>
+    <string>${HOME}/${plist_label}_err.log</string>
   <key>StandardOutPath</key>
-    <string>$(dirname $0)/${plist_label}.log</string>
+    <string>${HOME}/${plist_label}.log</string>
 </dict>
 </plist>
 END
@@ -240,11 +137,12 @@ END
 # launchd ロード
 #
 if ask_yesno "load this job ?"; then
-    mv "${plist_filepath}" "${dir_launch}"
-    launchctl load "${dir_launch}/${plist_label}.plist"
+    mv "${plist_filepath}" "${DIR_LAUNCH}"
+    launchctl load "${DIR_LAUNCH}/${plist_label}.plist"
 else
-    execho "processing will be canceled."
+    myecho "processing will be canceled."
 fi
+
 
 #
 # 終了
@@ -255,13 +153,14 @@ launchctl list | grep $(hostname -s) | \
 while IFS= read item; do
     job=$(echo "${item}" | awk '{print $3}')
     if [ $(echo "${job}" | grep backup) ]; then
-        echo -e ${esc}${job}${esc_off}
+        echo -e ${ESC_OFF}${job}${ESC_OFF}
     else
         echo -e "${job}"
     fi
 done
 
 # ~/Library/LaunchAgents を見せとく
-open "${dir_launch}"
+open "${DIR_LAUNCH}"
 
-execho "${esc_bld}Now it's done.${esc_off}"
+echo -e "${ESC_BOLD}Now it's done.${ESC_OFF}"
+
