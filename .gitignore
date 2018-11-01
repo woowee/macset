@@ -5,3 +5,5 @@ configurations.sh
 .DS_Store
 log/
 node_modules/
+*.log
+*log.txt
