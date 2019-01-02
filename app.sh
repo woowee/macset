@@ -226,17 +226,6 @@ fi
 
 
 #
-# "LESS"
-#
-myecho "Set LESS"
-if check_command 'npm'; then
-  npm install --global less
-else
-  myecho  "Could not find npm. npm been installed ?"
-fi
-
-
-#
 # "Python"
 #
 myecho "Set Python"
