@@ -231,6 +231,15 @@ fi
 myecho "Set Python"
 pip3 install --upgrade setuptools && pip3 install --upgrade pip || true
 
+# TODO: installation for jedi-vim, deocomplete
+pip3 install --user pynvim
+
+# TODO: jedi (to use jedi.vim plugin)
+if ! check_command 'jedi'; then
+    myecho "installing jedi..."
+    pip3 install jedi
+fi
+
 # mutagen (to use mid3v2)
 if ! check_command 'mid3v2'; then
     myecho "setting mutagen..."
@@ -426,6 +435,9 @@ if check_app macvim-kaoriya path_is ; then
   fi
 
   defaults write org.vim.MacVim "MMNativeFullScreen" -bool false
+
+  #TODO: for Jedi.vim
+  # Maybe need this command `git submodule update --init` in $HOME/.cache/dein/repos/github.com/davidhalter/jedi-vim
 fi
 
 
