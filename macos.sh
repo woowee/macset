@@ -657,7 +657,7 @@ fi
 
 
 ## Energy, Sleep
-if do_set echo -e 'Energy Saver: スクリーンセーバはオフ．'; then
+if do_set 'Energy Saver: スクリーンセーバはオフ．'; then
   defaults -currentHost write com.apple.screensaver idleTime -int 0
   # [デスクトップとスクリーンセーバ > スクリーンセーバ > 開始までの時間] = 開始しない
 fi
