@@ -144,7 +144,6 @@ sudo tmutil addexclusion \
   "/tmp" \
   "/usr" \
   "/var" \
-  "/vm" \
 
 sudo tmutil addexclusion \
   "${HOME}/Applications" \
@@ -154,7 +153,7 @@ sudo tmutil addexclusion \
   # "${HOME}/Public" \
   # "${HOME}/temp" \
 
-#対象外の確認: mdfind "com_apple_backup_excludeItem = 'com.apple.backupd'"
+#対象外の確認: mdfind "com_apple_backup_excludeitem = 'com.apple.backupd'"
 #対象外の確認: ls -l@
 
 tmutil destinationinfo
