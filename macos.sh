@@ -224,14 +224,16 @@ if do_set 'Finder: メニューバー設定．' $MODE_MINIMAL; then
         "/System/Library/CoreServices/Menu Extras/Clock.menu"
 fi
 
-if do_set 'Finder: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)'; then
-   defaults write com.apple.universalaccess reduceTransparency -bool true
-fi
+#TODO:air?
+#if do_set 'Finder: 各 UI の透明度を下げる．(メニューバーはじめ他のパーツの半透明を無効にする)'; then
+#   defaults write com.apple.universalaccess reduceTransparency -bool true
+#fi
 
-if do_set 'Finder: デスクトップを変更する．'; then
-    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$FILE_DESKTOPPICTURE"'"'
-    # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
-fi
+#TODO:air?
+#if do_set 'Finder: デスクトップを変更する．'; then
+#    osascript -e 'tell application "Finder" to set desktop picture to POSIX fil e "'"$FILE_DESKTOPPICTURE"'"'
+#    # [システム環境設定 > デスクトップとスクリーンセーバ] = [デスクトップ > Apple > 無地の色 > ソリッドグレイ・プロ・ウルトラダーク]
+#fi
 
 
 
@@ -358,8 +360,10 @@ if do_set 'Input : マウスの副ボタン機能をアクティヴにし、右�
 fi
 
 # Input - Keyboard
-keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk '{ print $4 }')
-keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
+#keyboard_vid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idVendor' | awk '{ print $4 }')
+keyboard_vid=$(ioreg -p IOUSB -c IOUSBDevice -n 'Apple Internal Keyboard / Trackpad' -r | grep -E 'idVendor' | awk '{ print $3 }')
+#keyboard_pid=$(ioreg -n 'Apple Internal Keyboard' -r | grep -E 'idProduct' | awk '{ print $4 }')
+keyboard_pid=$(ioreg -p IOUSB -c IOUSBDevice -n 'Apple Internal Keyboard / Trackpad' -r | grep -E 'idProduct' | awk '{ print $3 }')
 keyboardid="${keyboard_vid}-${keyboard_pid}-0"
 
 # Input - Keyboard - Modified key
