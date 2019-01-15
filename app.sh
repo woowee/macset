@@ -441,9 +441,6 @@ if check_app macvim-kaoriya path_is ; then
 fi
 
 
-#CHECK::
-defaults write com.apple.finder AppleShowAllFiles -boolean true
-
 # fin
 echo -e "
 
