@@ -156,7 +156,8 @@ sudo tmutil addexclusion \
 #対象外の確認: mdfind "com_apple_backup_excludeitem = 'com.apple.backupd'"
 #対象外の確認: ls -l@
 
-tmutil destinationinfo
+# TODO:
+# tmutil destinationinfo
 
 #Time Machine target items are;
 #  * ${HOME}/Documents

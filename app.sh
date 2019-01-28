@@ -90,7 +90,6 @@ readonly BINS=(\
   mp4v2 \
   base64 \
   swftools \
-  eye-d3 \
 )
 
 
