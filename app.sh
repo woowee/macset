@@ -99,8 +99,8 @@ readonly APPS_MINIMAL=(\
   dropbox \
   google-chrome \
   iterm2 \
-  ### caskroom/versions
-  macvim-kaoriya \
+### woowee/mycask
+  my-macvim-kaoriya \
 )
 
 APPS=(\
@@ -393,7 +393,7 @@ fi
 #
 # "MacVim"
 #
-if check_app macvim-kaoriya path_is ; then
+if check_app my-macvim-kaoriya path_is ; then
   myecho "Set MacVim"
 
   readonly DIR_SRC="${HOME}/dots/vimset"
