@@ -86,7 +86,7 @@ readonly BINS=(\
   libdvdcss \
   ### for radiko
   rtmpdump \
-  "ffmpeg --with-fdk-aac" \
+  "ffmpeg --bottle-arch=fdk-aac" \
   mp4v2 \
   base64 \
   swftools \
