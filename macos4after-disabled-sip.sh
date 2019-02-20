@@ -146,7 +146,6 @@ sudo tmutil addexclusion \
   "/var" \
 
 sudo tmutil addexclusion \
-  "${HOME}/Applications" \
   "${HOME}/Desktop" \
   "${HOME}/Dropbox" \
   "${HOME}/Library"
