@@ -152,7 +152,6 @@ brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
 brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
 brew tap | grep woowee >/dev/null || brew tap woowee/mycask
 brew tap | grep sanemat >/dev/null || brew tap sanemat/font
-brew tap | grep delphinus >/dev/null || brew tap delphinus/macvim-kaoriya
 
 
 myecho "brew update & upgrade..."
