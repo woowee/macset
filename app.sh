@@ -79,6 +79,7 @@ readonly BINS_MINIMAL=(\
   expect \
   rsync \
 ## caskformula/caskformula/inkscape
+  neovim \
 )
 
 readonly BINS=(\
@@ -86,7 +87,8 @@ readonly BINS=(\
   libdvdcss \
   ### for radiko
   rtmpdump \
-  "ffmpeg --bottle-arch=fdk-aac" \
+  # "ffmpeg --bottle-arch=fdk-aac"
+  ffmpeg \
   mp4v2 \
   base64 \
   swftools \
@@ -100,7 +102,8 @@ readonly APPS_MINIMAL=(\
   google-chrome \
   iterm2 \
 ### woowee/mycask
-  my-macvim-kaoriya \
+#  my-macvim-kaoriya \
+  macvim \
 )
 
 APPS=(\
@@ -117,7 +120,7 @@ APPS=(\
   libreoffice \
   libreoffice-language-pack \
   ### woowee/mycask
-  mytracks \
+  # mytracks \
 )
 
 
@@ -148,11 +151,10 @@ myecho "install homebrew..."
 type brew >/dev/null 2>&1 || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 myecho "install homebrew-cask..."
-brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
-brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
-brew tap | grep woowee >/dev/null || brew tap woowee/mycask
+# brew tap | grep caskroom/cask >/dev/null || brew tap caskroom/cask
+# brew tap | grep caskroom/versions >/dev/null || brew tap caskroom/versions
+# brew tap | grep woowee >/dev/null || brew tap woowee/mycask
 brew tap | grep sanemat >/dev/null || brew tap sanemat/font
-
 
 myecho "brew update & upgrade..."
 brew update && brew upgrade
@@ -369,7 +371,9 @@ fi
 #
 # font "Ricty"
 #
-brew install ricty --with-powerline &&:
+# brew install ricty --with-powerline &&:
+brew tap sanemat/font
+brew install ricty
 #c.f. http://qiita.com/ngyuki/items/aefd47700a9522fada75
 result=$?
 #c.f. http://dqn.sakusakutto.jp/2013/10/shellscript_elif.html
@@ -393,11 +397,16 @@ fi
 #
 # "MacVim"
 #
-if check_app my-macvim-kaoriya path_is ; then
+# if check_app my-macvim-kaoriya path_is ; then
+if check_app macvim path_is ; then
   myecho "Set MacVim"
 
   readonly DIR_SRC="${HOME}/dots/vimset"
   readonly DIR_DST="${HOME}/.vim"
+
+  pip3 install --upgrade neovim   # add
+
+  echo 'macvim path is : ${path_is}'
 
   if [ -e ${DIR_SRC} ]; then
     [ ! -e ${DIR_DST} ] && mkdir -p ${DIR_DST}
