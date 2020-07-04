@@ -356,6 +356,7 @@ fi
 
 if do_set 'Input : マウスの副ボタン機能をアクティヴにし、右クリックに割り当てる．' $MODE_MINIMAL; then
     defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseButtonMode "TwoButton"
+    defaults write com.apple.driver.AppleBluetoothMultitouch.mouse "save.MouseButtonMode.v1" -int 1
     # [システム環境設定 > マウス > ポイントオプションおよびクリックオプション > 副ボタンのクリック] = "ON"，[右側をクリック]
 fi
 

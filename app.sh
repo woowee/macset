@@ -104,6 +104,7 @@ readonly APPS_MINIMAL=(\
 ### woowee/mycask
 #  my-macvim-kaoriya \
   macvim \
+  brave-browser \
 )
 
 APPS=(\
